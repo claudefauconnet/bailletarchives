@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" media="screen" type="text/css" title="Design" href="js/jquery/jquery-ui.min.css"/>
+    <link rel="stylesheet" href="js/jsTree/themes/default/style.min.css"/>
+
+
+    <script src="js/jquery/jquery.min.js"></script>
+    <script src="js/jquery/jquery-ui.min.js"></script>
+
+
+    <script src="js/jsTree/jstree.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"/>
+
+    <script src="js/jsTree/treeController.js"></script>
+    <script src="js/writeDataController.js"></script>
+    <script src="js/dataTable.js"></script>
+    <script src="js/writeDataController.js"></script>
+
+
+    <script src="js/mainController.js"></script>
+
+
+    <style>
+        body {
+            font-family: Verdana;
+            font-size: 14px;
+        }
+
+        input, button {
+            margin: 0px;
+            padding: 2px
+
+        }
+
+        #main {
+            width: 100%;
+            display: table
+        }
+
+        #left {
+            float: left;
+            display: inline;
+            width: 20%;
+        }
+
+        #right {
+            float: left;
+            display: inline;
+            width: 77%;
+            margin-left: 5px;
+        }
+
+        .accordionInnerDiv {
+            min-height: 300px;
+
+        }
+
+        #dataTableDiv {
+            height: 500px;
+            width: 77%;
+            overflow: auto;
+        }
+
+        .myDatatable tr {
+            height: 20px !important;
+        }
+
+        #messageDiv {
+            font-style: italic;
+        }
+
+
+
+
+    </style>
+
+    <script>
+        var dialog;
+        $(function () {
+
+            $("#leftAccordion").accordion();
+
+            dialog = $("#dialogDiv").dialog({
+                autoOpen: false,
+                height: 400,
+                width:  "60%",
+                modal: true,
+                buttons: {
+                    "modifier": writeDataController.setModifyMode,
+                    "sauvegarder": writeDataController.setModifyMode,
+                    Cancel: function () {
+                        dialog.dialog("close");
+                    }
+                },
+                close: function () {
+                    form[0].reset();
+                    allFields.removeClass("ui-state-error");
+                }
+            });
+            mainController.bindActions();
+            mainController.setDivsSize();
+            mainController.loadDataModel(function (err, result) {
+                if (err)
+                    return;
+                mainController.initTablesSelects();
+
+
+            });
+
+
+        })
+
+    </script>
+</head>
+<body>
+<div id="messageDiv"></div>
+<div id="main">
+
+    <div id="left">
+        <div id="leftAccordion">
+            <h1>search</h1>
+            <div id="versementsDiv" class="accordionInnerDiv">
+                <table style="left: -30px;position: relative;">
+                    <tr>
+                        <td>
+                            table
+                        </td>
+                        <td>
+                            <select id="searchTableInput"></select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            champ
+                        </td>
+                        <td>
+                            <select id="searchColumnInput"></select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            operateur
+                        </td>
+                        <td>
+                            <select id="searchOperatorInput"></select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            valeur
+                        </td>
+                        <td>
+                            <input id="searchValueInput" style="width:150px"/>
+                        </td>
+                    </tr>
+                </table>
+
+
+                <br>
+                <button id="searchAddCriteria">+</button>&nbsp;<button id="searchsButton"> chercher</button>
+            </div>
+            <h1>magasins</h1>
+            <div id="magasinsDiv" class="accordionInnerDiv">
+                <button id="searchMagasinsButton"> chercher</button>
+            </div>
+            <h1>new</h1>
+            <div id="newDiv" class="accordionInnerDiv"></div>
+            <h1>statisitics</h1>
+            <div id="statsDiv" class="accordionInnerDiv">
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="right">
+        <div id="dataTableDiv">
+
+
+        </div>
+    </div>
+
+</div>
+
+<div id="dialogDiv"></div>
+
+
+</body>
+</html>
