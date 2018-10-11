@@ -3,6 +3,7 @@ var mainController = (function () {
     self.totalDims = {};
     self.dataModel = {};
     self.currentTable;
+    self.leftPanelWidth=200;
 
     var numberTypes=["float","double","decimal","int"];
     var stringTypes=["char","varchar","text",];
@@ -32,11 +33,26 @@ var mainController = (function () {
         $("#searchColumnInput").bind("change", function () {
             mainController.setOperators(this.value);
         })
+        $("#showHideLeftPanelButton").bind("click", function () {
+            mainController.showHideLeftPanel();
+        })
+
 
 
     }
 
+self.showHideLeftPanel=function(){
+        var width=$("#left").width();
+        if( width>=self.leftPanelWidth){
+            $("#left").width(0)
+            $("#left").css("display","none")
+        }
+        else {
+            $("#left").width(self.leftPanelWidth)
+            $("#left").css("display", "inline")
+        }
 
+    }
     self.initTablesSelects = function () {
 
         var tables = Object.keys(self.dataModel);
@@ -73,7 +89,7 @@ var mainController = (function () {
 
     //aa
     self.setDivsSize = function () {
-
+        $("#left").width(self.leftPanelWidth)
         mainController.totalDims.w = $(window).width();
         mainController.totalDims.h = $(window).height();
         var dataTableWidth = mainController.totalDims.w - $("#left").width() - 20
@@ -149,7 +165,7 @@ var mainController = (function () {
     }
 
 
-    self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField,) {
+    self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField) {
         $("#" + selectId).find('option').remove().end()
         if (withBlanckOption) {
             $("#" + selectId).append($('<option>', {
