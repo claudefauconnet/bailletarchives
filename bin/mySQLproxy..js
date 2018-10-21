@@ -26,7 +26,7 @@ var mySQLproxy = {
     },
 
 
-    find: function (connection, sql, callback) {
+    exec: function (connection, sql, callback) {
 
 
 
@@ -58,7 +58,7 @@ var mySQLproxy = {
                 result.forEach(function(line){
                     if(!model[line.TABLE_NAME])
                         model[line.TABLE_NAME]=[];
-                    model[line.TABLE_NAME].push({name:line.COLUMN_NAME,columnType:line.COLUMN_TYPE,dataType:line.DATA_TYPE,nullable:line.IS_NULLABLE,defaultValue: line.COLUMN_DEFAULT})
+                    model[line.TABLE_NAME].push({name:line.COLUMN_NAME,columnType:line.COLUMN_TYPE,dataType:line.DATA_TYPE,nullable:line.IS_NULLABLE,defaultValue: line.COLUMN_DEFAULT,maxLength:line.CHARACTER_MAXIMUM_LENGTH})
 
                 })
 

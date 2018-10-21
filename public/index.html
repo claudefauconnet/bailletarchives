@@ -16,9 +16,9 @@
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"/>
 
     <script src="js/jsTree/treeController.js"></script>
-    <script src="js/writeDataController.js"></script>
+    <script src="js/recordController.js"></script>
     <script src="js/dataTable.js"></script>
-    <script src="js/writeDataController.js"></script>
+    <script src="js/recordController.js"></script>
 
 
     <script src="js/mainController.js"></script>
@@ -59,9 +59,13 @@
 
         }
 
-        #dataTableDiv {
+        #listRecordsDiv, #linkedRecordsDiv {
             height: 500px;
             width: 77%;
+        / / overflow: auto;
+        }
+
+        #dataTable_wrapper {
             overflow: auto;
         }
 
@@ -73,7 +77,10 @@
             font-style: italic;
         }
 
+        .dialogTab {
 
+            background-color: #c2beff85;
+        }
 
 
     </style>
@@ -81,28 +88,38 @@
     <script>
         var dialog;
         $(function () {
-
+            mainController.setDivsSize();
             $("#leftAccordion").accordion();
 
+            $("#tabs").tabs({
+                activate: function (event, ui) {
+                    var currentTabIndex = ui.newTab.index();
+                    if (currentTabIndex == 1) {
+                        mainController.showLinkedRecords();
+                    }
+
+                }
+            });
             dialog = $("#dialogDiv").dialog({
                 autoOpen: false,
-                height: 400,
-                width:  "60%",
+                height: mainController.totalDims.h * .8,
+                width: "80%",
                 modal: true,
                 buttons: {
-                    "modifier": writeDataController.setModifyMode,
-                    "sauvegarder": writeDataController.setModifyMode,
+                    "Enregistrer": function () {
+                        recordController.saveRecord();
+                        dialog.dialog("close");
+                    },
                     Cancel: function () {
                         dialog.dialog("close");
                     }
                 },
                 close: function () {
-                    form[0].reset();
-                    allFields.removeClass("ui-state-error");
+                    // allFields.removeClass("ui-state-error");
                 }
             });
             mainController.bindActions();
-            mainController.setDivsSize();
+
             mainController.loadDataModel(function (err, result) {
                 if (err)
                     return;
@@ -177,7 +194,7 @@
 
     <div id="right">
         <button id="showHideLeftPanelButton"><< >></button>
-        <div id="dataTableDiv">
+        <div id="listRecordsDiv">
 
 
         </div>
@@ -185,7 +202,34 @@
 
 </div>
 
-<div id="dialogDiv"></div>
+<div id="dialogDiv">
+    <div id="tabs">
+        <ul>
+            <li><a href="#tabs-recordDiv">Details</a></li>
+            <li><a href="#tabs-linkedRecordDiv">LinkedRecord</a></li>
+            <li><a href="#tabs-newLinkedRecordDiv">lier</a></li>
+
+        </ul>
+        <div id="tabs-recordDiv" class="dialogTab">
+            <div id="recordDetailsDiv"></div>
+
+        </div>
+        <div id="tabs-linkedRecordDiv" class="dialogTab">
+            <div id="linkedRecordsDiv"></div>
+            <button id="deleteLinkedRecordButton">supprimer lien</button>
+
+        </div>
+        <div id="tabs-newLinkedRecordDiv" class="dialogTab">
+            <br>
+            chercher <input id="searchLinkedRecordsInput">
+            <div id="new_linkedRecordsDiv"></div>
+            <button id="addLinkedRecordButton">ajouter lien</button>
+        </div>
+        -
+
+
+    </div>
+</div>
 
 
 </body>

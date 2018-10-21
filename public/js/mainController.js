@@ -3,7 +3,11 @@ var mainController = (function () {
     self.totalDims = {};
     self.dataModel = {};
     self.currentTable;
+    self.currentLinkedTable;
     self.leftPanelWidth=200;
+    self.dataTables={};
+
+
 
     var numberTypes=["float","double","decimal","int"];
     var stringTypes=["char","varchar","text",];
@@ -13,6 +17,26 @@ var mainController = (function () {
         date: ["=", "<", "<=", ">", ">=", "!="],
 
     }
+    self.relations={
+
+        magasin:{
+            "versement":{
+                sql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and magasin.id="
+            }
+
+        },
+        versement:{
+            "magasin":{
+                sql: "select magasin.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and versement.id="
+            }
+
+        }
+
+
+
+    }
+
+
 
     self.bindActions = function () {
 
@@ -36,6 +60,25 @@ var mainController = (function () {
         $("#showHideLeftPanelButton").bind("click", function () {
             mainController.showHideLeftPanel();
         })
+
+        $("#addLinkedRecordButton").bind("click", function () {
+            mainController.addLinkedRecord();
+        })
+
+        $("#deleteLinkedRecordButton").bind("click", function () {
+            mainController.deleteLinkedRecord();
+        })
+
+        $("#searchLinkedRecordsInput").bind("keydown", function (e) {
+           if(e.keyCode==13) {
+               var str = $(this).val()
+               if (true || str.length > 3)
+                   mainController.searchLinkedRecords(str);
+           }
+        })
+
+
+
 
 
 
@@ -94,7 +137,7 @@ self.showHideLeftPanel=function(){
         mainController.totalDims.h = $(window).height();
         var dataTableWidth = mainController.totalDims.w - $("#left").width() - 20
       //  $("#dataTableDiv").width(dataTableWidth).height(500);
-        $("#dataTableDiv").width(dataTableWidth).height(mainController.totalDims.h-20);
+        $("#listRecordsDiv").width(dataTableWidth).height(mainController.totalDims.h-20);
 
     }
 
@@ -127,6 +170,12 @@ self.showHideLeftPanel=function(){
     self.listRecords = function () {
         var whereStr = "";
         var table = self.currentTable;
+        var relations=  mainController.relations[table];
+        var i=0;
+        for(var key in relations) {
+            if(i++==0)
+            self.currentLinkedTable=key;
+        }
         var column = $("#searchColumnInput").val();
         var operator = $("#searchOperatorInput").val();
         var value = $("#searchValueInput").val();
@@ -144,7 +193,7 @@ self.showHideLeftPanel=function(){
         var sql = "select * from " + table + whereStr;
         console.log(sql);
         var payload = {
-            find: 1,
+            exec: 1,
             sql: sql
         }
 
@@ -154,7 +203,10 @@ self.showHideLeftPanel=function(){
             data: payload,
             dataType: "json",
             success: function (json) {
-                dataTable.loadJson("dataTableDiv", json)
+                if(!self.dataTables[table])
+                    self.dataTables[table]=new dataTable();
+                self.dataTables[table].loadJson("listRecordsDiv", json,{  onClick: recordController.displayRecordData})
+                $( "#tabs" ).tabs( "option", "active", 0 );
                 var xx = json
             }, error: function (err) {
                 self.setErrorMessage(err.responseText)
@@ -164,6 +216,98 @@ self.showHideLeftPanel=function(){
         })
     }
 
+    self.showLinkedRecords=function(){
+        var linkedTable="";
+        var foreignKey=""
+
+        var relations=self.relations[self.currentTable];
+        var i=0;
+      for(var key in relations) {
+
+          if (i == 0) {
+              var sql =relations[key].sql+recordController.currentRecordId;
+              console.log(sql);
+              var payload = {
+                  exec: 1,
+                  sql: sql
+              }
+
+              $.ajax({
+                  type: "POST",
+                  url: "../mysql",
+                  data: payload,
+                  dataType: "json",
+                  success: function (json) {
+                      if (!self.dataTables[relations[key].table])
+                          self.dataTables[relations[key].table] = new dataTable();
+                      self.dataTables[relations[key].table].loadJson("linkedRecordsDiv", json, {onClick: recordController.displayRecordData})
+
+
+
+                  }, error: function (err) {
+                      self.setErrorMessage(err.responseText)
+                  }
+
+
+              })
+
+          }
+      }
+
+
+    }
+
+    self.addLinkedRecord=function(){
+
+
+
+    }
+    self.deleteLinkedRecord=function(){
+
+
+
+    }
+
+    self.searchLinkedRecords=function(str){
+        var concatStr="";
+        var i=0;
+       self.dataModel[self.currentLinkedTable].forEach(function(field){
+            if(i++>0)
+            concatStr+=","
+            concatStr+=field.name;
+        })
+
+
+        var sql="select * from "+self.currentLinkedTable+ "  WHERE CONCAT("+concatStr+") LIKE '%"+str+"%'";
+        console.log(sql);
+        console.log(sql);
+        var payload = {
+            exec: 1,
+            sql: sql
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "../mysql",
+            data: payload,
+            dataType: "json",
+            success: function (json) {
+
+
+                if (!self.dataTables["new_"+self.currentLinkedTable])
+                    self.dataTables["new_"+self.currentLinkedTable] = new dataTable();
+                self.dataTables["new_"+self.currentLinkedTable].loadJson("new_linkedRecordsDiv", json, {})
+
+            }, error: function (err) {
+                self.setErrorMessage(err.responseText)
+            }
+
+
+        })
+
+
+
+    }
 
     self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField) {
         $("#" + selectId).find('option').remove().end()

@@ -10,8 +10,8 @@ router.get('/', function(req, res, next) {
 
 
 router.post('/mysql', function(req, res, next) {
-  if(req.body.find){
-      mysql.find(req.body.connection,req.body.sql,function(err,result){
+  if(req.body.exec){
+      mysql.exec(req.body.connection,req.body.sql,function(err,result){
           processResponse(res,err,result)
 
       })
