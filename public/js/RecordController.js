@@ -19,7 +19,7 @@ var recordController = (function () {
             data: payload,
             dataType: "json",
             success: function (json) {
-                dataTable.loadJson("dataTableDiv", json)
+                //   dataTable.loadJson("dataTableDiv", json)
                 self.setAttributesValue(label, targetObj, node);
                 self.drawAttributes(targetObj, "nodeFormDiv");
                 var xx = json
@@ -33,6 +33,8 @@ var recordController = (function () {
 
 
     self.saveRecord = function () {
+        if (!self.currentRecordId)// new Record
+            return self.saveNewRecord();
         var sql = "Update " + mainController.currentTable + " set ";
         var i = 0;
         for (var key in self.currentRecordChanges) {
@@ -46,7 +48,7 @@ var recordController = (function () {
             else if (type == "date")
                 sql += key + "='" + self.currentRecordChanges[key] + "'";
         }
-        sql += " where id= " + self.currentRecordId
+        sql += " where id= " + self.currentRecordId;
         console.log(sql);
 
         var payload = {
@@ -75,6 +77,58 @@ var recordController = (function () {
 
 
         })
+    }
+
+    self.saveNewRecord = function () {
+
+        var sql1 = "insert into " + mainController.currentTable + " ( ";
+        var sql2 = " values ( ";
+        var i = 0;
+        for (var key in self.currentRecordChanges) {
+            if (i++ > 0) {
+                sql1 += ","
+                sql2 += ","
+            }
+            sql1 += key;
+            var type = mainController.getFieldType(mainController.currentTable, key)
+            if (type == "number")
+                sql2 +=  self.currentRecordChanges[key];
+            else if (type == "string")
+                sql2 += "'" + self.currentRecordChanges[key] + "'";
+            else if (type == "date")
+                sql2 +="'" + self.currentRecordChanges[key] + "'";
+        }
+       var  sql = sql1+")" +sql2+")";
+        console.log(sql);
+
+        var payload = {
+            exec: 1,
+            sql: sql
+        }
+        $.ajax({
+            type: "POST",
+            url: "../mysql",
+            data: payload,
+            dataType: "json",
+            success: function (json) {
+                mainController.setMessage("enregistrement sauvé");
+
+                for (var key in self.currentRecordChanges) {
+                    var cells = $('#dataTable').rows({selected: true});
+
+                    var x = "";
+                    // cell.data(cell.data() + 1).draw();
+                }
+
+
+            }, error: function (err) {
+                mainController.setErrorMessage(err.responseText)
+            }
+
+
+        })
+
+
     }
 
 
