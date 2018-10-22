@@ -62,14 +62,8 @@ var recordController = (function () {
             dataType: "json",
             success: function (json) {
                 mainController.setMessage("enregistrement sauvé");
-
-                for (var key in self.currentRecordChanges) {
-                    var cells = $('#dataTable').rows({selected: true});
-
-                    var x = "";
-                    // cell.data(cell.data() + 1).draw();
-                }
-
+                dialog.dialog("close");
+                mainController.dataTables[mainController.currentTable].updateSelectedRow(self.currentRecordChanges)
 
             }, error: function (err) {
                 mainController.setErrorMessage(err.responseText)
@@ -135,6 +129,8 @@ var recordController = (function () {
     self.displayRecordData = function (obj) {
         self.currentRecordId = obj.id;
         var table = mainController.currentTable;
+
+
         var targetObj = {}
         mainController.dataModel[table].forEach(function (field) {
             targetObj[field.name] = {
@@ -145,7 +141,7 @@ var recordController = (function () {
                 targetObj[field.name].cols = 10;
             if ((field.maxLength && field.maxLength > 50) || field.dataType == "text") {
                 targetObj[field.name].cols = 60;
-                targetObj[field.name].rows = 4;
+                targetObj[field.name].rows = 2;
             }
             else if (field.maxLength && field.maxLength <= 50)
                 targetObj[field.name].cols = field.maxLength;
@@ -157,6 +153,9 @@ var recordController = (function () {
         })
         self.setAttributesValue(table, targetObj, obj);
         self.drawAttributes(targetObj, "recordDetailsDiv");
+        $("#recordDetailsDiv").prepend("<span class='title'>"+table+"</span>")
+        $("#recordDetailsDiv").append("<button id='saveRecordButton' onclick='recordController.saveRecord()'>Sauvegarder</button>")
+        $("#tabs").tabs( "option", "enabled", [1,2] );
         $("#tabs").tabs("option", "active", 0);
 
 

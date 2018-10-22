@@ -4,7 +4,7 @@ var mainController = (function () {
     self.dataModel = {};
     self.currentTable;
     self.currentLinkedTable;
-    self.leftPanelWidth = 250;
+    self.leftPanelWidth = 200;
     self.dataTables = {};
 
 
@@ -76,6 +76,14 @@ var mainController = (function () {
         $("#newRecordTableSelect").bind("click", function () {
             mainController.showNewRecordDialog($(this).val());
         })
+       /* $("#saveRecordButton").bind("click", function () {
+            recordController.saveRecord();
+        })*/
+
+        $("#addRecordButton").bind("click", function () {
+            mainController.showNewRecordDialog();
+        })
+
 
 
     }
@@ -300,7 +308,11 @@ var mainController = (function () {
 
     }
 
-    self.showNewRecordDialog = function (table) {
+    self.showNewRecordDialog = function () {
+        var table=$("#searchTableInput").val();
+        if(!table){
+            return mainController.setErrorMessage("selectionnez une table")
+        }
         recordController.currentRecordId = null;
         mainController.currentTable = table;
         recordController.displayRecordData({});

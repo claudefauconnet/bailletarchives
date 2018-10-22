@@ -32,7 +32,8 @@
 
         input, button {
             margin: 0px;
-            padding: 2px
+            padding: 2px;
+            width:100px;
 
         }
 
@@ -59,15 +60,17 @@
 
         }
 
-        #listRecordsDiv, #linkedRecordsDiv {
+        #listRecordsDiv , #linkedRecordsDiv{
             height: 500px;
             width: 77%;
-        / / overflow: auto;
+
         }
 
-        #dataTable_wrapper {
-            overflow: auto;
-        }
+.dataTables_wrapper {
+
+    overflow: auto;
+   // height:90%;
+}
 
         .myDatatable tr {
             height: 20px !important;
@@ -106,10 +109,6 @@
                 width: "80%",
                 modal: true,
                 buttons: {
-                    "Enregistrer": function () {
-                        recordController.saveRecord();
-                        dialog.dialog("close");
-                    },
                     Cancel: function () {
                         dialog.dialog("close");
                     }
@@ -147,6 +146,8 @@
                         <td>
                             table
                         </td>
+                    </tr>
+                    <tr>
                         <td>
                             <select id="searchTableInput"></select>
                         </td>
@@ -155,6 +156,8 @@
                         <td>
                             champ
                         </td>
+                    </tr>
+                    <tr>
                         <td>
                             <select id="searchColumnInput"></select>
                         </td>
@@ -163,6 +166,8 @@
                         <td>
                             operateur
                         </td>
+                    </tr>
+                    <tr>
                         <td>
                             <select id="searchOperatorInput"></select>
                         </td>
@@ -171,17 +176,26 @@
                         <td>
                             valeur
                         </td>
+                    </tr>
+                    <tr>
                         <td>
                             <input id="searchValueInput" style="width:150px"/>
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            <button id="searchsButton"> chercher</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button id="addRecordButton">Ajouter</button>&nbsp;
+                        </td>
+                    </tr>
                 </table>
 
-
-                <br>
-                <button id="searchAddCriteria">+</button>&nbsp;<button id="searchsButton"> chercher</button>
             </div>
-            <h1>Créer</h1>
+          <!--  <h1>Créer</h1>
             <div id="newDiv" class="accordionInnerDiv">
 
                 <select id="newRecordTableSelect">
@@ -191,7 +205,7 @@
 
 
 
-            </div>
+            </div>-->
             <h1>Statisitiques</h1>
             <div id="statsDiv" class="accordionInnerDiv">
 
@@ -202,7 +216,7 @@
     </div>
 
     <div id="right">
-        <button id="showHideLeftPanelButton"><< >></button>
+     <!--   <button id="showHideLeftPanelButton"><< >></button>-->
         <div id="listRecordsDiv">
 
 
