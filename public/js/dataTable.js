@@ -45,9 +45,14 @@ var dataTable = function () {
         $("#table_" + containerDiv).width("400px").height(height);
 
        var  table= $("#table_" + containerDiv).DataTable({
+           dom: 'Bfrtip',
+           buttons: [
+               'copy', 'csv', 'excel', 'pdf', 'print'
+           ],
             data: this.dataSet,
             columns: columns,
-           "pageLength": 15
+           "pageLength": 15,
+
             /*   scrollX: true,
               scrollY: height - 100,
               fixedColumns: {

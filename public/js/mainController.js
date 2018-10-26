@@ -84,6 +84,11 @@ var mainController = (function () {
             mainController.showNewRecordDialog();
         })
 
+        $("#addRecordButton").bind("change", function () {
+            mainController.statsSelect();
+        })
+
+
 
 
     }
@@ -106,6 +111,8 @@ var mainController = (function () {
 
         self.fillSelectOptions("searchTableInput", tables, true);
         self.fillSelectOptions("newRecordTableSelect", tables, true);
+       var stats=Object.keys(statistics.stats);
+        self.fillSelectOptions("statsSelect", stats, true);
 
 
     }
