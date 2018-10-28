@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" media="screen" type="text/css" title="Design" href="js/jquery/jquery-ui.min.css"/>
+  <link rel="stylesheet" media="screen" type="text/css" title="Design" href="js/jquery/jquery-ui.min.css"/>
     <link rel="stylesheet" href="js/jsTree/themes/default/style.min.css"/>
 
 
@@ -12,12 +12,22 @@
 
 
 
-    <script src="js/jsTree/jstree.min.js"></script>
-    <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"/>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.flash.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+
+
+  <!--  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.19/sorting/datetime-moment.js"></script>-->
+
 
     <script src="js/jsTree/treeController.js"></script>
-    <script src="js/recordController.js"></script>
     <script src="js/dataTable.js"></script>
     <script src="js/recordController.js"></script>
 
@@ -58,6 +68,7 @@
 
         .accordionInnerDiv {
             min-height: 300px;
+            background-color: #9ca7b3;
 
         }
 
@@ -67,15 +78,26 @@
 
         }
 
-.dataTables_wrapper {
 
-    overflow: auto;
-   // height:90%;
-}
+        .myDatatable td {
+            border-bottom-style: solid;
+            border-bottom-width:1px;
+            border-bottom-color:#93aeca;
+            border-left-style: solid;
+            border-left-width:1px;
+            border-left-color:#93aeca;
 
-        .myDatatable tr {
             height: 20px !important;
         }
+
+        .dt-buttons{
+            left: 200px;
+            position: relative;
+        }
+        .dataTables_paginate{
+            font-weight: bold;
+        }
+
 
         #messageDiv {
             font-style: italic;
@@ -86,14 +108,24 @@
             background-color: #c2beff85;
         }
 
+        #dialogDiv ,.ui-dialog-buttonpane {
+
+            background-color: #93aeca;
+        }
+        .selected{
+            background-color: #0a6aa1;
+        }
+
+
 
     </style>
 
     <script>
         var dialog;
         $(function () {
+
             mainController.setDivsSize();
-            $("#leftAccordion").accordion();
+          $("#leftAccordion").accordion();
 
             $("#tabs").tabs({
                 activate: function (event, ui) {
@@ -209,7 +241,7 @@
             </div>-->
             <h1>Statisitiques</h1>
             <div id="statsDiv" class="accordionInnerDiv">
-                <select id="statsSelect">
+                <select id="statsSelect"  size="10" style="left: -30px;position: relative;">
 
                 </select>
 
@@ -221,7 +253,7 @@
 
     <div id="right">
      <!--   <button id="showHideLeftPanelButton"><< >></button>-->
-        <div id="listRecordsDiv">
+        <div id="listRecordsDiv"  class="dataTableDiv">
 
 
         </div>
@@ -242,15 +274,15 @@
 
         </div>
         <div id="tabs-linkedRecordDiv" class="dialogTab">
-            <div id="linkedRecordsDiv"></div>
+            <div id="linkedRecordsDiv" class="dataTableDiv"></div>
             <button id="deleteLinkedRecordButton">supprimer lien</button>
 
         </div>
         <div id="tabs-newLinkedRecordDiv" class="dialogTab">
             <br>
-            chercher <input id="searchLinkedRecordsInput">
-            <div id="new_linkedRecordsDiv"></div>
-            <button id="addLinkedRecordButton">ajouter lien</button>
+            chercher <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput"><button id="addLinkedRecordButton">ajouter lien</button>
+            <div id="new_linkedRecordsDiv" class="dataTableDiv"></div>
+
         </div>
         -
 

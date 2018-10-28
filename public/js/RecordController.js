@@ -4,6 +4,7 @@ var recordController = (function () {
     self.currentRecordId;
 
 
+
     var setModifyMode = function () {
 
     }
@@ -105,8 +106,8 @@ var recordController = (function () {
             data: payload,
             dataType: "json",
             success: function (json) {
-                mainController.setMessage("enregistrement sauvé");
-
+                mainController.setMessage("enregistrement enregistré");
+                dialog.dialog("close");
                 for (var key in self.currentRecordChanges) {
                     var cells = $('#dataTable').rows({selected: true});
 
@@ -125,6 +126,57 @@ var recordController = (function () {
 
     }
 
+    self.addLinkedRecord = function () {
+        var ww=1
+        var table=mainController.dataTables["newLink_" + mainController.currentLinkedTable].table;
+        var idx = table.rows('.selected', 0).indexes();
+        var x=idx.length;
+
+
+     //  var selectedRowsIndexes=table.rows('.selected').indexes();
+        for(var i=0;i<idx.length;i++){
+            var data= table.rows(idx[i]).data()[0]
+           var sql="";
+           if(mainController.currentTable=="versement")
+               sql="insert into r_versement_magasin (id_versement,id_magasin) values("+self.currentRecordId+","+data.id+")";
+           else    if(mainController.currentTable=="magasin")
+               sql="insert into r_versement_magasin (id_magasin,id_versement)values("+data.id+","+self.currentRecordId+")";
+           else
+               return mainController.setErrorMessage("no table selected");
+            var payload = {
+                exec: 1,
+                sql: sql
+            }
+            $.ajax({
+                type: "POST",
+                url: "../mysql",
+                data: payload,
+                dataType: "json",
+                success: function (json) {
+                    mainController.setMessage("lien enregistré");
+
+                    for (var key in self.currentRecordChanges) {
+                        var cells = $('#dataTable').rows({selected: true});
+
+                        var x = "";
+                        // cell.data(cell.data() + 1).draw();
+                    }
+
+
+                }, error: function (err) {
+                    mainController.setErrorMessage(err.responseText)
+                }
+
+
+            })
+        }
+
+    }
+    self.deleteLinkedRecord = function () {
+
+
+    }
+
 
     self.displayRecordData = function (obj) {
         self.currentRecordId = obj.id;
@@ -134,7 +186,7 @@ var recordController = (function () {
         var targetObj = {}
         mainController.dataModel[table].forEach(function (field) {
             targetObj[field.name] = {
-                type: mainController.getFieldType(table, field.dataType)
+                type: mainController.getFieldType(table, field.name)
             }
 
             if (targetObj.type == "number")
@@ -155,11 +207,13 @@ var recordController = (function () {
         self.drawAttributes(targetObj, "recordDetailsDiv");
         $("#recordDetailsDiv").prepend("<span class='title'>"+table+"</span>")
         $("#recordDetailsDiv").append("<button id='saveRecordButton' onclick='recordController.saveRecord()'>Sauvegarder</button>")
-        $("#tabs").tabs( "option", "enabled", [1,2] );
+
+        $("#tabs").tabs("enable", 1);
+        $("#tabs").tabs("enable", 2);
         $("#tabs").tabs("option", "active", 0);
 
 
-        //renommage du tab 1 du dailogue (à évoluer si d'autre relations
+        //renommage du tab 1 du dailogue (à évoluer si d'autre relationsSelect
 
         $('#tabs a[href=#tabs-linkedRecordDiv]').text(mainController.currentLinkedTable + "s")
 
@@ -208,7 +262,7 @@ var recordController = (function () {
 
             //if (type && type == 'select' && selectValues) {
             if (selectValues) {
-                var str = "<select  onblur='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' id='attr_" + key + "'>"
+                var str = "<select  onkeypress='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' id='attr_" + key + "'>"
                 str += "<option  value=''></option>";
                 for (var i = 0; i < selectValues.length; i++) {
 
@@ -236,10 +290,17 @@ var recordController = (function () {
             }
 
             else if (type == 'password') {
-                value = "<input type='password' onblur='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
+                value = "<input type='password' onkeypress='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
                     + key + "'value='" + value + "'>";
             }
-            else if (!type || type == 'string' || type == 'number') {
+        /*    else if(type=='date'){
+
+
+                    value = "<input onkeypress='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput datePicker' " + strCols + "id='attr_"
+                        + key + "' value='" + value + "'>";
+
+            }*/
+            else if (!type || type == 'string' || type == 'number' || type == 'date') {
                 var cols = targetObj[key].cols;
                 var rows = targetObj[key].rows;
                 var strCols = ""
@@ -248,12 +309,12 @@ var recordController = (function () {
                     if (cols)
                         strCols = " cols='" + cols + "' ";
                     rows = " rows='" + rows + "' ";
-                    value = "<textArea  onblur='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + rows
+                    value = "<textArea  onkeypress='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + rows
                         + "id='attr_" + key + "' > " + value + "</textarea>";
                 } else {
                     if (cols)
                         strCols = " size='" + cols + "' ";
-                    value = "<input onblur='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
+                    value = "<input onkeypress='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
                         + key + "' value='" + value + "'>";
                 }
             }
@@ -264,10 +325,14 @@ var recordController = (function () {
 
 
     self.incrementChanges = function (input) {
-        self.isModifying += 1;
+
+
         var fieldName = $(input).attr('id').substring(5);
         var value = $(input).val();
-        self.currentRecordChanges[fieldName] = value;
+        if(!self.currentRecordChanges[fieldName]) {
+            self.isModifying += 1;
+            self.currentRecordChanges[fieldName] = value;
+        }
 
 
     }
@@ -370,7 +435,15 @@ var recordController = (function () {
         }
         str += "</table>" + strHidden;
         $("#" + zoneId).css("visibility", "visible");
-        $("#" + zoneId).html(str);
+        $("#" + zoneId).html(str).promise().done(function(){
+            var xx=$('#attr_dateArrivee');
+            console.log ($('#attr_dateArrivee').val())
+           $('#attr_dateArrivee').datepicker({
+               dateFormat: "yy/mm/dd"
+           });
+        });
+
+
 
     }
 

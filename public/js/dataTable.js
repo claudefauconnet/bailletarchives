@@ -5,6 +5,7 @@ var dataTable = function () {
     this.columns = [];
     this.table;
     this.selectedRow;
+    self.dateColumns = []
 
     this.loadJson = function (containerDiv, json, options) {
 
@@ -19,39 +20,74 @@ var dataTable = function () {
         this.dataSet = json
         ;
         var keys = []
-        json.forEach(function (line) {
+        json.forEach(function (line, index) {
             for (var key in line) {
                 if (keys.indexOf(key) < 0)
                     keys.push(key);
             }
         })
-        var columns = []
-        keys.forEach(function (key) {
-            columns.push({data: key, title: key})
+        var columns = [];
+        self.dateColumns = [];
+        keys.forEach(function (key, index) {
+            var type = mainController.getFieldType(this.table, key);
+
+            var obj = {data: key, title: key};
+            if (type == "date") {
+                self.dateColumns.push(index);
+            }
+            columns.push(obj)
         })
 
         this.columns = columns;
-        var htmlStr = "<br><br><br></div><table style=' z-index:100 ' id='table_" + containerDiv + "'  class='myDatatable cell-border display nowrap'></table>"
+        var htmlStr = "<table style=' z-index:100 ' id='table_" + containerDiv + "'  class='myDatatable cell-border display nowrap'></table>"
 
         var xxx = $("#" + containerDiv).html();
         $("#" + containerDiv).html(htmlStr);
         $('#' + containerDiv).css("font-size", "10px");
-      //  $('#table_' + containerDiv).css("font-size", "10px");
 
-       // table_listRecordsDiv_wrapper
-
-
-        var height = $("#table_" + containerDiv).height() - 200
+        var height = $(".dataTableDiv").height() - (mainController.leftPanelWidth + 50);
+        var width = $(".dataTableDiv").width() - 280;
         $("#table_" + containerDiv).width("400px").height(height);
 
-       var  table= $("#table_" + containerDiv).DataTable({
-           dom: 'Bfrtip',
-           buttons: [
-               'copy', 'csv', 'excel', 'pdf', 'print'
-           ],
+        var table = $("#table_" + containerDiv).DataTable({
+            //  dom: 'Blfrtip',
+            "dom": '<"top"firptl><"bottom"B><"clear">',
+
+            buttons: [
+                'copy', 'csv', 'print'
+                // 'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
             data: this.dataSet,
             columns: columns,
-           "pageLength": 15,
+
+
+            "columnDefs": [
+                {//dates
+                    "render": function (data, type, row) {
+                        var str = "";
+                        if (data != null && data != "" && data.indexOf("0000") < 0) {
+                            var date = new Date(data);
+                            str = date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
+                        }
+                        return str;
+
+                    },
+                    "targets": self.dateColumns
+                }
+
+            ],
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            },
+
+            // pageLength: 10,
+            "pager": true,
+
+            "scrollY": "" + height + "px",
+            "scrollX": "" + width + "px",
+
+            // "pagingType": "scrolling"
 
             /*   scrollX: true,
               scrollY: height - 100,
@@ -68,7 +104,7 @@ var dataTable = function () {
         })
         /*   table.buttons().container()
                .appendTo( $('.col-sm-6:eq(0)', table.table().container() ) );*/
-        this.table=table;
+        this.table = table;
 
         $('#table_' + containerDiv + ' tbody').on('click', 'tr', function (event) {
             if ($(this).hasClass('selected')) {
@@ -76,16 +112,18 @@ var dataTable = function () {
                 $("#table_" + containerDiv + " tbody tr").css("height", "20px");
             }
             else {
-                if (options.onClick ) {
+                if (!event.ctrlKey)
                     $('tr.selected').removeClass('selected');
-                    $(this).addClass('selected');
+                $(this).addClass('selected');
+                if (options.onClick) {
+
                     var px = event.clientX;
                     var py = event.clientY;
-                    this.selectedRow=table.row(this);
-                    var line= table.row( this ).data();
-                  /*  var idx = table.cell('.selected', 0).index();
-                    // var data = table.row( idx.row ).data();
-                    var line = this.dataSet[idx.row];*/
+                    this.selectedRow = table.row(this);
+                    var line = table.row(this).data();
+                    /*  var idx = table.cell('.selected', 0).index();
+                      // var data = table.row( idx.row ).data();
+                      var line = this.dataSet[idx.row];*/
 
                     options.onClick(line);
                     // recordController.displayRecordData(line);
@@ -100,13 +138,13 @@ var dataTable = function () {
 
     },
 
-        this.updateSelectedRow=function(obj){
-            var rowIndex  = this.table.rows( '.selected' ).indexes()[0];
-            var table=this.table;
+        this.updateSelectedRow = function (obj) {
+            var rowIndex = this.table.rows('.selected').indexes()[0];
+            var table = this.table;
             for (var key in recordController.currentRecordChanges) {
-                this.columns.forEach(function(column,colIndex){
-                    if(column.data==key) {
-                        table.cell(rowIndex,colIndex).data(recordController.currentRecordChanges[key]).draw();
+                this.columns.forEach(function (column, colIndex) {
+                    if (column.data == key) {
+                        table.cell(rowIndex, colIndex).data(recordController.currentRecordChanges[key]).draw();
                     }
                 })
 
@@ -118,6 +156,4 @@ var dataTable = function () {
         }
 
 
-
 }
-

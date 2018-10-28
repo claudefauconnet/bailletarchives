@@ -4,7 +4,7 @@ var mainController = (function () {
     self.dataModel = {};
     self.currentTable;
     self.currentLinkedTable;
-    self.leftPanelWidth = 200;
+    self.leftPanelWidth = 250;
     self.dataTables = {};
 
 
@@ -16,23 +16,47 @@ var mainController = (function () {
         date: ["=", "<", "<=", ">", ">=", "!="],
 
     }
-    self.relations = {
 
+    self.tableDefs = {
         magasin: {
-            "versement": {
-                sql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and magasin.id="
+            relationsSelect: {
+                "versement": {
+                    sql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and magasin.id=",
+                    selectfields: ["num", "versement", "theme", "deposant"]
+                }
             }
+
 
         },
         versement: {
-            "magasin": {
-                sql: "select magasin.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and versement.id="
+            relationsSelect: {
+                "magasin": {
+                    sql: "select magasin.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and versement.id=",
+                    selectfields: ["coordonnees"]
+                }
             }
 
+
         }
-
-
     }
+
+    /*  self.relationsSelect = {
+
+          magasin: {
+              "versement": {
+                  sql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and magasin.id="
+              }
+
+          },
+          versement: {
+              "magasin": {
+                  sql: "select magasin.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and versement.id="
+              }
+
+          }
+
+
+      }*/
 
 
     self.bindActions = function () {
@@ -59,7 +83,7 @@ var mainController = (function () {
         })
 
         $("#addLinkedRecordButton").bind("click", function () {
-            mainController.addLinkedRecord();
+            recordController.addLinkedRecord();
         })
 
         $("#deleteLinkedRecordButton").bind("click", function () {
@@ -67,7 +91,7 @@ var mainController = (function () {
         })
 
         $("#searchLinkedRecordsInput").bind("keydown", function (e) {
-            if (e.keyCode == 13) {
+            if (e.keyCode == 13 || e.keyCode == 9) {
                 var str = $(this).val()
                 if (true || str.length > 3)
                     mainController.searchLinkedRecords(str);
@@ -76,19 +100,18 @@ var mainController = (function () {
         $("#newRecordTableSelect").bind("click", function () {
             mainController.showNewRecordDialog($(this).val());
         })
-       /* $("#saveRecordButton").bind("click", function () {
-            recordController.saveRecord();
-        })*/
+        /* $("#saveRecordButton").bind("click", function () {
+             recordController.saveRecord();
+         })*/
 
         $("#addRecordButton").bind("click", function () {
             mainController.showNewRecordDialog();
         })
 
-        $("#addRecordButton").bind("change", function () {
-            mainController.statsSelect();
+        $("#statsSelect").bind("change", function () {
+            var str = $(this).val()
+            statistics.displayStat(str);
         })
-
-
 
 
     }
@@ -111,7 +134,7 @@ var mainController = (function () {
 
         self.fillSelectOptions("searchTableInput", tables, true);
         self.fillSelectOptions("newRecordTableSelect", tables, true);
-       var stats=Object.keys(statistics.stats);
+        var stats = Object.keys(statistics.stats);
         self.fillSelectOptions("statsSelect", stats, true);
 
 
@@ -146,9 +169,9 @@ var mainController = (function () {
         $("#left").width(self.leftPanelWidth)
         mainController.totalDims.w = $(window).width();
         mainController.totalDims.h = $(window).height();
-        var dataTableWidth = mainController.totalDims.w - $("#left").width() - 20
+        var dataTableWidth = mainController.totalDims.w - (self.leftPanelWidth)
         //  $("#dataTableDiv").width(dataTableWidth).height(500);
-        $("#listRecordsDiv").width(dataTableWidth).height(mainController.totalDims.h - 20);
+        $(".dataTableDiv").width(dataTableWidth).height(mainController.totalDims.h - 50);
 
     }
 
@@ -181,11 +204,15 @@ var mainController = (function () {
     self.listRecords = function () {
         var whereStr = "";
         var table = self.currentTable;
-        var relations = mainController.relations[table];
+        var relationsSelect = mainController.tableDefs[table].relationsSelect;
         var i = 0;
-        for (var key in relations) {
-            if (i++ == 0)
+
+        for (var key in relationsSelect) {
+            if (i++ == 0) {
                 self.currentLinkedTable = key;
+                var selectfields = relationsSelect[key].selectfields;
+                mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
+            }
         }
         var column = $("#searchColumnInput").val();
         var operator = $("#searchOperatorInput").val();
@@ -231,12 +258,13 @@ var mainController = (function () {
         var linkedTable = "";
         var foreignKey = ""
 
-        var relations = self.relations[self.currentTable];
+        var relationsSelect = mainController.tableDefs[self.currentTable].relationsSelect;
         var i = 0;
-        for (var key in relations) {
+        for (var key in relationsSelect) {
 
             if (i == 0) {
-                var sql = relations[key].sql + recordController.currentRecordId;
+
+                var sql = relationsSelect[key].sql + recordController.currentRecordId;
                 console.log(sql);
                 var payload = {
                     exec: 1,
@@ -249,9 +277,9 @@ var mainController = (function () {
                     data: payload,
                     dataType: "json",
                     success: function (json) {
-                        if (!self.dataTables[relations[key].table])
-                            self.dataTables[relations[key].table] = new dataTable();
-                        self.dataTables[relations[key].table].loadJson("linkedRecordsDiv", json, {onClick: recordController.displayRecordData})
+                        if (!self.dataTables[relationsSelect[key].table])
+                            self.dataTables[relationsSelect[key].table] = new dataTable();
+                        self.dataTables[relationsSelect[key].table].loadJson("linkedRecordsDiv", json, {onClick: recordController.displayRecordData})
 
 
                     }, error: function (err) {
@@ -267,14 +295,6 @@ var mainController = (function () {
 
     }
 
-    self.addLinkedRecord = function () {
-
-
-    }
-    self.deleteLinkedRecord = function () {
-
-
-    }
 
     self.searchLinkedRecords = function (str) {
         var concatStr = "";
@@ -284,9 +304,12 @@ var mainController = (function () {
                 concatStr += ","
             concatStr += field.name;
         })
-
-
-        var sql = "select * from " + self.currentLinkedTable + "  WHERE CONCAT(" + concatStr + ") LIKE '%" + str + "%'";
+        var sql = "";
+        var field = $("#linkedRecordsFieldSelect").val();
+        if (field == "")
+            sql = "select * from " + self.currentLinkedTable + "  WHERE CONCAT(" + concatStr + ") LIKE '%" + str + "%'";
+        else
+            sql = "select * from " + self.currentLinkedTable + "  WHERE " + field + " LIKE '%" + str + "%'";
         console.log(sql);
         console.log(sql);
         var payload = {
@@ -301,9 +324,9 @@ var mainController = (function () {
             dataType: "json",
             success: function (json) {
 
-                if (!self.dataTables["new_" + self.currentLinkedTable])
-                    self.dataTables["new_" + self.currentLinkedTable] = new dataTable();
-                self.dataTables["new_" + self.currentLinkedTable].loadJson("new_linkedRecordsDiv", json, {})
+                if (!self.dataTables["newLink_" + self.currentLinkedTable])
+                    self.dataTables["newLink_" + self.currentLinkedTable] = new dataTable();
+                self.dataTables["newLink_" + self.currentLinkedTable].loadJson("new_linkedRecordsDiv", json, {})
 
             }, error: function (err) {
                 self.setErrorMessage(err.responseText)
@@ -316,8 +339,8 @@ var mainController = (function () {
     }
 
     self.showNewRecordDialog = function () {
-        var table=$("#searchTableInput").val();
-        if(!table){
+        var table = $("#searchTableInput").val();
+        if (!table) {
             return mainController.setErrorMessage("selectionnez une table")
         }
         recordController.currentRecordId = null;
