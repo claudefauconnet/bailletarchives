@@ -2,6 +2,10 @@ var statistics=(function(){
     var self={};
 
     self.stats= {
+
+        "prochain numero de versement":{
+            sql: "select concat('0',MAX( CONVERT(numVersement, SIGNED INTEGER)+1)) as prochainNumeroVersement from versement"
+        },
         "versements par année et etatTraitement": {
             sql: "select YEAR(dateArrivee) as annee,etatTraitement,sum(nbBoites) nbreBoites,sum(metrage)totalMetrage, count(*) as nbreVersements, sum(volumeGO) as volumeTotalGO,sum(nbreElements) nbreTotalElements from versement group by annee,etatTraitement"
         },
@@ -36,7 +40,7 @@ if(!stat)
             success: function (json) {
                 if (!mainController.dataTables["stats"])
                     mainController.dataTables["stats"] = new dataTable();
-                mainController.dataTables["stats"].loadJson("listRecordsDiv", json, {})
+                mainController.dataTables["stats"].loadJson("listRecordsDiv", json, { dom:"ltiB",})
             }, error: function (err) {
                 mainController.setErrorMessage(err.responseText)
             }

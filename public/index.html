@@ -116,6 +116,12 @@
             background-color: #0a6aa1;
         }
 
+        .title{
+                font-weight: bold;
+            font-size: 14px;color:#0a6aa1 ;
+
+        }
+
 
 
     </style>
@@ -131,7 +137,7 @@
                 activate: function (event, ui) {
                     var currentTabIndex = ui.newTab.index();
                     if (currentTabIndex == 1) {
-                        mainController.showLinkedRecords();
+                       ; mainController.loadLinkedRecords();
                     }
 
                 }
@@ -142,7 +148,7 @@
                 width: "80%",
                 modal: true,
                 buttons: {
-                    Cancel: function () {
+                    Annuler: function () {
                         dialog.dialog("close");
                     }
                 },
@@ -150,6 +156,24 @@
                     // allFields.removeClass("ui-state-error");
                 }
             });
+
+
+            $("#confirmDialogDiv").dialog({
+                autoOpen: false,
+                modal: true,
+                buttons : {
+                    "OK" : function() {
+                        $(this).attr("response",true);
+                        $(this).dialog("close");
+                    },
+                    "Annuler" : function() {
+                        $(this).attr("response",false);
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+
             mainController.bindActions();
 
             mainController.loadDataModel(function (err, result) {
@@ -182,7 +206,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <select id="searchTableInput"></select>
+                            <select id="searchTableInput" size="0"></select>
                         </td>
                     </tr>
                     <tr>
@@ -262,11 +286,12 @@
 </div>
 
 <div id="dialogDiv">
+
     <div id="tabs">
         <ul>
             <li><a href="#tabs-recordDiv">Details</a></li>
             <li><a href="#tabs-linkedRecordDiv">LinkedRecord</a></li>
-            <li><a href="#tabs-newLinkedRecordDiv">lier</a></li>
+            <li><a href="#tabs-newLinkedRecordDiv">Créer lien(s)</a></li>
 
         </ul>
         <div id="tabs-recordDiv" class="dialogTab">
@@ -274,13 +299,14 @@
 
         </div>
         <div id="tabs-linkedRecordDiv" class="dialogTab">
+            <button id="deleteLinkedRecordButton">Supprimer lien</button>
             <div id="linkedRecordsDiv" class="dataTableDiv"></div>
-            <button id="deleteLinkedRecordButton">supprimer lien</button>
+
 
         </div>
         <div id="tabs-newLinkedRecordDiv" class="dialogTab">
             <br>
-            chercher <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput"><button id="addLinkedRecordButton">ajouter lien</button>
+            Chercher <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput"><button id="addLinkedRecordButton">ajouter lien</button>
             <div id="new_linkedRecordsDiv" class="dataTableDiv"></div>
 
         </div>
@@ -289,7 +315,9 @@
 
     </div>
 </div>
+<div id="confirmDialogDiv" title="Confirmation Required">
 
+</div>
 
 </body>
 </html>

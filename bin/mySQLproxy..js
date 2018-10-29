@@ -56,10 +56,21 @@ var mySQLproxy = {
 
                 var model={};
                 result.forEach(function(line){
-                    if(!model[line.TABLE_NAME])
-                        model[line.TABLE_NAME]=[];
-                    model[line.TABLE_NAME].push({name:line.COLUMN_NAME,columnType:line.COLUMN_TYPE,dataType:line.DATA_TYPE,nullable:line.IS_NULLABLE,defaultValue: line.COLUMN_DEFAULT,maxLength:line.CHARACTER_MAXIMUM_LENGTH})
+                    if(line.TABLE_NAME.indexOf("r_")==0)//relation
+                     ;
+                    else {
+                        if (!model[line.TABLE_NAME])
+                            model[line.TABLE_NAME] = [];
 
+                        model[line.TABLE_NAME].push({
+                            name: line.COLUMN_NAME,
+                            columnType: line.COLUMN_TYPE,
+                            dataType: line.DATA_TYPE,
+                            nullable: line.IS_NULLABLE,
+                            defaultValue: line.COLUMN_DEFAULT,
+                            maxLength: line.CHARACTER_MAXIMUM_LENGTH
+                        })
+                    }
                 })
 
                 return callback(null, model);

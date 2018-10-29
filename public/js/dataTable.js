@@ -6,20 +6,24 @@ var dataTable = function () {
     this.table;
     this.selectedRow;
     self.dateColumns = []
-
+    this.pageLength = 10;
+    this.colHeight = 80;
     this.loadJson = function (containerDiv, json, options) {
 
         if (!options)
             options = {};
 
-        height = 500;
         this.dataSet = [];
         this.columns = [];
 
 
         this.dataSet = json
         ;
-        var keys = []
+        var keys = [];
+        var sortColumns= [];
+        if(mainController.tableDefs[mainController.currentTable] && mainController.tableDefs[mainController.currentTable].sortFields )
+            sortColumns = mainController.tableDefs[mainController.currentTable].sortFields;
+        var dataTableSortArray = [];
         json.forEach(function (line, index) {
             for (var key in line) {
                 if (keys.indexOf(key) < 0)
@@ -35,23 +39,51 @@ var dataTable = function () {
             if (type == "date") {
                 self.dateColumns.push(index);
             }
-            columns.push(obj)
+            columns.push(obj);
+
+            //sort datatable
+            if (sortColumns.length > 0 && sortColumns[0].indexOf(key) > -1) {
+                var order = sortColumns[0].indexOf("desc") > -1;
+                if (order)
+                    order = "desc"
+                else
+                    order = "asc"
+
+                dataTableSortArray.push([index, order])
+            }
         })
 
         this.columns = columns;
+
         var htmlStr = "<table style=' z-index:100 ' id='table_" + containerDiv + "'  class='myDatatable cell-border display nowrap'></table>"
 
         var xxx = $("#" + containerDiv).html();
         $("#" + containerDiv).html(htmlStr);
         $('#' + containerDiv).css("font-size", "10px");
-
-        var height = $(".dataTableDiv").height() - (mainController.leftPanelWidth + 50);
-        var width = $(".dataTableDiv").width() - 280;
+        var height;
+        var width;
+        if (options.height)
+            height = options.height;
+        else
+            height = $(".dataTableDiv").height() - (mainController.leftPanelWidth + 50);
+        if (options.width)
+            height = options.width;
+        else
+            width = $(".dataTableDiv").width() - 280;
         $("#table_" + containerDiv).width("400px").height(height);
 
+
+        if (json.length < this.pageLength)
+            height = this.colHeight * json.length;
+
+        var dom = '<"top"firptl><"bottom"B><"clear">'
+        if (options.dom)
+            dom = options.dom;
+
+
         var table = $("#table_" + containerDiv).DataTable({
-            //  dom: 'Blfrtip',
-            "dom": '<"top"firptl><"bottom"B><"clear">',
+
+            "dom": dom,
 
             buttons: [
                 'copy', 'csv', 'print'
@@ -59,7 +91,7 @@ var dataTable = function () {
             ],
             data: this.dataSet,
             columns: columns,
-
+            "order": dataTableSortArray,
 
             "columnDefs": [
                 {//dates
@@ -81,30 +113,18 @@ var dataTable = function () {
                 selector: 'td:first-child'
             },
 
-            // pageLength: 10,
+            pageLength: this.pageLength,
             "pager": true,
 
             "scrollY": "" + height + "px",
             "scrollX": "" + width + "px",
+            scrollCollapse: true,
 
-            // "pagingType": "scrolling"
-
-            /*   scrollX: true,
-              scrollY: height - 100,
-              fixedColumns: {
-                  heightMatch: 'none'
-              },
-             dom: 'Bfrtip',
-              buttons: [
-                  //'copyHtml5',
-                  'excelHtml5',
-                  'csvHtml5',
-                  'pdfHtml5'
-              ]*/
         })
-        /*   table.buttons().container()
-               .appendTo( $('.col-sm-6:eq(0)', table.table().container() ) );*/
+        table.columns.adjust().draw();
+        $("#table_" + containerDiv).css('display', 'block');
         this.table = table;
+
 
         $('#table_' + containerDiv + ' tbody').on('click', 'tr', function (event) {
             if ($(this).hasClass('selected')) {

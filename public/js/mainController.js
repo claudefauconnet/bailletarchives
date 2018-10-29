@@ -19,6 +19,7 @@ var mainController = (function () {
 
     self.tableDefs = {
         magasin: {
+            sortFields: ["magasin"],
             relationsSelect: {
                 "versement": {
                     sql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and magasin.id=",
@@ -29,6 +30,7 @@ var mainController = (function () {
 
         },
         versement: {
+            sortFields: ["numVersement desc"],
             relationsSelect: {
                 "magasin": {
                     sql: "select magasin.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and versement.id=",
@@ -87,7 +89,7 @@ var mainController = (function () {
         })
 
         $("#deleteLinkedRecordButton").bind("click", function () {
-            mainController.deleteLinkedRecord();
+            recordController.deleteLinkedRecord();
         })
 
         $("#searchLinkedRecordsInput").bind("keydown", function (e) {
@@ -141,8 +143,12 @@ var mainController = (function () {
     }
     self.getFieldType = function (table, _field) {
         var type = "";
+        if(!table || !self.dataModel[table])
+            return "string";
+
         if (!table)
             table = self.currentTable;
+
         self.dataModel[table].forEach(function (field) {
             if (field.name == _field)
                 type = field.dataType;
@@ -174,6 +180,18 @@ var mainController = (function () {
         $(".dataTableDiv").width(dataTableWidth).height(mainController.totalDims.h - 50);
 
     }
+
+    self.enableLinkButton=function(){
+        $("#addLinkedRecordButton").removeAttr("disabled");
+    }
+
+
+    self.enableUnlinkButton=function(){
+        $("#deleteLinkedRecordButton").removeAttr("disabled");
+    }
+
+
+
 
 
     self.loadDataModel = function (callback) {
@@ -221,14 +239,37 @@ var mainController = (function () {
             return self.setErrorMessage(" selectionner une table");
         if (column != "") {
 
-            if (operator == "LIKE")
+            if (operator == "LIKE") {
                 value = "'%" + value + "%'"
-            whereStr = " WHERE " + table + "." + column + " " + operator + " " + value
+            }
+            else {
+                var type = self.getFieldType(table, column);
+                if (type == "string")
+                    value = "'" + value + "'";
+                else if (type == "date") {
+                    value = value.replace(/\//g, "-")
+                    value = "'" + value + "'";
+                } else if (type == "number")
+                    value = value;
+
+
+            }
+            whereStr = " WHERE " + table + "." + column + " " + operator + " " + value;
 
 
         }
 
         var sql = "select * from " + table + whereStr;
+        var sortClause = "";
+        var sortFields = self.tableDefs[table].sortFields;
+        sortFields.forEach(function (field, index) {
+            if (index == 0)
+                sortClause = " order by "
+            else
+                sortClause += ","
+            sortClause += field;
+        })
+        sql += sortClause;
         console.log(sql);
         var payload = {
             exec: 1,
@@ -245,7 +286,9 @@ var mainController = (function () {
                     self.dataTables[table] = new dataTable();
                 self.dataTables[table].loadJson("listRecordsDiv", json, {onClick: recordController.displayRecordData})
                 $("#tabs").tabs("option", "active", 0);
-                var xx = json
+                $("#addLinkedRecordButton").attr("disabled",true);
+                $("#deleteLinkedRecordButton").attr("disabled",true);
+
             }, error: function (err) {
                 self.setErrorMessage(err.responseText)
             }
@@ -254,7 +297,7 @@ var mainController = (function () {
         })
     }
 
-    self.showLinkedRecords = function () {
+    self.loadLinkedRecords = function () {
         var linkedTable = "";
         var foreignKey = ""
 
@@ -277,9 +320,18 @@ var mainController = (function () {
                     data: payload,
                     dataType: "json",
                     success: function (json) {
-                        if (!self.dataTables[relationsSelect[key].table])
-                            self.dataTables[relationsSelect[key].table] = new dataTable();
-                        self.dataTables[relationsSelect[key].table].loadJson("linkedRecordsDiv", json, {onClick: recordController.displayRecordData})
+                        var width=mainController.totalDims.h * .7;
+                        var height=300
+                        if (!self.dataTables["linked_"+key])
+                            self.dataTables["linked_"+key] = new dataTable();
+                        self.dataTables["linked_"+key].loadJson("linkedRecordsDiv", json,  {
+                            dom:"lti",
+                            width:width,
+                            height:height,
+                            onClick:mainController.enableUnlinkButton
+
+
+                        })
 
 
                     }, error: function (err) {
@@ -317,16 +369,23 @@ var mainController = (function () {
             sql: sql
         }
 
+
         $.ajax({
             type: "POST",
             url: "../mysql",
             data: payload,
             dataType: "json",
             success: function (json) {
-
+                var width=mainController.totalDims.h * .7;
+                var height=300
                 if (!self.dataTables["newLink_" + self.currentLinkedTable])
                     self.dataTables["newLink_" + self.currentLinkedTable] = new dataTable();
-                self.dataTables["newLink_" + self.currentLinkedTable].loadJson("new_linkedRecordsDiv", json, {})
+                self.dataTables["newLink_" + self.currentLinkedTable].loadJson("new_linkedRecordsDiv", json, {
+                    dom:"ti",
+                    width:width,
+                    heightheight:height,
+                    onClick:mainController.enableLinkButton
+                })
 
             }, error: function (err) {
                 self.setErrorMessage(err.responseText)
@@ -348,6 +407,17 @@ var mainController = (function () {
         recordController.displayRecordData({});
         $(dialog.dialog("open"))
         $("#tabs").tabs({disabled: [1, 2]});
+        self.execCustomization({type:"newRecord"});
+
+    }
+
+    self.execCustomization=function(options){
+        if(!options)
+            options={};
+        if(options.type=="newRecord"){
+
+        }
+
 
     }
 
@@ -378,6 +448,9 @@ var mainController = (function () {
         $("#messageDiv").css("color", "red");
         $("#messageDiv").html(message);
 
+    }
+    self.confirm=function(message){
+        $("#confirmDialogDiv").html(message);
     }
 
 
