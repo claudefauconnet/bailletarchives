@@ -18,47 +18,38 @@ var mainController = (function () {
     }
 
     self.tableDefs = {
-        magasin: {
+        "magasin": {
             sortFields: ["magasin"],
             relationsSelect: {
                 "versement": {
                     sql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and magasin.id=",
                     selectfields: ["num", "versement", "theme", "deposant"]
                 }
-            }
+            },
+
 
 
         },
-        versement: {
+        "versement": {
             sortFields: ["numVersement desc"],
             relationsSelect: {
                 "magasin": {
                     sql: "select magasin.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and versement.id=",
                     selectfields: ["coordonnees"]
                 }
+            },
+            fieldConstraints :{
+                etatTraitement:{
+                    values:["","BV","Rien","Inv"]
+                }
+
             }
 
 
         }
     }
 
-    /*  self.relationsSelect = {
 
-          magasin: {
-              "versement": {
-                  sql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and magasin.id="
-              }
-
-          },
-          versement: {
-              "magasin": {
-                  sql: "select magasin.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and versement.id="
-              }
-
-          }
-
-
-      }*/
 
 
     self.bindActions = function () {
@@ -164,7 +155,7 @@ var mainController = (function () {
 
     }
     self.setOperators = function (field) {
-        var type = self.getFieldType(null, field);
+        var type = self.getFieldType(this.currentTable, field);
         var operatorsArray = operators[type];
         self.fillSelectOptions("searchOperatorInput", operatorsArray, true)
     }
@@ -247,6 +238,18 @@ var mainController = (function () {
                 if (type == "string")
                     value = "'" + value + "'";
                 else if (type == "date") {
+                    var parts=value.split("/");
+                    if( parts.length==1) {
+                        if(operator ==">")
+                        value = "" + (parseInt(value) + 1) + "/01/01";
+                        else
+                            value = value + "/01/01";
+                    }
+                   else if( parts.length==2)
+                        value=value+"/01";
+                   else if(parts.length>3 || parts.length<1)
+                       return mainController.setErrorMessage("format de date invalide :format attendu AAAA/MM/JJ")
+
                     value = value.replace(/\//g, "-")
                     value = "'" + value + "'";
                 } else if (type == "number")
@@ -451,6 +454,37 @@ var mainController = (function () {
     }
     self.confirm=function(message){
         $("#confirmDialogDiv").html(message);
+    }
+
+    self.logon=function(){
+        var login=$("#login").val();
+        var password=$("#password").val();
+        var sql="select login from users where login='"+login+"' and password='"+password+"'";
+        var payload = {
+            exec: 1,
+            sql: sql
+        }
+
+
+        $.ajax({
+            type: "POST",
+            url: "../mysql",
+            data: payload,
+            dataType: "json",
+            success: function (json) {
+
+               if(json.length==1){
+                   $("#leftAccordion").css("opacity",1);
+                   $("#loginDialogDiv").dialog("close");
+               }
+
+            }, error: function (err) {
+              $("#logonMessageDiv").html("identifiant ou mot de passe incorrect")
+            }
+
+
+        })
+
     }
 
 

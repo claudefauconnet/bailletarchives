@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-  <link rel="stylesheet" media="screen" type="text/css" title="Design" href="js/jquery/jquery-ui.min.css"/>
+    <link rel="stylesheet" media="screen" type="text/css" title="Design" href="js/jquery/jquery-ui.min.css"/>
     <link rel="stylesheet" href="js/jsTree/themes/default/style.min.css"/>
 
 
     <script src="js/jquery/jquery.min.js"></script>
     <script src="js/jquery/jquery-ui.min.js"></script>
-
 
 
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
@@ -22,9 +21,8 @@
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
 
 
-
-  <!--  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
-  <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.19/sorting/datetime-moment.js"></script>-->
+    <!--  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.19/sorting/datetime-moment.js"></script>-->
 
 
     <script src="js/jsTree/treeController.js"></script>
@@ -44,8 +42,11 @@
         input, button {
             margin: 0px;
             padding: 2px;
-            width:100px;
+            width: 100px;
 
+        }
+        input{
+            width: 150px;
         }
 
         #main {
@@ -72,32 +73,31 @@
 
         }
 
-        #listRecordsDiv , #linkedRecordsDiv{
+        #listRecordsDiv, #linkedRecordsDiv {
             height: 500px;
             width: 77%;
 
         }
 
-
         .myDatatable td {
             border-bottom-style: solid;
-            border-bottom-width:1px;
-            border-bottom-color:#93aeca;
+            border-bottom-width: 1px;
+            border-bottom-color: #93aeca;
             border-left-style: solid;
-            border-left-width:1px;
-            border-left-color:#93aeca;
+            border-left-width: 1px;
+            border-left-color: #93aeca;
 
             height: 20px !important;
         }
 
-        .dt-buttons{
+        .dt-buttons {
             left: 200px;
             position: relative;
         }
-        .dataTables_paginate{
+
+        .dataTables_paginate {
             font-weight: bold;
         }
-
 
         #messageDiv {
             font-style: italic;
@@ -108,20 +108,21 @@
             background-color: #c2beff85;
         }
 
-        #dialogDiv ,.ui-dialog-buttonpane {
+        #dialogDiv, .ui-dialog-buttonpane {
 
             background-color: #93aeca;
         }
-        .selected{
+
+        .selected {
             background-color: #0a6aa1;
         }
 
-        .title{
-                font-weight: bold;
-            font-size: 14px;color:#0a6aa1 ;
+        .title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #0a6aa1;
 
         }
-
 
 
     </style>
@@ -131,13 +132,13 @@
         $(function () {
 
             mainController.setDivsSize();
-          $("#leftAccordion").accordion();
+            $("#leftAccordion").accordion();
 
             $("#tabs").tabs({
                 activate: function (event, ui) {
                     var currentTabIndex = ui.newTab.index();
                     if (currentTabIndex == 1) {
-                       ; mainController.loadLinkedRecords();
+                        ;mainController.loadLinkedRecords();
                     }
 
                 }
@@ -158,22 +159,23 @@
             });
 
 
-            $("#confirmDialogDiv").dialog({
+            $("#loginDialogDiv").dialog({
                 autoOpen: false,
                 modal: true,
-                buttons : {
-                    "OK" : function() {
-                        $(this).attr("response",true);
-                        $(this).dialog("close");
+                buttons: {
+                    "OK": function () {
+                        mainController.logon();
                     },
-                    "Annuler" : function() {
-                        $(this).attr("response",false);
+                    "Annuler": function () {
                         $(this).dialog("close");
                     }
                 }
             });
+            if (true) {
 
-
+                $("#leftAccordion").css("opacity",0.2);
+                $("#loginDialogDiv").dialog("open");
+            }
             mainController.bindActions();
 
             mainController.loadDataModel(function (err, result) {
@@ -193,7 +195,7 @@
 <div id="messageDiv"></div>
 <div id="main">
 
-    <div id="left">
+    <div id="left" >
 
         <div id="leftAccordion">
             <h1>Chercher</h1>
@@ -252,20 +254,20 @@
                 </table>
 
             </div>
-          <!--  <h1>Créer</h1>
-            <div id="newDiv" class="accordionInnerDiv">
+            <!--  <h1>Créer</h1>
+              <div id="newDiv" class="accordionInnerDiv">
 
-                <select id="newRecordTableSelect">
+                  <select id="newRecordTableSelect">
 
-                </select>
-
-
+                  </select>
 
 
-            </div>-->
+
+
+              </div>-->
             <h1>Statisitiques</h1>
             <div id="statsDiv" class="accordionInnerDiv">
-                <select id="statsSelect"  size="10" style="left: -30px;position: relative;">
+                <select id="statsSelect" size="10" style="left: -30px;position: relative;">
 
                 </select>
 
@@ -276,8 +278,8 @@
     </div>
 
     <div id="right">
-     <!--   <button id="showHideLeftPanelButton"><< >></button>-->
-        <div id="listRecordsDiv"  class="dataTableDiv">
+        <!--   <button id="showHideLeftPanelButton"><< >></button>-->
+        <div id="listRecordsDiv" class="dataTableDiv">
 
 
         </div>
@@ -306,7 +308,8 @@
         </div>
         <div id="tabs-newLinkedRecordDiv" class="dialogTab">
             <br>
-            Chercher <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput"><button id="addLinkedRecordButton">ajouter lien</button>
+            Chercher <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput">
+            <button id="addLinkedRecordButton">ajouter lien</button>
             <div id="new_linkedRecordsDiv" class="dataTableDiv"></div>
 
         </div>
@@ -315,7 +318,26 @@
 
     </div>
 </div>
-<div id="confirmDialogDiv" title="Confirmation Required">
+<div id="loginDialogDiv" title="Connexion">
+    <table>
+        <tr>
+            <td>
+                Utilisateur
+            </td>
+            <td>
+                <input id="login">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                mot de passe
+            </td>
+            <td>
+                <input type="password" id="password">
+            </td>
+        </tr>
+    </table>
+    <span id="logonMessageDiv"></span>
 
 </div>
 

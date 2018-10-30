@@ -45,6 +45,7 @@ var mySQLproxy = {
     },
 
     datamodel:function(connection,callback){
+        var excludedTables=["users","r_versement_magasin"]
         mySQLproxy.getConnection(connection, function (err, conn) {
             if (err)
                 return callback(err);
@@ -56,7 +57,7 @@ var mySQLproxy = {
 
                 var model={};
                 result.forEach(function(line){
-                    if(line.TABLE_NAME.indexOf("r_")==0)//relation
+                    if(line.TABLE_NAME.indexOf("r_")==0 || excludedTables.indexOf(line.TABLE_NAME)>-1)//relation
                      ;
                     else {
                         if (!model[line.TABLE_NAME])

@@ -340,7 +340,7 @@ var recordController = (function () {
 
     self.setAttributesValue = function (table, targetObj, sourceObj, changeType) {
         self.currentRecordChanges = []
-
+        var selectFields =mainController.tableDefs[mainController.currentTable].fieldConstraints;
         if (!changeType)
             changeType = "table";
         for (var key in targetObj) {
@@ -360,20 +360,15 @@ var recordController = (function () {
 
             var selectValues = null;
 
-            /*  var selectFields = Schema.schema.fieldsSelectValues[table];
+
               if (selectFields) {
                   selectValues = selectFields[key];
                   if (selectValues) {
-                      if (selectValues.source) {
-                          selectValues.source.field = key;
-                          selectValues = [];//self.getDynamicSelectValues(selectValues.source);
-                      } else {
+                      selectValues= selectValues.values.sort();
 
-                          selectValues.sort();
-                      }
                   }
 
-              }*/
+              }
 
 
             //if (type && type == 'select' && selectValues) {
