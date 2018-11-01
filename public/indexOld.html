@@ -21,7 +21,8 @@
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
 
 
-
+    <!--  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.19/sorting/datetime-moment.js"></script>-->
 
 
     <script src="js/jsTree/treeController.js"></script>
@@ -31,10 +32,6 @@
 
     <script src="js/mainController.js"></script>
     <script src="js/statistics.js"></script>
-
-    <script src="js/listController.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/context.js"></script>
 
     <style>
         body {
@@ -131,7 +128,7 @@
     </style>
 
     <script>
-        var dialog,dialog2;
+        var dialog;
         $(function () {
 
             mainController.setDivsSize();
@@ -139,9 +136,9 @@
 
             $("#tabs").tabs({
                 activate: function (event, ui) {
-                    var index = ui.newTab.index();
-                    if (index>0) {
-                        mainController.loadTab(index)
+                    var currentTabIndex = ui.newTab.index();
+                    if (currentTabIndex == 1) {
+                        ;listController.loadLinkedRecords();
                     }
 
                 }
@@ -154,20 +151,6 @@
                 buttons: {
                     Annuler: function () {
                         dialog.dialog("close");
-                    }
-                },
-                close: function () {
-                    // allFields.removeClass("ui-state-error");
-                }
-            });
-            dialog2 = $("#dialog2Div").dialog({
-                autoOpen: false,
-                height: mainController.totalDims.h * .8,
-                width: "80%",
-                modal: true,
-                buttons: {
-                    Annuler: function () {
-                        dialog2.dialog("close");
                     }
                 },
                 close: function () {
@@ -188,7 +171,7 @@
                     }
                 }
             });
-            if (false) {
+            if (true) {
 
                 $("#leftAccordion").css("opacity",0.2);
                 $("#loginDialogDiv").dialog("open");
@@ -202,8 +185,6 @@
 
 
             });
-
-
 
 
         })
@@ -311,28 +292,25 @@
     <div id="tabs">
         <ul>
             <li><a href="#tabs-recordDiv">Details</a></li>
-            <li><a href="#tabs-linkedRecordDiv1">LinkedRecord</a></li>
-            <li><a href="#tabs-linkedRecordDiv2">LinkedRecord</a></li>
-
+            <li><a href="#tabs-linkedRecordDiv">LinkedRecord</a></li>
+            <li><a href="#tabs-newLinkedRecordDiv">Créer lien(s)</a></li>
 
         </ul>
         <div id="tabs-recordDiv" class="dialogTab">
             <div id="recordDetailsDiv"></div>
 
         </div>
-        <div id="tabs-linkedRecordDiv1" class="dialogTab">
-
+        <div id="tabs-linkedRecordDiv" class="dialogTab">
             <button id="deleteLinkedRecordButton">Supprimer lien</button>
-            <button class="showAddLinkedRecordButton">Ajouter lien</button>
             <div id="linkedRecordsDiv" class="dataTableDiv"></div>
 
 
         </div>
-        <div id="tabs-linkedRecordDiv2" class="dialogTab">
-            <button id="deleteLinkedRecordButton2">Supprimer lien</button>
-            <button class="showAddLinkedRecordButton">Ajouter lien</button>
-            <div id="linkedRecordsDiv2" class="dataTableDiv"></div>
-
+        <div id="tabs-newLinkedRecordDiv" class="dialogTab">
+            <br>
+            Chercher <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput">
+            <button id="addLinkedRecordButton">ajouter lien</button>
+            <div id="new_linkedRecordsDiv" class="dataTableDiv"></div>
 
         </div>
         -
@@ -340,14 +318,6 @@
 
     </div>
 </div>
-<div id="dialog2Div">
-    Chercher <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput">
-    <button id="addLinkedRecordButton">ajouter lien</button>
-    <div id="new_linkedRecordsDiv" class="dataTableDiv"></div>
-</div>
-
-
-
 <div id="loginDialogDiv" title="Connexion">
     <table>
         <tr>

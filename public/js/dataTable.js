@@ -21,8 +21,8 @@ var dataTable = function () {
         ;
         var keys = [];
         var sortColumns= [];
-        if(mainController.tableDefs[mainController.currentTable] && mainController.tableDefs[mainController.currentTable].sortFields )
-            sortColumns = mainController.tableDefs[mainController.currentTable].sortFields;
+        if(config.tableDefs[context.currentTable] && config.tableDefs[context.currentTable].sortFields )
+            sortColumns = config.tableDefs[context.currentTable].sortFields;
         var dataTableSortArray = [];
         json.forEach(function (line, index) {
             for (var key in line) {
@@ -141,13 +141,8 @@ var dataTable = function () {
                     var py = event.clientY;
                     this.selectedRow = table.row(this);
                     var line = table.row(this).data();
-                    /*  var idx = table.cell('.selected', 0).index();
-                      // var data = table.row( idx.row ).data();
-                      var line = this.dataSet[idx.row];*/
-
                     options.onClick(line);
-                    // recordController.displayRecordData(line);
-                    $(dialog.dialog("open"))
+               //
                 }
 
 

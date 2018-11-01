@@ -38,9 +38,9 @@ if(!stat)
             data: payload,
             dataType: "json",
             success: function (json) {
-                if (!mainController.dataTables["stats"])
-                    mainController.dataTables["stats"] = new dataTable();
-                mainController.dataTables["stats"].loadJson("listRecordsDiv", json, { dom:"ltiB",})
+                if (!context.dataTables["stats"])
+                    context.dataTables["stats"] = new dataTable();
+                context.dataTables["stats"].loadJson("listRecordsDiv", json, { dom:"ltiB",})
             }, error: function (err) {
                 mainController.setErrorMessage(err.responseText)
             }

@@ -1,11 +1,8 @@
 var mainController = (function () {
     var self = {};
     self.totalDims = {};
-    self.dataModel = {};
-    self.currentTable;
-    self.currentLinkedTable;
+
     self.leftPanelWidth = 250;
-    self.dataTables = {};
 
 
     var numberTypes = ["float", "double", "decimal", "int"];
@@ -17,56 +14,22 @@ var mainController = (function () {
 
     }
 
-    self.tableDefs = {
-        "magasin": {
-            sortFields: ["magasin"],
-            relationsSelect: {
-                "versement": {
-                    sql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and magasin.id=",
-                    selectfields: ["num", "versement", "theme", "deposant"]
-                }
-            },
-
-
-
-        },
-        "versement": {
-            sortFields: ["numVersement desc"],
-            relationsSelect: {
-                "magasin": {
-                    sql: "select magasin.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id and versement.id=",
-                    selectfields: ["coordonnees"]
-                }
-            },
-            fieldConstraints :{
-                etatTraitement:{
-                    values:["","BV","Rien","Inv"]
-                }
-
-            }
-
-
-        }
-    }
-
-
-
 
     self.bindActions = function () {
 
         $("#searchTableInput").bind("change", function () {
 
-            self.currentTable = this.value;
+            context.currentTable = this.value;
 
-            self.fillSelectOptions("searchColumnInput", self.dataModel[self.currentTable], true, "name", "name")
+            self.fillSelectOptions("searchColumnInput", context.dataModel[context.currentTable], true, "name", "name")
         })
 
         $("#searchsButton").bind("click", function () {
-            mainController.listRecords();
+            listController.listRecords();
         })
 
         $("#searchMagasinsButton").bind("click", function () {
-            mainController.listRecords("magasin");
+            listController.listRecords("magasin");
         })
         $("#searchColumnInput").bind("change", function () {
             mainController.setOperators(this.value);
@@ -76,19 +39,23 @@ var mainController = (function () {
         })
 
         $("#addLinkedRecordButton").bind("click", function () {
-            recordController.addLinkedRecord();
+            listController.addLinkedRecord();
         })
 
         $("#deleteLinkedRecordButton").bind("click", function () {
-            recordController.deleteLinkedRecord();
+            listController.deleteLinkedRecord();
         })
 
         $("#searchLinkedRecordsInput").bind("keydown", function (e) {
             if (e.keyCode == 13 || e.keyCode == 9) {
                 var str = $(this).val()
                 if (true || str.length > 3)
-                    mainController.searchLinkedRecords(str);
+                    listController.searchLinkedRecords(str);
             }
+        })
+
+        $(".showAddLinkedRecordButton").bind("click", function () {
+            $("#dialog2Div").dialog("open");
         })
         $("#newRecordTableSelect").bind("click", function () {
             mainController.showNewRecordDialog($(this).val());
@@ -123,7 +90,7 @@ var mainController = (function () {
     }
     self.initTablesSelects = function () {
 
-        var tables = Object.keys(self.dataModel);
+        var tables = Object.keys(context.dataModel);
 
         self.fillSelectOptions("searchTableInput", tables, true);
         self.fillSelectOptions("newRecordTableSelect", tables, true);
@@ -134,13 +101,13 @@ var mainController = (function () {
     }
     self.getFieldType = function (table, _field) {
         var type = "";
-        if(!table || !self.dataModel[table])
+        if (!table || !context.dataModel[table])
             return "string";
 
         if (!table)
-            table = self.currentTable;
+            table = context.currentTable;
 
-        self.dataModel[table].forEach(function (field) {
+        context.dataModel[table].forEach(function (field) {
             if (field.name == _field)
                 type = field.dataType;
         })
@@ -157,7 +124,7 @@ var mainController = (function () {
     self.setOperators = function (field) {
         var type = self.getFieldType(this.currentTable, field);
         var operatorsArray = operators[type];
-        self.fillSelectOptions("searchOperatorInput", operatorsArray, true)
+        self.fillSelectOptions("searchOperatorInput", operatorsArray, false)
     }
 
 
@@ -172,17 +139,14 @@ var mainController = (function () {
 
     }
 
-    self.enableLinkButton=function(){
+    self.enableLinkButton = function () {
         $("#addLinkedRecordButton").removeAttr("disabled");
     }
 
 
-    self.enableUnlinkButton=function(){
+    self.enableUnlinkButton = function () {
         $("#deleteLinkedRecordButton").removeAttr("disabled");
     }
-
-
-
 
 
     self.loadDataModel = function (callback) {
@@ -197,7 +161,7 @@ var mainController = (function () {
             data: payload,
             dataType: "json",
             success: function (json) {
-                self.dataModel = json;
+                context.dataModel = json;
                 return callback(null, json);
 
             }, error: function (err) {
@@ -209,195 +173,79 @@ var mainController = (function () {
 
     }
 
-
-    self.listRecords = function () {
-        var whereStr = "";
-        var table = self.currentTable;
-        var relationsSelect = mainController.tableDefs[table].relationsSelect;
-        var i = 0;
-
-        for (var key in relationsSelect) {
-            if (i++ == 0) {
-                self.currentLinkedTable = key;
-                var selectfields = relationsSelect[key].selectfields;
-                mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
-            }
-        }
-        var column = $("#searchColumnInput").val();
-        var operator = $("#searchOperatorInput").val();
-        var value = $("#searchValueInput").val();
-        if (!table || table == "")
-            return self.setErrorMessage(" selectionner une table");
-        if (column != "") {
-
-            if (operator == "LIKE") {
-                value = "'%" + value + "%'"
-            }
-            else {
-                var type = self.getFieldType(table, column);
-                if (type == "string")
-                    value = "'" + value + "'";
-                else if (type == "date") {
-                    var parts=value.split("/");
-                    if( parts.length==1) {
-                        if(operator ==">")
-                        value = "" + (parseInt(value) + 1) + "/01/01";
-                        else
-                            value = value + "/01/01";
-                    }
-                   else if( parts.length==2)
-                        value=value+"/01";
-                   else if(parts.length>3 || parts.length<1)
-                       return mainController.setErrorMessage("format de date invalide :format attendu AAAA/MM/JJ")
-
-                    value = value.replace(/\//g, "-")
-                    value = "'" + value + "'";
-                } else if (type == "number")
-                    value = value;
+    self.loadTab = function (tabIndex) {
+        context.currentTabIndex = tabIndex;
+        if (tabIndex > 0) {
+            var linkedTable = config.tableDefs[context.currentTable].tabs[tabIndex];
+            var dataTableDivName = "linkedRecordsDiv"
+            if (tabIndex > 1)
+                dataTableDivName += tabIndex;// increment des noms de divs dans
 
 
-            }
-            whereStr = " WHERE " + table + "." + column + " " + operator + " " + value;
-
-
-        }
-
-        var sql = "select * from " + table + whereStr;
-        var sortClause = "";
-        var sortFields = self.tableDefs[table].sortFields;
-        sortFields.forEach(function (field, index) {
-            if (index == 0)
-                sortClause = " order by "
-            else
-                sortClause += ","
-            sortClause += field;
-        })
-        sql += sortClause;
-        console.log(sql);
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
-
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-                if (!self.dataTables[table])
-                    self.dataTables[table] = new dataTable();
-                self.dataTables[table].loadJson("listRecordsDiv", json, {onClick: recordController.displayRecordData})
-                $("#tabs").tabs("option", "active", 0);
-                $("#addLinkedRecordButton").attr("disabled",true);
-                $("#deleteLinkedRecordButton").attr("disabled",true);
-
-            }, error: function (err) {
-                self.setErrorMessage(err.responseText)
-            }
-
-
-        })
-    }
-
-    self.loadLinkedRecords = function () {
-        var linkedTable = "";
-        var foreignKey = ""
-
-        var relationsSelect = mainController.tableDefs[self.currentTable].relationsSelect;
-        var i = 0;
-        for (var key in relationsSelect) {
-
-            if (i == 0) {
-
-                var sql = relationsSelect[key].sql + recordController.currentRecordId;
-                console.log(sql);
-                var payload = {
-                    exec: 1,
-                    sql: sql
-                }
-
-                $.ajax({
-                    type: "POST",
-                    url: "../mysql",
-                    data: payload,
-                    dataType: "json",
-                    success: function (json) {
-                        var width=mainController.totalDims.h * .7;
-                        var height=300
-                        if (!self.dataTables["linked_"+key])
-                            self.dataTables["linked_"+key] = new dataTable();
-                        self.dataTables["linked_"+key].loadJson("linkedRecordsDiv", json,  {
-                            dom:"lti",
-                            width:width,
-                            height:height,
-                            onClick:mainController.enableUnlinkButton
-
-
-                        })
-
-
-                    }, error: function (err) {
-                        self.setErrorMessage(err.responseText)
-                    }
-
-
-                })
-
-            }
+            listController.loadLinkedRecords(linkedTable, dataTableDivName);
         }
 
 
     }
 
+    self.displayRecordData = function (obj) {
+        context.currentRecordId = obj.id;
+        var table = context.currentTable;
 
-    self.searchLinkedRecords = function (str) {
-        var concatStr = "";
-        var i = 0;
-        self.dataModel[self.currentLinkedTable].forEach(function (field) {
-            if (i++ > 0)
-                concatStr += ","
-            concatStr += field.name;
+
+        var targetObj = {}
+        context.dataModel[table].forEach(function (field) {
+            targetObj[field.name] = {
+                type: mainController.getFieldType(table, field.name)
+            }
+
+            if (targetObj.type == "number")
+                targetObj[field.name].cols = 10;
+            if ((field.maxLength && field.maxLength > 50) || field.dataType == "text") {
+                targetObj[field.name].cols = 60;
+                targetObj[field.name].rows = 2;
+            }
+            else if (field.maxLength && field.maxLength <= 50)
+                targetObj[field.name].cols = field.maxLength;
+
+
+            if (field.name == "id") {
+                targetObj[field.name].type = "readOnly"
+            }
         })
-        var sql = "";
-        var field = $("#linkedRecordsFieldSelect").val();
-        if (field == "")
-            sql = "select * from " + self.currentLinkedTable + "  WHERE CONCAT(" + concatStr + ") LIKE '%" + str + "%'";
-        else
-            sql = "select * from " + self.currentLinkedTable + "  WHERE " + field + " LIKE '%" + str + "%'";
-        console.log(sql);
-        console.log(sql);
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
+        recordController.setAttributesValue(table, targetObj, obj);
+        recordController.drawAttributes(targetObj, "recordDetailsDiv");
+
+        if (obj && obj.id)
+            $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
+
+        $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;")
+
+        $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>");
+
+        $("#saveRecordButton").attr("disabled", true);
+        $(dialog.dialog("open"))
 
 
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-                var width=mainController.totalDims.h * .7;
-                var height=300
-                if (!self.dataTables["newLink_" + self.currentLinkedTable])
-                    self.dataTables["newLink_" + self.currentLinkedTable] = new dataTable();
-                self.dataTables["newLink_" + self.currentLinkedTable].loadJson("new_linkedRecordsDiv", json, {
-                    dom:"ti",
-                    width:width,
-                    heightheight:height,
-                    onClick:mainController.enableLinkButton
-                })
+        self.setTabs();
 
-            }, error: function (err) {
-                self.setErrorMessage(err.responseText)
+        $("#dialog").dialog({title: table});
+
+    }
+    self.setTabs = function () {
+        // title of tabs for linked records depending on config
+        var tabNames = config.tableDefs[context.currentTable].tabs;
+
+        var tabLis = $('.ui-tabs-anchor').toArray();
+        tabLis.forEach(function (li, index) {
+            if (index > 0 && tabNames[index]) {
+                $(li).text(tabNames[index] + "s liés");
+                $("#tabs").tabs("enable", index);
             }
 
 
         })
-
-
+        $("#tabs").tabs("option", "active", 0);
     }
 
     self.showNewRecordDialog = function () {
@@ -405,19 +253,19 @@ var mainController = (function () {
         if (!table) {
             return mainController.setErrorMessage("selectionnez une table")
         }
-        recordController.currentRecordId = null;
-        mainController.currentTable = table;
-        recordController.displayRecordData({});
+        context.currentRecordId = null;
+        context.currentTable = table;
+        mainController.displayRecordData({});
         $(dialog.dialog("open"))
         $("#tabs").tabs({disabled: [1, 2]});
-        self.execCustomization({type:"newRecord"});
+        self.execCustomization({type: "newRecord"});
 
     }
 
-    self.execCustomization=function(options){
-        if(!options)
-            options={};
-        if(options.type=="newRecord"){
+    self.execCustomization = function (options) {
+        if (!options)
+            options = {};
+        if (options.type == "newRecord") {
 
         }
 
@@ -452,14 +300,14 @@ var mainController = (function () {
         $("#messageDiv").html(message);
 
     }
-    self.confirm=function(message){
+    self.confirm = function (message) {
         $("#confirmDialogDiv").html(message);
     }
 
-    self.logon=function(){
-        var login=$("#login").val();
-        var password=$("#password").val();
-        var sql="select login from users where login='"+login+"' and password='"+password+"'";
+    self.logon = function () {
+        var login = $("#login").val();
+        var password = $("#password").val();
+        var sql = "select login from users where login='" + login + "' and password='" + password + "'";
         var payload = {
             exec: 1,
             sql: sql
@@ -473,13 +321,13 @@ var mainController = (function () {
             dataType: "json",
             success: function (json) {
 
-               if(json.length==1){
-                   $("#leftAccordion").css("opacity",1);
-                   $("#loginDialogDiv").dialog("close");
-               }
+                if (json.length == 1) {
+                    $("#leftAccordion").css("opacity", 1);
+                    $("#loginDialogDiv").dialog("close");
+                }
 
             }, error: function (err) {
-              $("#logonMessageDiv").html("identifiant ou mot de passe incorrect")
+                $("#logonMessageDiv").html("identifiant ou mot de passe incorrect")
             }
 
 

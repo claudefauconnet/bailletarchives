@@ -1,47 +1,23 @@
 var recordController = (function () {
     self = {};
     self.currentRecordChanges = {}
-    self.currentRecordId;
+
 
 
     var setModifyMode = function () {
 
     }
-    self.showData = function (table, id) {
-        var sql = "select * from " + table + " where id=" + id;
-        var payload = {
-            find: 1,
-            sql: sql
-        }
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-                //   dataTable.loadJson("dataTableDiv", json)
-                self.setAttributesValue(label, targetObj, node);
-                self.drawAttributes(targetObj, "nodeFormDiv");
-
-                var xx = json
-            }, error: function (err) {
-                mainController.setErrorMessage(err.responseText)
-            }
-
-
-        })
-    }
 
 
     self.saveRecord = function () {
-        if (!self.currentRecordId)// new Record
+        if (!context.currentRecordId)// new Record
             return self.saveNewRecord();
-        var sql = "Update " + mainController.currentTable + " set ";
+        var sql = "Update " + context.currentTable + " set ";
         var i = 0;
         for (var key in self.currentRecordChanges) {
             if (i++ > 0)
                 sql += ","
-            var type = mainController.getFieldType(mainController.currentTable, key)
+            var type = mainController.getFieldType(context.currentTable, key)
             if (type == "number")
                 sql += key + "=" + self.currentRecordChanges[key];
             else if (type == "string")
@@ -51,7 +27,7 @@ var recordController = (function () {
                 sql += key + "='" + str + "'";
             }
         }
-        sql += " where id= " + self.currentRecordId;
+        sql += " where id= " + context.currentRecordId;
         console.log(sql);
 
         var payload = {
@@ -68,7 +44,7 @@ var recordController = (function () {
                 dialog.dialog("close");
 
                 // delete linked records
-                mainController.dataTables[mainController.currentTable].updateSelectedRow(self.currentRecordChanges)
+                context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
                 var payload = {
                     exec: 1,
                     sql: sql
@@ -97,7 +73,7 @@ var recordController = (function () {
 
     self.saveNewRecord = function () {
 
-        var sql1 = "insert into " + mainController.currentTable + " ( ";
+        var sql1 = "insert into " + context.currentTable + " ( ";
         var sql2 = " values ( ";
         var i = 0;
         for (var key in self.currentRecordChanges) {
@@ -106,7 +82,7 @@ var recordController = (function () {
                 sql2 += ","
             }
             sql1 += key;
-            var type = mainController.getFieldType(mainController.currentTable, key)
+            var type = mainController.getFieldType(context.currentTable, key)
             if (type == "number")
                 sql2 += self.currentRecordChanges[key];
             else if (type == "string")
@@ -151,8 +127,8 @@ var recordController = (function () {
     }
 
     self.deleteRecord = function () {
-        mainController.loadLinkedRecords();
-        var linkedtable = mainController.dataTables["linked_" + mainController.currentLinkedTable];
+        listController.loadLinkedRecords();
+        var linkedtable = context.dataTables["linked_" + context.currentLinkedTable];
         var linkedRecordsData = linkedtable.dataSet;
         var nlinks = linkedtable.dataSet.length;
         var ok = ""
@@ -165,7 +141,7 @@ var recordController = (function () {
             return;
 
 
-        var sql = "delete from " + mainController.currentTable + " where id=" + self.currentRecordId;
+        var sql = "delete from " + context.currentTable + " where id=" + context.currentRecordId;
         var payload = {
             exec: 1,
             sql: sql
@@ -178,9 +154,9 @@ var recordController = (function () {
             success: function (json) {
                 mainController.setMessage("enregistrement supprimé");
                 dialog.dialog("close");
-                mainController.listRecords();
+                listRecords.listRecords();
                 linkedRecordsData.forEach(function (linkedRecord) {
-                    var sql = "delete from r_versement_magasin where id_" + mainController.currentLinkedTable + "=" + linkedRecord.id;
+                    var sql = "delete from r_versement_magasin where id_" + context.currentLinkedTable + "=" + linkedRecord.id;
                     var payload = {
                         exec: 1,
                         sql: sql
@@ -208,139 +184,13 @@ var recordController = (function () {
 
     }
 
-    self.addLinkedRecord = function () {
-        var table = mainController.dataTables["newLink_" + mainController.currentLinkedTable].table;
-        var idx = table.rows('.selected', 0).indexes();
-        for (var i = 0; i < idx.length; i++) {
-            var data = table.rows(idx[i]).data()[0]
-            var sql = "";
-            if (mainController.currentTable == "versement")
-                sql = "insert into r_versement_magasin (id_versement,id_magasin) values(" + self.currentRecordId + "," + data.id + ")";
-            else if (mainController.currentTable == "magasin")
-                sql = "insert into r_versement_magasin (id_magasin,id_versement)values(" + data.id + "," + self.currentRecordId + ")";
-            else
-                return mainController.setErrorMessage("no table selected");
-            var payload = {
-                exec: 1,
-                sql: sql
-            }
-
-            $.ajax({
-                type: "POST",
-                url: "../mysql",
-                data: payload,
-                dataType: "json",
-                success: function (json) {
-                    mainController.setMessage("lien enregistré");
-
-                    //update  tab linked record
-                    var linksTable = mainController.dataTables["linked_" + mainController.currentLinkedTable];
-                    linksTable.table.rows.add(data);
-                    $("#tabs").tabs("option", "active", 1);
 
 
-                }, error: function (err) {
-                    mainController.setErrorMessage(err.responseText)
-                }
-
-
-            })
-        }
-
-    }
-    self.deleteLinkedRecord = function () {
-        var linksTable = mainController.dataTables["linked_" + mainController.currentLinkedTable].table;
-        var idx = linksTable.rows('.selected', 0).indexes();
-        for (var i = 0; i < idx.length; i++) {
-            var data = linksTable.rows(idx[i]).data()[0]
-            var sql = "delete from r_versement_magasin where id_" + mainController.currentLinkedTable + "=" + data.id;
-
-            var payload = {
-                exec: 1,
-                sql: sql
-            }
-
-            $.ajax({
-                type: "POST",
-                url: "../mysql",
-                data: payload,
-                dataType: "json",
-                success: function (json) {
-                    mainController.setMessage("lien supprimé");
-
-                    //update  tab linked record
-                    /*   var rows = linksTable.rows('.selected');
-                       linksTable.rows('.selected').remove();
-                      linksTable.rows('.selected', 0).remove();*/
-
-                    mainController.loadLinkedRecords();
-
-
-                }, error: function (err) {
-                    mainController.setErrorMessage(err.responseText)
-                }
-
-
-            })
-        }
-
-    }
-
-
-    self.displayRecordData = function (obj) {
-        self.currentRecordId = obj.id;
-        var table = mainController.currentTable;
-
-
-        var targetObj = {}
-        mainController.dataModel[table].forEach(function (field) {
-            targetObj[field.name] = {
-                type: mainController.getFieldType(table, field.name)
-            }
-
-            if (targetObj.type == "number")
-                targetObj[field.name].cols = 10;
-            if ((field.maxLength && field.maxLength > 50) || field.dataType == "text") {
-                targetObj[field.name].cols = 60;
-                targetObj[field.name].rows = 2;
-            }
-            else if (field.maxLength && field.maxLength <= 50)
-                targetObj[field.name].cols = field.maxLength;
-
-
-            if (field.name == "id") {
-                targetObj[field.name].type = "readOnly"
-            }
-        })
-        self.setAttributesValue(table, targetObj, obj);
-        self.drawAttributes(targetObj, "recordDetailsDiv");
-
-        if (obj && obj.id)
-            $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
-
-        $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;")
-
-             $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>");
-
-        $("#saveRecordButton").attr("disabled", true);
-        $("#tabs").tabs("enable", 1);
-        $("#tabs").tabs("enable", 2);
-        $("#tabs").tabs("option", "active", 0);
-
-        //  mainController.loadLinkedRecords();
-
-        //renommage du tab 1 du dailogue (à évoluer si d'autre relationsSelect
-
-        $('#tabs a[href=#tabs-linkedRecordDiv]').text(mainController.currentLinkedTable + "s liés")
-
-        $("#dialog").dialog({title: table});
-
-    }
 
 
     self.setAttributesValue = function (table, targetObj, sourceObj, changeType) {
         self.currentRecordChanges = []
-        var selectFields =mainController.tableDefs[mainController.currentTable].fieldConstraints;
+        var selectFields = config.tableDefs[context.currentTable].fieldConstraints;
         if (!changeType)
             changeType = "table";
         for (var key in targetObj) {
@@ -361,14 +211,14 @@ var recordController = (function () {
             var selectValues = null;
 
 
-              if (selectFields) {
-                  selectValues = selectFields[key];
-                  if (selectValues) {
-                      selectValues= selectValues.values.sort();
+            if (selectFields) {
+                selectValues = selectFields[key];
+                if (selectValues) {
+                    selectValues = selectValues.values.sort();
 
-                  }
+                }
 
-              }
+            }
 
 
             //if (type && type == 'select' && selectValues) {
