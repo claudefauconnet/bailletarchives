@@ -3,8 +3,51 @@ var recordController = (function () {
     self.currentRecordChanges = {}
 
 
-
     var setModifyMode = function () {
+
+    }
+    self.displayRecordData = function (obj) {
+        context.currentRecordId = obj.id;
+        var table = context.currentTable;
+
+
+        var targetObj = {}
+        context.dataModel[table].forEach(function (field) {
+            targetObj[field.name] = {
+                type: mainController.getFieldType(table, field.name)
+            }
+
+            if (targetObj.type == "number")
+                targetObj[field.name].cols = 10;
+            if ((field.maxLength && field.maxLength > 50) || field.dataType == "text") {
+                targetObj[field.name].cols = 60;
+                targetObj[field.name].rows = 2;
+            }
+            else if (field.maxLength && field.maxLength <= 50)
+                targetObj[field.name].cols = field.maxLength;
+
+
+            if (field.name == "id") {
+                targetObj[field.name].type = "readOnly"
+            }
+        })
+        recordController.setAttributesValue(table, targetObj, obj);
+        recordController.drawAttributes(targetObj, "recordDetailsDiv");
+
+        if (obj && obj.id)
+            $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
+
+        $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
+
+        $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>");
+
+        $("#saveRecordButton").attr("disabled", true);
+        $(dialog.dialog("open"))
+
+
+        mainController.setTabs();
+
+        $("#dialog").dialog({title: table});
 
     }
 
@@ -107,23 +150,37 @@ var recordController = (function () {
             dataType: "json",
             success: function (json) {
                 mainController.setMessage("enregistrement enregistré");
-                dialog.dialog("close");
-                for (var key in self.currentRecordChanges) {
-                    var cells = $('#dataTable').rows({selected: true});
+                //   dialog.dialog("close");
+                // get new saved record id and set currentId
+                var sql = "SELECT max(id) as id from " + context.currentTable;
 
-                    var x = "";
-                    // cell.data(cell.data() + 1).draw();
+                var payload = {
+                    exec: 1,
+                    sql: sql
                 }
+                $.ajax({
+                    type: "POST",
+                    url: "../mysql",
+                    data: payload,
+                    dataType: "json",
+                    success: function (json) {
+                        context.currentRecordId=json[0].id;
+                        mainController.setTabs();
+                        for (var key in self.currentRecordChanges) {
+                            var cells = $('#dataTable').rows({selected: true});
 
-
-            }, error: function (err) {
+                            var x = "";
+                            // cell.data(cell.data() + 1).draw();
+                        }
+                    }, error: function (err) {
+                        mainController.setErrorMessage(err.responseText)
+                    }
+                })
+            }
+            , error: function (err) {
                 mainController.setErrorMessage(err.responseText)
             }
-
-
         })
-
-
     }
 
     self.deleteRecord = function () {
@@ -185,9 +242,6 @@ var recordController = (function () {
     }
 
 
-
-
-
     self.setAttributesValue = function (table, targetObj, sourceObj, changeType) {
         self.currentRecordChanges = []
         var selectFields = config.tableDefs[context.currentTable].fieldConstraints;
@@ -223,7 +277,7 @@ var recordController = (function () {
 
             //if (type && type == 'select' && selectValues) {
             if (selectValues) {
-                var str = "<select  onkeypress='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' id='attr_" + key + "'>"
+                var str = "<select  onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' id='attr_" + key + "'>"
                 str += "<option  value=''></option>";
                 for (var i = 0; i < selectValues.length; i++) {
 
@@ -251,7 +305,7 @@ var recordController = (function () {
             }
 
             else if (type == 'password') {
-                value = "<input type='password' onkeypress='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
+                value = "<input type='password' onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
                     + key + "'value='" + value + "'>";
             }
             /*    else if(type=='date'){
@@ -270,12 +324,12 @@ var recordController = (function () {
                     if (cols)
                         strCols = " cols='" + cols + "' ";
                     rows = " rows='" + rows + "' ";
-                    value = "<textArea  onkeypress='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + rows
+                    value = "<textArea  onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + type + "' " + strCols + rows
                         + "id='attr_" + key + "' > " + value + "</textarea>";
                 } else {
                     if (cols)
                         strCols = " size='" + cols + "' ";
-                    value = "<input onkeypress='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
+                    value = "<input onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput " + type + "' " + strCols + "id='attr_"
                         + key + "' value='" + value + "'>";
                 }
             }
@@ -286,14 +340,33 @@ var recordController = (function () {
 
 
     self.incrementChanges = function (input) {
+        $("#recordMessageSpan").html("");
 
-        $("#saveRecordButton").removeAttr("disabled");
+        var message = null;
+
         var fieldName = $(input).attr('id').substring(5);
         var value = $(input).val();
         if (!self.currentRecordChanges[fieldName]) {
             self.isModifying += 1;
         }
-        self.currentRecordChanges[fieldName] = value;
+        var classe = $(input).attr("class");
+        if (classe.indexOf("number") > -1) {
+           // if (!value.match(/-?\d*[\.|,]?\d*/))
+            var xx=value.match(/[a-zA-Z]+/)
+            if (value.match(/[a-zA-Z]+/).length>0)
+                message = fieldName + " nombre invalide " + value;
+            value = value.replace(",", ".")
+
+
+        }
+        if (message) {
+            $("#recordMessageSpan").html(message);
+            $("#saveRecordButton").attr("disabled",true);
+        }
+        else {
+            $("#saveRecordButton").removeAttr("disabled");
+            self.currentRecordChanges[fieldName] = value;
+        }
 
     }
 

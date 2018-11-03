@@ -86,7 +86,7 @@ var listController = (function () {
             success: function (json) {
                 if (!context.dataTables[table])
                     context.dataTables[table] = new dataTable();
-                context.dataTables[table].loadJson("listRecordsDiv", json, {onClick: mainController.displayRecordData})
+                context.dataTables[table].loadJson("listRecordsDiv", json, {onClick: recordController.displayRecordData})
                 $("#tabs").tabs("option", "active", 0);
                 $("#addLinkedRecordButton").attr("disabled", true);
                 $("#deleteLinkedRecordButton").attr("disabled", true);
@@ -121,8 +121,8 @@ var listController = (function () {
             data: payload,
             dataType: "json",
             success: function (json) {
-                var width = mainController.totalDims.h * .7;
-                var height = 300
+                var width = mainController.totalDims.w * 0.9;
+                var height =mainController.totalDims.h -300;
                 if (!context.dataTables["linked_" + linkedTable])
                     context.dataTables["linked_" + linkedTable] = new dataTable();
                 context.dataTables["linked_" + linkedTable].loadJson(dataTableDivName, json, {
@@ -179,7 +179,7 @@ var listController = (function () {
                 if (!context.dataTables["newLink_" + context.currentLinkedTable])
                     context.dataTables["newLink_" + context.currentLinkedTable] = new dataTable();
                 context.dataTables["newLink_" + context.currentLinkedTable].loadJson("new_linkedRecordsDiv", json, {
-                    dom: "ti",
+                    dom: "tip",
                     width: width,
                     heightheight: height,
                     onClick: mainController.enableLinkButton

@@ -76,6 +76,17 @@ var config=(function(){
         }
     }
 
+    self.tools={
+
+
+        "findTablettesForVersement":{}
+
+
+
+
+
+    }
+
 
 
     return self;

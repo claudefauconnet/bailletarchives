@@ -122,7 +122,7 @@ var mainController = (function () {
 
     }
     self.setOperators = function (field) {
-        var type = self.getFieldType(this.currentTable, field);
+        var type = self.getFieldType(context.currentTable, field);
         var operatorsArray = operators[type];
         self.fillSelectOptions("searchOperatorInput", operatorsArray, false)
     }
@@ -133,9 +133,10 @@ var mainController = (function () {
         $("#left").width(self.leftPanelWidth)
         mainController.totalDims.w = $(window).width();
         mainController.totalDims.h = $(window).height();
-        var dataTableWidth = mainController.totalDims.w - (self.leftPanelWidth)
+        var dataTableWidth = mainController.totalDims.w - (self.leftPanelWidth);
+        $("#listRecordsDiv").width(mainController.totalDims.w-(self.leftPanelWidth+20) ).height( mainController.totalDims.h-20);
         //  $("#dataTableDiv").width(dataTableWidth).height(500);
-        $(".dataTableDiv").width(dataTableWidth).height(mainController.totalDims.h - 50);
+      //  $(".dataTableDiv").width(dataTableWidth).height(mainController.totalDims.h - 50);
 
     }
 
@@ -188,50 +189,7 @@ var mainController = (function () {
 
     }
 
-    self.displayRecordData = function (obj) {
-        context.currentRecordId = obj.id;
-        var table = context.currentTable;
 
-
-        var targetObj = {}
-        context.dataModel[table].forEach(function (field) {
-            targetObj[field.name] = {
-                type: mainController.getFieldType(table, field.name)
-            }
-
-            if (targetObj.type == "number")
-                targetObj[field.name].cols = 10;
-            if ((field.maxLength && field.maxLength > 50) || field.dataType == "text") {
-                targetObj[field.name].cols = 60;
-                targetObj[field.name].rows = 2;
-            }
-            else if (field.maxLength && field.maxLength <= 50)
-                targetObj[field.name].cols = field.maxLength;
-
-
-            if (field.name == "id") {
-                targetObj[field.name].type = "readOnly"
-            }
-        })
-        recordController.setAttributesValue(table, targetObj, obj);
-        recordController.drawAttributes(targetObj, "recordDetailsDiv");
-
-        if (obj && obj.id)
-            $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
-
-        $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;")
-
-        $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>");
-
-        $("#saveRecordButton").attr("disabled", true);
-        $(dialog.dialog("open"))
-
-
-        self.setTabs();
-
-        $("#dialog").dialog({title: table});
-
-    }
     self.setTabs = function () {
         // title of tabs for linked records depending on config
         var tabNames = config.tableDefs[context.currentTable].tabs;
@@ -255,7 +213,7 @@ var mainController = (function () {
         }
         context.currentRecordId = null;
         context.currentTable = table;
-        mainController.displayRecordData({});
+        recordController.displayRecordData({});
         $(dialog.dialog("open"))
         $("#tabs").tabs({disabled: [1, 2]});
         self.execCustomization({type: "newRecord"});

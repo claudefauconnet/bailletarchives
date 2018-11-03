@@ -77,8 +77,8 @@
         }
 
         #listRecordsDiv, #linkedRecordsDiv {
-            height: 500px;
-            width: 77%;
+
+            overflow:auto ;
 
         }
 
@@ -126,7 +126,24 @@
             color: #0a6aa1;
 
         }
+        #recordMessageSpan{
 
+            font :bold 14px Serif;
+            color :red;
+        }
+
+     /*   table thead th {
+            transform: rotate(-45deg);
+            transform-origin: top left;
+        }
+
+        .table-scrollable{
+            overflow: visible;
+        }*/
+
+        div.dt-buttons {
+            float: left;
+        }
 
     </style>
 
@@ -148,8 +165,8 @@
             });
             dialog = $("#dialogDiv").dialog({
                 autoOpen: false,
-                height: mainController.totalDims.h * .8,
-                width: "80%",
+                height: mainController.totalDims.h  -100,
+                width: "100%",
                 modal: true,
                 buttons: {
                     Annuler: function () {
@@ -162,8 +179,8 @@
             });
             dialog2 = $("#dialog2Div").dialog({
                 autoOpen: false,
-                height: mainController.totalDims.h * .8,
-                width: "80%",
+                height: mainController.totalDims.h * 1.0,
+                width: "100%",
                 modal: true,
                 buttons: {
                     Annuler: function () {
@@ -194,6 +211,9 @@
                 $("#loginDialogDiv").dialog("open");
             }
             mainController.bindActions();
+
+
+
 
             mainController.loadDataModel(function (err, result) {
                 if (err)
@@ -273,10 +293,10 @@
                 </table>
 
             </div>
-            <!--  <h1>Créer</h1>
-              <div id="newDiv" class="accordionInnerDiv">
+           <h1>Outils</h1>
+              <div id="tooldsDiv" class="accordionInnerDiv">
 
-                  <select id="newRecordTableSelect">
+                  <select id="toolsSelect" size="10" style="left: -30px;position: relative;">
 
                   </select>
 

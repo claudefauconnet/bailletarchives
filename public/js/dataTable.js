@@ -6,7 +6,7 @@ var dataTable = function () {
     this.table;
     this.selectedRow;
     self.dateColumns = []
-    this.pageLength = 10;
+    this.pageLength = 25;
     this.colHeight = 80;
     this.loadJson = function (containerDiv, json, options) {
 
@@ -60,7 +60,7 @@ var dataTable = function () {
         var xxx = $("#" + containerDiv).html();
         $("#" + containerDiv).html(htmlStr);
         $('#' + containerDiv).css("font-size", "10px");
-        var height;
+     /*   var height;
         var width;
         if (options.height)
             height = options.height;
@@ -70,13 +70,15 @@ var dataTable = function () {
             height = options.width;
         else
             width = $(".dataTableDiv").width() - 280;
-        $("#table_" + containerDiv).width("400px").height(height);
+        $("#table_" + containerDiv).width("400px").height(height);*/
 
 
-        if (json.length < this.pageLength)
-            height = this.colHeight * json.length;
+    /*    if (json.length < this.pageLength)
+            height = this.colHeight * json.length;*/
 
+     var dom = '<"top"firptl><"bottom"B><"clear">'
         var dom = '<"top"firptl><"bottom"B><"clear">'
+        var dom ='<"top"firplBt>'
         if (options.dom)
             dom = options.dom;
 
@@ -116,8 +118,8 @@ var dataTable = function () {
             pageLength: this.pageLength,
             "pager": true,
 
-            "scrollY": "" + height + "px",
-            "scrollX": "" + width + "px",
+        /*    "scrollY": "" + height + "px",
+            "scrollX": "" + width + "px",*/
             scrollCollapse: true,
 
         })
