@@ -14,19 +14,32 @@ var listController = (function () {
         }
     }
     self.addSearchCriteria = function (execute) {
-
+        mainController.setMessage("");
         var whereStr = "";
         var table = context.currentTable;
         if (!table || table == "")
-            mainController.setErrorMessage("selectionnez une table")
-        var relations = config.tableDefs[table].relations;
-        var i = 0;
+            mainController.setErrorMessage("selectionnez une table");
+
+        // gestion des requetes sur plusieurs tables
+        var joinTable = context.currentJoinTable;// see mainController lines 21 to 25
+        var joinObj = null;
+        if (joinTable && joinTable != table) {
+            var relations = config.tableDefs[context.currentJoinTable].relations;
+
+            if (relations[context.currentTable]) {
+                joinObj = relations[context.currentTable].joinObj;
+            }
+            else {
+                return mainController.setErrorMessage("jointure impossible entre les tables " + table + " et " + joinTable)
+            }
+        }
+        // fin gestion des requetes sur plusieurs tables
 
 
         var column = $("#searchColumnInput").val();
         var operator = $("#searchOperatorInput").val();
         var value = $("#searchValueInput").val();
-        var whereText = column + " " + operator + " " + value
+        var whereText = table + " : " + column + " " + operator + " " + value
         if (column != "") {
 
             if (operator == "LIKE") {
@@ -71,7 +84,7 @@ var listController = (function () {
                 context.currentCriteria.push({text: whereText, sqlWhere: whereStr});
                 var indice = context.currentCriteria.length - 1;
                 var str = "<div  class='searchCriteria' id='searchCriteria_" + indice + "'>" + whereText;
-                str += " <img src='images/clear.jpg' width='15px' style='float: right' onclick='listController.removeSearchCriteria(" + indice + ")'>"
+                str += " <img src='images/clear.png' width='15px' style='float: right' onclick='listController.removeSearchCriteria(" + indice + ")'>"
                 str += "</div>"
                 $("#searchCriteriaDiv").append(str);
 
@@ -79,16 +92,27 @@ var listController = (function () {
         }
 
         if (execute) {
-            var whereStrAll ="";
+            var whereStrAll = "";
             context.currentCriteria.forEach(function (criteria, indice) {
-                if (indice == 0)
-                    whereStrAll +=" WHERE "
-                else
+                if (indice > 0)
                     whereStrAll += " AND ";
                 whereStrAll += criteria.sqlWhere;
             })
 
-            var sql = "select * from " + table + whereStrAll;
+
+            var sql = "";
+            if (joinObj) {
+                sql = " select distinct " + context.currentJoinTable + ".* from  " + joinObj.tables + " WHERE " + joinObj.where + " and " + whereStrAll;
+                // on remet la table initiale comme currentTable
+                context.currentTable = context.currentJoinTable;
+                $("#searchTableInput").val(context.currentTable);
+
+
+            } else {
+                if (whereStrAll.length > 0)
+                    whereStrAll = " WHERE " + whereStrAll;
+                sql = "select * from " + table + whereStrAll
+            }
             var sortClause = "";
             var sortFields = config.tableDefs[table].sortFields;
             sortFields.forEach(function (field, index) {
@@ -98,6 +122,7 @@ var listController = (function () {
                     sortClause += ","
                 sortClause += field;
             })
+
             sql += sortClause;
             console.log(sql);
             self.listRecords(sql);
@@ -107,8 +132,13 @@ var listController = (function () {
     }
 
     self.removeSearchCriteria = function (indice) {
-        context.currentCriteria.splice(indice, 1);
-        $("#searchCriteria_" + indice).remove();
+        if (indice > -1) {
+            context.currentCriteria.splice(indice, 1);
+            $("#searchCriteria_" + indice).remove();
+        } else {
+            context.currentCriteria = [];
+            $(".searchCriteria ").remove();
+        }
         $("#searchColumnInput").val("");
         $("#searchOperatorInput").val("");
         $("#searchValueInput").val("");
@@ -149,8 +179,9 @@ var listController = (function () {
         var selectfields = relations[linkedTable].selectfields;
         mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
 
+        var joinObj = relations[linkedTable].joinObj;
+        var sql = " select " + linkedTable + ".* from  " + joinObj.tables + " where " + joinObj.where + " and " + context.currentTable + ".id=" + context.currentRecordId;
 
-        var sql = relations[linkedTable].selectSql + context.currentRecordId;
         console.log(sql);
 
         var payload = {

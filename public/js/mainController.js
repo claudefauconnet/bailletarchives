@@ -18,9 +18,15 @@ var mainController = (function () {
     self.bindActions = function () {
 
         $("#searchTableInput").bind("change", function () {
+            if (context.currentCriteria.length >0 &&  context.currentTable != this.value) {// search sur plusieurs tables
+                context.currentJoinTable = context.currentTable;
+                context.currentTable = this.value;
 
-            context.currentTable = this.value;
-            self.fillSelectOptions("searchColumnInput", context.dataModel[context.currentTable], true, "name", "name");
+            } else {
+                context.currentTable = this.value;
+
+            }
+            self.fillSelectOptions("searchColumnInput", context.dataModel[this.value], true, "name", "name");
             $("#searchValueInput").val("");
         })
         $("#searchColumnInput").bind("change", function () {
@@ -34,7 +40,6 @@ var mainController = (function () {
         $("#andSearchButton").bind("click", function () {
             listController.addSearchCriteria();
         })
-
 
 
         $("#searchMagasinsButton").bind("click", function () {
@@ -87,7 +92,6 @@ var mainController = (function () {
             var str = $(this).val()
             tools.execTool(str);
         })
-
 
 
     }
@@ -151,9 +155,9 @@ var mainController = (function () {
         mainController.totalDims.w = $(window).width();
         mainController.totalDims.h = $(window).height();
         var dataTableWidth = mainController.totalDims.w - (self.leftPanelWidth);
-        $("#listRecordsDiv").width(mainController.totalDims.w-(self.leftPanelWidth+20) ).height( mainController.totalDims.h-20);
+        $("#listRecordsDiv").width(mainController.totalDims.w - (self.leftPanelWidth + 20)).height(mainController.totalDims.h - 20);
         //  $("#dataTableDiv").width(dataTableWidth).height(500);
-      //  $(".dataTableDiv").width(dataTableWidth).height(mainController.totalDims.h - 50);
+        //  $(".dataTableDiv").width(dataTableWidth).height(mainController.totalDims.h - 50);
 
     }
 

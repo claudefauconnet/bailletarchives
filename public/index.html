@@ -270,7 +270,7 @@
         <div id="leftAccordion">
             <h1>Chercher</h1>
             <div id="versementsDiv" class="accordionInnerDiv">
-                <table style="left: -30px;position: relative;">
+                <table align="center" style="left: -30px;position: relative;">
                     <tr>
                         <td>
                             table
@@ -292,30 +292,20 @@
                             <select id="searchColumnInput"></select>
                         </td>
                     </tr>
+
                     <tr>
                         <td>
-                            operateur
+                            <select id="searchOperatorInput"></select>  <input id="searchValueInput" style="width:100px"/>
                         </td>
                     </tr>
+
                     <tr>
                         <td>
-                            <select id="searchOperatorInput"></select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            valeur
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input id="searchValueInput" style="width:150px"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
+
                             <button id="andSearchButton" style="width:20px">  + </button>
+                            <img src='images/clear.png' style="vertical-align: middle" width='20px'  onclick='listController.removeSearchCriteria(-1)'>
                             <button id="searchButton"> chercher</button>
+
 
                         </td>
                     </tr>
