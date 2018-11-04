@@ -79,7 +79,9 @@ var config=(function(){
     self.tools={
 
 
-        "findTablettesForVersement":{}
+        "ChercherTablettesDisponibles ":{htmlPage:"findTablettesDialog.html"}
+
+        "DéplacerLesBoitesDunVersement ":{htmlPage:"deplacerBoitesDialog.html"}
 
 
 

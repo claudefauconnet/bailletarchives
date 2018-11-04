@@ -1,0 +1,130 @@
+<script>
+
+    findTablettes_exec = function () {
+
+        var magasin = $("#findTablettes_magasin").val();
+        var metrage = parseFloat($("#findTablettes_metrageVersement").val().replace(",","."));
+
+
+
+        var nTablettes=Math.round(metrage/0.8)+1 //estimation a priori  pour voir large: les tablettes font 1.15 en général et donc ramener plus de tablettes que nécessaire
+
+        var sql="SELECT coordonnees,DimTabletteMLineaire from magasin where cotesParTablette =\"\" and magasin=\""+magasin+"\"  order by coordonnees limit "+nTablettes;
+        var payload = {
+            exec: 1,
+            sql: sql
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "../mysql",
+            data: payload,
+            dataType: "json",
+            success: function (json) {
+                debugger;
+                var sum=0;
+                var tablettesExtremes="";
+                var nTablettes=0;
+                var stop=false;
+                json.forEach(function(tablette,indice){
+                    if(stop)
+                        return;
+                    if(indice==0)
+                        tablettesExtremes+="de "+tablette.coordonnees+" à ";
+                    sum+=tablette.DimTabletteMLineaire;
+                    nTablettes+=1;
+                    if(sum>metrage){
+                        tablettesExtremes+=tablette.coordonnees
+                        stop=true;
+
+                    }
+                })
+
+              var message="Métrage du versement : "+metrage+"<br>"
+                message+="tablettes proposées : <B>"+tablettesExtremes+"</B><br>"
+                message+="nombre de tablettes : <B>"+nTablettes+"</B><br>";
+                $("#findTablettes_message").html(message)
+
+            }, error: function (err) {
+                mainController.setErrorMessage(err.responseText)
+            }
+
+
+        })
+
+
+    }
+
+
+</script>
+<table>
+    <tr>
+        <td>
+            Magasin
+        </td>
+        <td>
+            <select id="findTablettes_magasin"></select>
+        </td>
+    </tr>
+    <tr>
+        <td>
+           Métrage du versement
+        </td>
+        <td>
+            <input id="findTablettes_metrageVersement">
+        </td>
+    </tr>
+    <tr>
+        <td>
+
+        </td>
+        <td>
+
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <button onclick="findTablettes_exec()">Chercher</button>
+        </td>
+        <td>
+<div id="findTablettes_message" style="color:#0a6aa1"></div>
+        </td>
+    </tr>
+
+
+
+</table>
+
+<script>
+
+var sql="select distinct magasin from magasin";
+var payload = {
+    exec: 1,
+    sql: sql
+}
+
+$.ajax({
+    type: "POST",
+    url: "../mysql",
+    data: payload,
+    dataType: "json",
+    success: function (json) {
+      //  var x=a.id;
+      mainController.fillSelectOptions("findTablettes_magasin",json,true,"magasin","magasin")
+
+
+
+    }, error: function (err) {
+        mainController.setErrorMessage(err.responseText)
+    }
+
+
+})
+
+
+
+</script>
+
+
+

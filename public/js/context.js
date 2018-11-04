@@ -4,5 +4,6 @@ var context = {
     currentLinkedTable: "",
     dataTables: {},
     currentRecordId: "",
-    currentTabIndex:0
+    currentTabIndex:0,
+    currentCriteria:[]
 }

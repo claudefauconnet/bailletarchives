@@ -9,15 +9,16 @@ var listController = (function () {
         try {
             return eval(sql);
         }
-        catch(e){
-          return  console.log(e);
+        catch (e) {
+            return console.log(e);
         }
     }
+    self.addSearchCriteria = function (execute) {
 
-
-    self.listRecords = function () {
         var whereStr = "";
         var table = context.currentTable;
+        if (!table || table == "")
+            mainController.setErrorMessage("selectionnez une table")
         var relations = config.tableDefs[table].relations;
         var i = 0;
 
@@ -25,8 +26,7 @@ var listController = (function () {
         var column = $("#searchColumnInput").val();
         var operator = $("#searchOperatorInput").val();
         var value = $("#searchValueInput").val();
-        if (!table || table == "")
-            return mainController.setErrorMessage(" selectionner une table");
+        var whereText = column + " " + operator + " " + value
         if (column != "") {
 
             if (operator == "LIKE") {
@@ -56,23 +56,66 @@ var listController = (function () {
 
 
             }
-            whereStr = " WHERE " + table + "." + column + " " + operator + " " + value;
+            whereStr = table + "." + column + " " + operator + " " + value;
 
 
         }
+        if (whereStr != "") {
+            var criteriaAllreadyExist = false;
+            context.currentCriteria.forEach(function (criteria, indice) {
+                if (criteria.sqlWhere == whereStr)
+                    criteriaAllreadyExist = true;
+            })
 
-        var sql = "select * from " + table + whereStr;
-        var sortClause = "";
-        var sortFields = config.tableDefs[table].sortFields;
-        sortFields.forEach(function (field, index) {
-            if (index == 0)
-                sortClause = " order by "
-            else
-                sortClause += ","
-            sortClause += field;
-        })
-        sql += sortClause;
-        console.log(sql);
+            if (!criteriaAllreadyExist) {
+                context.currentCriteria.push({text: whereText, sqlWhere: whereStr});
+                var indice = context.currentCriteria.length - 1;
+                var str = "<div  class='searchCriteria' id='searchCriteria_" + indice + "'>" + whereText;
+                str += " <img src='images/clear.jpg' width='15px' style='float: right' onclick='listController.removeSearchCriteria(" + indice + ")'>"
+                str += "</div>"
+                $("#searchCriteriaDiv").append(str);
+
+            }
+        }
+
+        if (execute) {
+            var whereStrAll ="";
+            context.currentCriteria.forEach(function (criteria, indice) {
+                if (indice == 0)
+                    whereStrAll +=" WHERE "
+                else
+                    whereStrAll += " AND ";
+                whereStrAll += criteria.sqlWhere;
+            })
+
+            var sql = "select * from " + table + whereStrAll;
+            var sortClause = "";
+            var sortFields = config.tableDefs[table].sortFields;
+            sortFields.forEach(function (field, index) {
+                if (index == 0)
+                    sortClause = " order by "
+                else
+                    sortClause += ","
+                sortClause += field;
+            })
+            sql += sortClause;
+            console.log(sql);
+            self.listRecords(sql);
+        }
+
+
+    }
+
+    self.removeSearchCriteria = function (indice) {
+        context.currentCriteria.splice(indice, 1);
+        $("#searchCriteria_" + indice).remove();
+        $("#searchColumnInput").val("");
+        $("#searchOperatorInput").val("");
+        $("#searchValueInput").val("");
+    }
+
+    self.listRecords = function (sql) {
+        var table = context.currentTable;
         var payload = {
             exec: 1,
             sql: sql
@@ -122,7 +165,7 @@ var listController = (function () {
             dataType: "json",
             success: function (json) {
                 var width = mainController.totalDims.w * 0.9;
-                var height =mainController.totalDims.h -300;
+                var height = mainController.totalDims.h - 300;
                 if (!context.dataTables["linked_" + linkedTable])
                     context.dataTables["linked_" + linkedTable] = new dataTable();
                 context.dataTables["linked_" + linkedTable].loadJson(dataTableDivName, json, {
@@ -147,6 +190,8 @@ var listController = (function () {
 
 
     self.searchLinkedRecords = function (str) {
+        if (!str)
+            str = $("#searchLinkedRecordsInput").val();
         var concatStr = "";
         var i = 0;
         context.dataModel[context.currentLinkedTable].forEach(function (field) {
@@ -201,13 +246,14 @@ var listController = (function () {
             var data = table.rows(idx[i]).data()[0];
 
             var sql = config.tableDefs[context.currentTable].relations[context.currentLinkedTable].createRelSql;
-            var array=null;
+            var array = null;
             //substitution of variable names to their current value
-            while((array=/<%([^%>]*)%>/g.exec(sql))!=null){
-                var str=array[1];
-                var value=eval(str);
-                sql=sql.replace(array[0],value);
-            };
+            while ((array = /<%([^%>]*)%>/g.exec(sql)) != null) {
+                var str = array[1];
+                var value = eval(str);
+                sql = sql.replace(array[0], value);
+            }
+            ;
 
 
             var payload = {
@@ -238,16 +284,17 @@ var listController = (function () {
         var idx = linksTable.rows('.selected', 0).indexes();
         for (var i = 0; i < idx.length; i++) {
             var data = linksTable.rows(idx[i]).data()[0]
-          //  var sql = "delete from r_versement_magasin where id_" + context.currentLinkedTable + "=" + data.id;
+            //  var sql = "delete from r_versement_magasin where id_" + context.currentLinkedTable + "=" + data.id;
 
-           var sql = config.tableDefs[context.currentTable].relations[context.currentLinkedTable].deleteRelSql;
-            var array=null;
+            var sql = config.tableDefs[context.currentTable].relations[context.currentLinkedTable].deleteRelSql;
+            var array = null;
             //substitution of variable names to their current value
-            while((array=/<%([^%>]*)%>/g.exec(sql))!=null){
-                var str=array[1];
-                var value=eval(str);
-                sql=sql.replace(array[0],value);
-            };
+            while ((array = /<%([^%>]*)%>/g.exec(sql)) != null) {
+                var str = array[1];
+                var value = eval(str);
+                sql = sql.replace(array[0], value);
+            }
+            ;
 
             var payload = {
                 exec: 1,

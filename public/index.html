@@ -31,6 +31,7 @@
 
     <script src="js/mainController.js"></script>
     <script src="js/statistics.js"></script>
+    <script src="js/tools.js"></script>
 
     <script src="js/listController.js"></script>
     <script src="js/config.js"></script>
@@ -82,6 +83,12 @@
 
         }
 
+       #listRecordsDiv{
+            border: #0a6aa1;
+            border-width: 2px;
+            border-style: solid;
+        }
+
         .myDatatable td {
             border-bottom-style: solid;
             border-bottom-width: 1px;
@@ -104,6 +111,13 @@
 
         #messageDiv {
             font-style: italic;
+        }
+        .searchCriteria{
+            background-color: white;
+            border-radius: 5px;
+            padding: 2px;
+            margin: 2px;
+            font-size: 10px;
         }
 
         .dialogTab {
@@ -145,10 +159,12 @@
             float: left;
         }
 
+
+
     </style>
 
     <script>
-        var dialog,dialog2;
+        var dialog,dialog2,dialog3;
         $(function () {
 
             mainController.setDivsSize();
@@ -191,6 +207,21 @@
                     // allFields.removeClass("ui-state-error");
                 }
             });
+            dialog3 = $("#dialog3Div").dialog({
+                autoOpen: false,
+                height: 500,
+                width: "50%",
+                modal: true,
+                buttons: {
+                    Annuler: function () {
+                        dialog3.dialog("close");
+                    }
+                },
+                close: function () {
+                    // allFields.removeClass("ui-state-error");
+                }
+            });
+
 
 
             $("#loginDialogDiv").dialog({
@@ -248,6 +279,7 @@
                     <tr>
                         <td>
                             <select id="searchTableInput" size="0"></select>
+                            <button id="addRecordButton"  style="width:60px">Ajouter</button>&nbsp;
                         </td>
                     </tr>
                     <tr>
@@ -282,12 +314,16 @@
                     </tr>
                     <tr>
                         <td>
-                            <button id="searchsButton"> chercher</button>
+                            <button id="andSearchButton" style="width:20px">  + </button>
+                            <button id="searchButton"> chercher</button>
+
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <button id="addRecordButton">Ajouter</button>&nbsp;
+<div id="searchCriteriaDiv">
+
+</div>
                         </td>
                     </tr>
                 </table>
@@ -297,13 +333,11 @@
               <div id="tooldsDiv" class="accordionInnerDiv">
 
                   <select id="toolsSelect" size="10" style="left: -30px;position: relative;">
-
                   </select>
 
+              </div>
 
 
-
-              </div>-->
             <h1>Statisitiques</h1>
             <div id="statsDiv" class="accordionInnerDiv">
                 <select id="statsSelect" size="10" style="left: -30px;position: relative;">
@@ -361,9 +395,14 @@
     </div>
 </div>
 <div id="dialog2Div">
-    Chercher <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput">
+     <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput">
+    <button id="searchLinkedRecordsButton">chercher</button>
     <button id="addLinkedRecordButton">ajouter lien</button>
     <div id="new_linkedRecordsDiv" class="dataTableDiv"></div>
+</div>
+
+<div id="dialog3Div">
+
 </div>
 
 

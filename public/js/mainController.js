@@ -20,20 +20,27 @@ var mainController = (function () {
         $("#searchTableInput").bind("change", function () {
 
             context.currentTable = this.value;
-
-            self.fillSelectOptions("searchColumnInput", context.dataModel[context.currentTable], true, "name", "name")
+            self.fillSelectOptions("searchColumnInput", context.dataModel[context.currentTable], true, "name", "name");
+            $("#searchValueInput").val("");
+        })
+        $("#searchColumnInput").bind("change", function () {
+            mainController.setOperators(this.value);
+            $("#searchValueInput").val("");
         })
 
-        $("#searchsButton").bind("click", function () {
-            listController.listRecords();
+        $("#searchButton").bind("click", function () {
+            listController.addSearchCriteria(true);
         })
+        $("#andSearchButton").bind("click", function () {
+            listController.addSearchCriteria();
+        })
+
+
 
         $("#searchMagasinsButton").bind("click", function () {
             listController.listRecords("magasin");
         })
-        $("#searchColumnInput").bind("change", function () {
-            mainController.setOperators(this.value);
-        })
+
         $("#showHideLeftPanelButton").bind("click", function () {
             mainController.showHideLeftPanel();
         })
@@ -53,6 +60,10 @@ var mainController = (function () {
                     listController.searchLinkedRecords(str);
             }
         })
+        $("#searchLinkedRecordsButton").bind("click", function () {
+            listController.searchLinkedRecords();
+        })
+
 
         $(".showAddLinkedRecordButton").bind("click", function () {
             $("#dialog2Div").dialog("open");
@@ -72,6 +83,11 @@ var mainController = (function () {
             var str = $(this).val()
             statistics.displayStat(str);
         })
+        $("#toolsSelect").bind("change", function () {
+            var str = $(this).val()
+            tools.execTool(str);
+        })
+
 
 
     }
@@ -96,6 +112,7 @@ var mainController = (function () {
         self.fillSelectOptions("newRecordTableSelect", tables, true);
         var stats = Object.keys(statistics.stats);
         self.fillSelectOptions("statsSelect", stats, true);
+        tools.init();
 
 
     }
