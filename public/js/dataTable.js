@@ -6,10 +6,10 @@ var dataTable = function () {
     this.table;
     this.selectedRow;
     self.dateColumns = []
-    this.pageLength = 25;
+    this.pageLength = 10;
     this.colHeight = 80;
-    this.loadJson = function (containerDiv, json, options) {
-
+    this.loadJson = function (table,containerDiv, json, options) {
+        this.table=table
         if (!options)
             options = {};
 
@@ -21,8 +21,8 @@ var dataTable = function () {
         ;
         var keys = [];
         var sortColumns= [];
-        if(config.tableDefs[context.currentTable] && config.tableDefs[context.currentTable].sortFields )
-            sortColumns = config.tableDefs[context.currentTable].sortFields;
+        if(config.tableDefs[table] && config.tableDefs[table].sortFields )
+            sortColumns = config.tableDefs[table].sortFields;
         var dataTableSortArray = [];
         json.forEach(function (line, index) {
             for (var key in line) {
@@ -33,7 +33,7 @@ var dataTable = function () {
         var columns = [];
         self.dateColumns = [];
         keys.forEach(function (key, index) {
-            var type = mainController.getFieldType(this.table, key);
+            var type = mainController.getFieldType(table, key);
 
             var obj = {data: key, title: key};
             if (type == "date") {
@@ -78,7 +78,7 @@ var dataTable = function () {
 
      var dom = '<"top"firptl><"bottom"B><"clear">'
         var dom = '<"top"firptl><"bottom"B><"clear">'
-        var dom ='<"top"firplBt>'
+
         if (options.dom)
             dom = options.dom;
 

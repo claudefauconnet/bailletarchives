@@ -39,7 +39,7 @@ var recordController = (function () {
 
         $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
 
-        $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>");
+        $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
 
         $("#saveRecordButton").attr("disabled", true);
         $(dialog.dialog("open"))
@@ -73,45 +73,26 @@ var recordController = (function () {
         sql += " where id= " + context.currentRecordId;
         console.log(sql);
 
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-                mainController.setMessage("enregistrement sauvé");
-                dialog.dialog("close");
+        mainController.execSql(sql, function (err, json) {
+            if (err)
+                mainController.setErrorMessage(err)
 
-                // delete linked records
-                context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
-                var payload = {
-                    exec: 1,
-                    sql: sql
-                }
+            mainController.setMessage("enregistrement sauvé");
+            dialog.dialog("close");
 
-                $.ajax({
-                    type: "POST",
-                    url: "../mysql",
-                    data: payload,
-                    dataType: "json",
-                    success: function (json) {
-                        ;
-                    }, error: function (err) {
-                        mainController.setErrorMessage(err.responseText)
-                    }
-
-
-                })
-            }, error: function (err) {
-                mainController.setErrorMessage(err.responseText)
-            }
-
+            ///*******************************A finir*******************************************************************************
+            context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
+            return;
+            // delete linked records
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
+                    ;
+            })
 
         })
+
+
     }
 
     self.saveNewRecord = function () {
@@ -139,48 +120,22 @@ var recordController = (function () {
         var sql = sql1 + ")" + sql2 + ")";
         console.log(sql);
 
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-                mainController.setMessage("enregistrement enregistré");
-                //   dialog.dialog("close");
-                // get new saved record id and set currentId
-                var sql = "SELECT max(id) as id from " + context.currentTable;
+        mainController.execSql(sql, function (err, json) {
+            if (err)
+                mainController.setErrorMessage(err);
+            mainController.setMessage("enregistrement enregistré");
 
-                var payload = {
-                    exec: 1,
-                    sql: sql
-                }
-                $.ajax({
-                    type: "POST",
-                    url: "../mysql",
-                    data: payload,
-                    dataType: "json",
-                    success: function (json) {
-                        context.currentRecordId=json[0].id;
-                        mainController.setTabs();
-                        for (var key in self.currentRecordChanges) {
-                            var cells = $('#dataTable').rows({selected: true});
+            var sql = "SELECT max(id) as id from " + context.currentTable;
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
+                context.currentRecordId = json[0].id;
+                mainController.setTabs();
 
-                            var x = "";
-                            // cell.data(cell.data() + 1).draw();
-                        }
-                    }, error: function (err) {
-                        mainController.setErrorMessage(err.responseText)
-                    }
-                })
-            }
-            , error: function (err) {
-                mainController.setErrorMessage(err.responseText)
-            }
+            })
         })
+
+
     }
 
     self.deleteRecord = function () {
@@ -199,42 +154,19 @@ var recordController = (function () {
 
 
         var sql = "delete from " + context.currentTable + " where id=" + context.currentRecordId;
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
+        mainController.execSql(sql, function (err, json) {
+            if (err)
+                mainController.setErrorMessage(err)
                 mainController.setMessage("enregistrement supprimé");
                 dialog.dialog("close");
                 listRecords.listRecords();
                 linkedRecordsData.forEach(function (linkedRecord) {
                     var sql = "delete from r_versement_magasin where id_" + context.currentLinkedTable + "=" + linkedRecord.id;
-                    var payload = {
-                        exec: 1,
-                        sql: sql
-                    }
-
-                    $.ajax({
-                        type: "POST",
-                        url: "../mysql",
-                        data: payload,
-                        dataType: "json",
-                        success: function (json) {
-                        }, error: function (err) {
-                            mainController.setErrorMessage(err.responseText)
-                        }
+                    mainController.execSql(sql, function (err, json) {
+                        if (err)
+                            mainController.setErrorMessage(err)
                     })
-
                 })
-            }, error: function (err) {
-                mainController.setErrorMessage(err.responseText)
-            }
-
 
         })
 
@@ -277,7 +209,7 @@ var recordController = (function () {
 
             //if (type && type == 'select' && selectValues) {
             if (selectValues) {
-                var str = "<select  onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' id='attr_" + key + "'>"
+                var str = "<select  onchange='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' id='attr_" + key + "'>"
                 str += "<option  value=''></option>";
                 for (var i = 0; i < selectValues.length; i++) {
 
@@ -351,9 +283,9 @@ var recordController = (function () {
         }
         var classe = $(input).attr("class");
         if (classe.indexOf("number") > -1) {
-           // if (!value.match(/-?\d*[\.|,]?\d*/))
-            var xx=value.match(/[a-zA-Z]+/)
-            if (value.match(/[a-zA-Z]+/).length>0)
+            // if (!value.match(/-?\d*[\.|,]?\d*/))
+            var xx = value.match(/[a-zA-Z]+/)
+            if (value.match(/[a-zA-Z]+/).length > 0)
                 message = fieldName + " nombre invalide " + value;
             value = value.replace(",", ".")
 
@@ -361,7 +293,7 @@ var recordController = (function () {
         }
         if (message) {
             $("#recordMessageSpan").html(message);
-            $("#saveRecordButton").attr("disabled",true);
+            $("#saveRecordButton").attr("disabled", true);
         }
         else {
             $("#saveRecordButton").removeAttr("disabled");
@@ -436,7 +368,17 @@ var recordController = (function () {
         var str = "<table>";
         var strHidden = "";
         var dateFieldIds = [];
+
+        var fieldTools=config.tableDefs[context.currentTable].fieldTools;
+        if(!fieldTools)
+            fieldTools={};
+
         for (var key in targetObj) {
+var fieldToolStr=""
+            if(fieldTools[key]){
+                fieldToolStr="&nbsp;&nbsp;<Button onclick='tools."+fieldTools[key].toolFn+"("+context.currentRecordId+")'>"+fieldTools[key].title+"</Button>"
+            }
+
 
             var strVal = targetObj[key].value;
             if (targetObj[key].type == "date")
@@ -465,7 +407,7 @@ var recordController = (function () {
                     className = 'mandatoryFieldLabel';
 
 
-                str += "<tr><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal + "</span></td></tr>";
+                str += "<tr><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal +fieldToolStr+ "</span></td></tr>";
             }
         }
         str += "</table>" + strHidden;

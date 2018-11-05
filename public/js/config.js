@@ -3,6 +3,7 @@ var config=(function(){
 
     self.tableDefs = {
         "magasin": {
+            defaultSearchField:"coodronnees",
             tabs:["","versement"],
             type:"n-n",
             sortFields: ["magasin"],
@@ -17,16 +18,26 @@ var config=(function(){
                     deleteRelSql: "delete from r_versement_magasin where id_versement=<%data.id%>",
 
 
-                    selectfields: ["num", "versement", "theme", "deposant"]
+                    selectfields: ["numVersement", "theme", "deposant"]
                 }
             },
 
 
         },
         "versement": {
-
+defaultSearchField:"numVersement",
             tabs:["","magasin","item"],
             sortFields: ["numVersement desc"],
+            fieldTools:{
+                "cotesExtremesBoites":{
+                    title:"calculer",
+                    toolFn:"SetVersementCotesExtremesFromMagasin"
+                },
+                "nbBoites":{
+                    title:"calculer",
+                    toolFn:"SetVersementnbBoitesFromMagasin"
+                }
+            },
             relations: {
                 "magasin": {
                     type:"n-n",
@@ -55,6 +66,9 @@ var config=(function(){
             fieldConstraints: {
                 etatTraitement: {
                     values: ["", "BV", "Rien", "Inv"]
+                },
+                nature: {
+                    values: ["", "analogique", "numérique", "hybride"]
                 }
 
             }
@@ -94,7 +108,7 @@ var config=(function(){
 
         "ChercherTablettesDisponibles ":{htmlPage:"findTablettesDialog.html"},
 
-        "DéplacerLesBoitesDunVersement ":{htmlPage:"deplacerBoitesDialog.html"}
+        "DéplacerBoitesVersement ":{htmlPage:"deplacerBoitesDialog.html"}
 
 
 

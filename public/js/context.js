@@ -5,5 +5,6 @@ var context = {
     dataTables: {},
     currentRecordId: "",
     currentTabIndex:0,
-    currentCriteria:[]
+    currentCriteria:[],
+    currentVersementInfos:{}
 }

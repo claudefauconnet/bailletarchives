@@ -2,63 +2,20 @@
 
     deplacerBoites_exec = function () {
 
-        var magasin = $("#findTablettes_magasin").val();
+        var targetMagasin = $("#deplacerBoites_targetMagasin").val();
+        var metrage= context.currentVersementInfos.tablettes.metrage;
 
-        var nTablettes=Math.round(metrage/0.8)+1 //estimation a priori  pour voir large: les tablettes font 1.15 en général et donc ramener plus de tablettes que nécessaire
-
-
-        var sql="SELECT coordonnees,DimTabletteMLineaire from magasin where cotesParTablette =\"\" and magasin=\""+magasin+"\"  order by coordonnees limit "+nTablettes;
-
-
-
-        var numVersement=$("#deplacerBoites_numVersement").val();
-        var sql="select magasin.* from  versement,magasin,r_versement_magasin where  magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id  and versement.numVersement="
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
-
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-
-
-
-
-
-
-
-
-                debugger;
-                var sum=0;
-                var tablettesExtremes="";
-                var nTablettes=0;
-                var stop=false;
-                json.forEach(function(tablette,indice){
-                    if(stop)
-                        return;
-                    if(indice==0)
-                        tablettesExtremes+="de "+tablette.coordonnees+" à ";
-                    sum+=tablette.DimTabletteMLineaire;
-                    nTablettes+=1;
-                    if(sum>metrage){
-                        tablettesExtremes+=tablette.coordonnees
-                        stop=true;
-
-                    }
-                })
-
-              var message="Métrage du versement : "+metrage+"<br>"
-                message+="tablettes proposées : <B>"+tablettesExtremes+"</B><br>"
-                message+="nombre de tablettes : <B>"+nTablettes+"</B><br>";
-                $("#findTablettes_message").html(message)
-
-            }, error: function (err) {
-                mainController.setErrorMessage(err.responseText)
+        var searchLimit = Math.round(metrage / 0.8) + 1 //estimation a priori  pour voir large: les tablettes font 1.15 en général et donc ramener plus de tablettes que nécessaire
+        tools.findTablettes(targetMagasin,searchLimit, metrage, function (err, result) {
+            if (err) {
+                console.log(err.responseText)
+                return mainController.setErrorMessage(err.responseText);
             }
+            var tablettesExtremes="de "+result[0].coordonnees+" à "+result[result.length-1].coordonnees
+            var message = "Métrage du versement : " + metrage + "<br>"
+            message += "tablettes proposées : <B>" + tablettesExtremes + "</B><br>"
+            message += "nombre de tablettes : <B>" + result.length + "</B><br>";
+            $("#findTablettes_message").html(message)
 
 
         })
@@ -66,23 +23,67 @@
 
     }
 
+    getInfos = function () {
+        var numVersement = $("#deplacerBoites_numVersement").val();
+        tools.getVersementMagasinInfos({numVersement:numVersement}, function (err, infos) {
+            if (err)
+               console.log(err);
+        //  $("#deplacerBoites_message").html(JSON.stringify(infos,null,2));
+
+            context.currentVersementInfos=infos;
+
+         /*   var infos={
+                versement:{
+                    numVersement:null,
+                    id:null,
+                    metrage:0,
+                    nbreBoites:0
+                },
+                tablettes:{
+                    metrage:0,
+                    coteBoites:[],
+                    tailleTotaleTablettes:0
+
+                }
+            }*/
+         var message="<table border='1'><tr><td>;</td><td>versement</td><td>magasin</td></tr>";
+         message+="<tr><td>nbreBoites</td><td>"+infos.versement.nbreBoites+"</td><td>"+infos.tablettes.coteBoites.length+"</td></tr>";
+            message+="<tr><td>metrage</td><td>"+infos.versement.metrage+"</td><td>"+infos.tablettes.metrage+"</td></tr>";
+            message+="<tr><td>tailleTotaleTablettes;</td><td>&nbsp;</td><td>"+infos.tablettes.tailleTotaleTablettes+"</td></tr>";
+            message+="</table>"
+            $("#deplacerBoites_message").html(message);
+
+            $("#deplacerBoites_execButton").removeAttr("disabled")
+
+
+
+
+
+        })
+    }
+
 
 </script>
-<table>
+<table style="vertical-align: center">
+    <tr>
+        <td colspan="2">
+            <span class="title"> Déplacer les boites d'un versement</span>
+        </td>
+    </tr>
     <tr>
         <td>
             numero du versement à déplacer
         </td>
         <td>
-            <input id="deplacerBoites_numVersement">
+            <input id="deplacerBoites_numVersement" value="0105">
         </td>
     </tr>
     <tr>
         <td>
-          déplacer dans magasin
+            déplacer dans magasin
         </td>
         <td>
-            <input id="deplacerBoites_targetMagasin">
+            <select id="deplacerBoites_targetMagasin"></select>
         </td>
     </tr>
     <tr>
@@ -96,43 +97,32 @@
 
     <tr>
         <td>
-            <button onclick="deplacerBoites_exec()">Chercher</button>
+            <button onclick="getInfos()">infos</button>
+
+
         </td>
         <td>
-<div id="deplacerBoites_message" style="color:#0a6aa1"></div>
+            <div id="deplacerBoites_message" style="color:#0a6aa1"></div>
+            <br>
+            <button id="deplacerBoites_execButton" onclick="deplacerBoites_exec()">Chercher des tablettes</button>
+            <div id="findTablettes_message" style="color:#0a6aa1"></div>
+
         </td>
     </tr>
-
 
 
 </table>
 
 <script>
 
-var sql="select distinct magasin from magasin";
-var payload = {
-    exec: 1,
-    sql: sql
-}
+    var sql = "select distinct magasin from magasin order by magasin";
+    mainController.execSql(sql, function (err, json) {
+        if (err)
+            mainController.setErrorMessage(err)
+        mainController.fillSelectOptions("deplacerBoites_targetMagasin", json, true, "magasin", "magasin")
 
-$.ajax({
-    type: "POST",
-    url: "../mysql",
-    data: payload,
-    dataType: "json",
-    success: function (json) {
-      //  var x=a.id;
-      mainController.fillSelectOptions("deplacerBoites_targetMagasin",json,true,"magasin","magasin")
-
-
-
-    }, error: function (err) {
-        mainController.setErrorMessage(err.responseText)
-    }
-
-
-})
-
+    })
+    $("#deplacerBoites_execButton").attr("disabled",true)
 
 
 </script>

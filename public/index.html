@@ -136,7 +136,7 @@
 
         .title {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 18px;
             color: #0a6aa1;
 
         }
@@ -185,7 +185,7 @@
                 width: "100%",
                 modal: true,
                 buttons: {
-                    Annuler: function () {
+                    Fermer: function () {
                         dialog.dialog("close");
                     }
                 },
@@ -199,7 +199,7 @@
                 width: "100%",
                 modal: true,
                 buttons: {
-                    Annuler: function () {
+                    Fermer: function () {
                         dialog2.dialog("close");
                     }
                 },
@@ -213,7 +213,7 @@
                 width: "50%",
                 modal: true,
                 buttons: {
-                    Annuler: function () {
+                    Fermer: function () {
                         dialog3.dialog("close");
                     }
                 },
@@ -231,7 +231,7 @@
                     "OK": function () {
                         mainController.logon();
                     },
-                    "Annuler": function () {
+                    "Fermer": function () {
                         $(this).dialog("close");
                     }
                 }
@@ -268,7 +268,7 @@
     <div id="left" >
 
         <div id="leftAccordion">
-            <h1>Chercher</h1>
+            <h1>Données</h1>
             <div id="versementsDiv" class="accordionInnerDiv">
                 <table align="center" style="left: -30px;position: relative;">
                     <tr>
@@ -304,7 +304,7 @@
 
                             <button id="andSearchButton" style="width:20px">  + </button>
                             <img src='images/clear.png' style="vertical-align: middle" width='20px'  onclick='listController.removeSearchCriteria(-1)'>
-                            <button id="searchButton"> chercher</button>
+                            <button id="searchButton" > chercher</button>
 
 
                         </td>

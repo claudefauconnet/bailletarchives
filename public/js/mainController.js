@@ -14,6 +14,25 @@ var mainController = (function () {
 
     }
 
+    self.execSql=function(sql,callback){
+        var payload = {
+            exec: 1,
+            sql: sql
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "../mysql",
+            data: payload,
+            dataType: "json",
+            success: function (json) {
+                return callback(null,json);
+            },
+            error: function (err) {
+                return callback(err);
+            }
+        })
+    }
 
     self.bindActions = function () {
 
@@ -26,20 +45,36 @@ var mainController = (function () {
                 context.currentTable = this.value;
 
             }
+
+           var  defaultSearchField=config.tableDefs[context.currentTable].defaultSearchField;
+            if(!defaultSearchField)
+                defaultSearchField="";
             self.fillSelectOptions("searchColumnInput", context.dataModel[this.value], true, "name", "name");
+            $("#searchColumnInput").val(defaultSearchField);
+            if(defaultSearchField!="") {
+                mainController.setOperators(defaultSearchField);
+                $("#searchValueInput").focus();
+            }
             $("#searchValueInput").val("");
         })
         $("#searchColumnInput").bind("change", function () {
             mainController.setOperators(this.value);
             $("#searchValueInput").val("");
+            $("#searchValueInput").focus();
         })
 
         $("#searchButton").bind("click", function () {
             listController.addSearchCriteria(true);
         })
+
         $("#andSearchButton").bind("click", function () {
             listController.addSearchCriteria();
         })
+        $("#searchValueInput").keyup(function(event) {
+            if (event.keyCode === 13 || event.keyCode === 9) {
+                listController.addSearchCriteria(true);
+            }
+        });
 
 
         $("#searchMagasinsButton").bind("click", function () {
@@ -287,29 +322,13 @@ var mainController = (function () {
         var login = $("#login").val();
         var password = $("#password").val();
         var sql = "select login from users where login='" + login + "' and password='" + password + "'";
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
-
-
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-
+        mainController.execSql(sql, function (err, json) {
+            if (err)
+                mainController.setErrorMessage(err)
                 if (json.length == 1) {
                     $("#leftAccordion").css("opacity", 1);
                     $("#loginDialogDiv").dialog("close");
                 }
-
-            }, error: function (err) {
-                $("#logonMessageDiv").html("identifiant ou mot de passe incorrect")
-            }
-
-
         })
 
     }

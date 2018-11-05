@@ -98,7 +98,14 @@ var listController = (function () {
                     whereStrAll += " AND ";
                 whereStrAll += criteria.sqlWhere;
             })
+    //if simpleSearchand execute  dont keep this query
+            if(  context.currentCriteria.length==1){
+                self.removeSearchCriteria(-1);
+               // context.currentTable=null;
+                context.currentLinkedTable=null;
 
+
+            }
 
             var sql = "";
             if (joinObj) {
@@ -146,28 +153,16 @@ var listController = (function () {
 
     self.listRecords = function (sql) {
         var table = context.currentTable;
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
+         mainController.execSql(sql, function (err, json) {
+            if (err)
+                mainController.setErrorMessage(err)
 
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-                if (!context.dataTables[table])
-                    context.dataTables[table] = new dataTable();
-                context.dataTables[table].loadJson("listRecordsDiv", json, {onClick: recordController.displayRecordData})
-                $("#tabs").tabs("option", "active", 0);
-                $("#addLinkedRecordButton").attr("disabled", true);
-                $("#deleteLinkedRecordButton").attr("disabled", true);
-
-            }, error: function (err) {
-                mainController.setErrorMessage(err.responseText)
-            }
-
+            if (!context.dataTables[table])
+                context.dataTables[table] = new dataTable();
+            context.dataTables[table].loadJson(table,"listRecordsDiv", json, {onClick: recordController.displayRecordData})
+            $("#tabs").tabs("option", "active", 0);
+            $("#addLinkedRecordButton").attr("disabled", true);
+            $("#deleteLinkedRecordButton").attr("disabled", true);
 
         })
     }
@@ -181,39 +176,20 @@ var listController = (function () {
 
         var joinObj = relations[linkedTable].joinObj;
         var sql = " select " + linkedTable + ".* from  " + joinObj.tables + " where " + joinObj.where + " and " + context.currentTable + ".id=" + context.currentRecordId;
+          mainController.execSql(sql, function (err, json) {
+            if (err)
+                mainController.setErrorMessage(err)
 
-        console.log(sql);
-
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
-
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-                var width = mainController.totalDims.w * 0.9;
-                var height = mainController.totalDims.h - 300;
-                if (!context.dataTables["linked_" + linkedTable])
-                    context.dataTables["linked_" + linkedTable] = new dataTable();
-                context.dataTables["linked_" + linkedTable].loadJson(dataTableDivName, json, {
-                    dom: "lti",
-                    width: width,
-                    height: height,
-                    onClick: mainController.enableUnlinkButton
-
-
-                })
-
-
-            }, error: function (err) {
-                mainController.setErrorMessage(err.responseText)
-            }
-
-
+            var width = mainController.totalDims.w * 0.9;
+            var height = mainController.totalDims.h - 300;
+            if (!context.dataTables["linked_" + linkedTable])
+                context.dataTables["linked_" + linkedTable] = new dataTable();
+            context.dataTables["linked_" + linkedTable].loadJson(linkedTable,dataTableDivName, json, {
+                dom: "lti",
+                width: width,
+                height: height,
+                onClick: mainController.enableUnlinkButton
+            })
         })
 
 
@@ -236,35 +212,20 @@ var listController = (function () {
             sql = "select * from " + context.currentLinkedTable + "  WHERE CONCAT(" + concatStr + ") LIKE '%" + str + "%'";
         else
             sql = "select * from " + context.currentLinkedTable + "  WHERE " + field + " LIKE '%" + str + "%'";
-        console.log(sql);
-        console.log(sql);
-        var payload = {
-            exec: 1,
-            sql: sql
-        }
+         mainController.execSql(sql, function (err, json) {
+            if (err)
+                mainController.setErrorMessage(err)
 
-
-        $.ajax({
-            type: "POST",
-            url: "../mysql",
-            data: payload,
-            dataType: "json",
-            success: function (json) {
-                var width = mainController.totalDims.h * .7;
-                var height = 300
-                if (!context.dataTables["newLink_" + context.currentLinkedTable])
-                    context.dataTables["newLink_" + context.currentLinkedTable] = new dataTable();
-                context.dataTables["newLink_" + context.currentLinkedTable].loadJson("new_linkedRecordsDiv", json, {
-                    dom: "tip",
-                    width: width,
-                    heightheight: height,
-                    onClick: mainController.enableLinkButton
-                })
-
-            }, error: function (err) {
-                mainController.setErrorMessage(err.responseText)
-            }
-
+            var width = mainController.totalDims.h * .7;
+            var height = 300
+            if (!context.dataTables["newLink_" + context.currentLinkedTable])
+                context.dataTables["newLink_" + context.currentLinkedTable] = new dataTable();
+            context.dataTables["newLink_" + context.currentLinkedTable].loadJson(context.currentLinkedTable,"new_linkedRecordsDiv", json, {
+                dom: "tip",
+                width: width,
+                heightheight: height,
+                onClick: mainController.enableLinkButton
+            })
 
         })
 
@@ -284,26 +245,14 @@ var listController = (function () {
                 var value = eval(str);
                 sql = sql.replace(array[0], value);
             }
-            ;
 
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
 
-            var payload = {
-                exec: 1,
-                sql: sql
-            }
-
-            $.ajax({
-                type: "POST",
-                url: "../mysql",
-                data: payload,
-                dataType: "json",
-                success: function (json) {
-                    mainController.setMessage("lien enregistré");
-                    mainController.loadTab(context.currentTabIndex);
-                    $("#dialog2Div").dialog("close");
-                }, error: function (err) {
-                    mainController.setErrorMessage(err.responseText)
-                }
+                mainController.setMessage("lien enregistré");
+                mainController.loadTab(context.currentTabIndex);
+                $("#dialog2Div").dialog("close");
 
 
             })
@@ -325,27 +274,14 @@ var listController = (function () {
                 var value = eval(str);
                 sql = sql.replace(array[0], value);
             }
-            ;
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
 
-            var payload = {
-                exec: 1,
-                sql: sql
-            }
-
-            $.ajax({
-                type: "POST",
-                url: "../mysql",
-                data: payload,
-                dataType: "json",
-                success: function (json) {
-                    mainController.setMessage("lien supprimé");
-                    mainController.loadTab(context.currentTabIndex);
-                }, error: function (err) {
-                    mainController.setErrorMessage(err.responseText)
-                }
-
-
+                mainController.setMessage("lien supprimé");
+                mainController.loadTab(context.currentTabIndex);
             })
+
         }
 
     }
