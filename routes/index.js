@@ -1,34 +1,45 @@
 var express = require('express');
 var router = express.Router();
-var mysql=require('../bin/mySQLproxy..js')
+var mysql = require('../bin/mySQLproxy..js')
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get('/', function (req, res, next) {
+    if (isRequestLocalHost(req, res))
+        res.render('index', {title: 'Express'});
 });
 
 
+router.post('/mysql', function (req, res, next) {
+    if (req.body.exec && isRequestLocalHost(req, res)) {
+        mysql.exec(req.body.connection, req.body.sql, function (err, result) {
+            processResponse(res, err, result)
 
-router.post('/mysql', function(req, res, next) {
-  if(req.body.exec){
-      mysql.exec(req.body.connection,req.body.sql,function(err,result){
-          processResponse(res,err,result)
+        })
 
-      })
+    }
 
-  }
-
-    if(req.body.datamodel){
-        mysql.datamodel(req.body.connection,function(err,result){
-            processResponse(res,err,result)
+    if (req.body.datamodel && isRequestLocalHost(req, res)) {
+        mysql.datamodel(req.body.connection, function (err, result) {
+            processResponse(res, err, result)
 
         })
 
     }
 
 
-
 });
+
+function isRequestLocalHost(req, res) {
+
+        var remote = req.ip || req.connection.remoteAddress
+        if ((remote === '::1') || (remote === 'localhost'))
+            return true;
+        else {
+            res.send(401);
+            return false;
+
+    }
+}
 
 function processResponse(response, error, result) {
     if (response && !response.finished) {

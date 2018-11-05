@@ -14,6 +14,17 @@ var listController = (function () {
         }
     }
     self.addSearchCriteria = function (execute) {
+
+        //if simpleSearch previous query execute  dont keep this query
+        if(execute && context.currentCriteria.length==1 && context.currentCriteria[0].execute){
+            self.removeSearchCriteria(-1);
+            // context.currentTable=null;
+            context.currentLinkedTable=null;
+
+
+        }
+
+
         mainController.setMessage("");
         var whereStr = "";
         var table = context.currentTable;
@@ -40,7 +51,7 @@ var listController = (function () {
         var operator = $("#searchOperatorInput").val();
         var value = $("#searchValueInput").val();
         var whereText = table + " : " + column + " " + operator + " " + value
-        if (column != "") {
+        if (column != "" && value != "") {
 
             if (operator == "LIKE") {
                 value = "'%" + value + "%'"
@@ -81,7 +92,7 @@ var listController = (function () {
             })
 
             if (!criteriaAllreadyExist) {
-                context.currentCriteria.push({text: whereText, sqlWhere: whereStr});
+                context.currentCriteria.push({text: whereText, sqlWhere: whereStr,execute:execute});
                 var indice = context.currentCriteria.length - 1;
                 var str = "<div  class='searchCriteria' id='searchCriteria_" + indice + "'>" + whereText;
                 str += " <img src='images/clear.png' width='15px' style='float: right' onclick='listController.removeSearchCriteria(" + indice + ")'>"
@@ -98,14 +109,7 @@ var listController = (function () {
                     whereStrAll += " AND ";
                 whereStrAll += criteria.sqlWhere;
             })
-    //if simpleSearchand execute  dont keep this query
-            if(  context.currentCriteria.length==1){
-                self.removeSearchCriteria(-1);
-               // context.currentTable=null;
-                context.currentLinkedTable=null;
 
-
-            }
 
             var sql = "";
             if (joinObj) {
@@ -154,6 +158,10 @@ var listController = (function () {
     self.listRecords = function (sql) {
         var table = context.currentTable;
          mainController.execSql(sql, function (err, json) {
+             if(json.length==0){
+                 self.removeSearchCriteria(context.currentCriteria.length-1);
+                 return mainController.setMessage("Pas de resultat")
+             }
             if (err)
                 mainController.setErrorMessage(err)
 

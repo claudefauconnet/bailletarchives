@@ -1,0 +1,63 @@
+select metrageStr, CAST(Replace(metrageStr,",",".") AS DECIMAL(10,3)) from versement
+
+update versement set metrage=CAST(Replace(metrageStr,",",".") AS DECIMAL(10,3)) 
+
+update  versement set  metrage=CAST(Replace(metrageStr,",",".") AS DECIMAL(10,2)) where metrageStr is not null
+
+set sql_mode=""
+select dateArriveeStr,str_to_date(dateArriveeStr,"%d/%c/%Y") from versement
+
+
+update versement v  LEFT OUTER JOIN versement  magasin m ON v.numVersement=m.numVersement set v.numVersement= m.numVersement 
+
+select versement.numVersement, magasin.numVersement from versement , magasin where magasin.numVersement=versement.numVersement
+
+update  versement set dateArrivee=str_to_date(dateArriveeStr,"%Y/%c/%d")
+
+select numVersement,CONCAT("0 ",numVersement) from versement where CHAR_LENGTH(numVersement)=3
+
+
+update versement v  JOIN  magasin m ON v.numVersement=m.numVersement set v.etatTraitement= m.etatTraitement 
+
+
+
+
+
+
+
+
+UPDATE v SET v.Status = 'old' FROM versement v INNER JOIN magasin n ON v.numVersement = m.numVersement
+
+UPDATE v SET v.etatVersement = m.nouveau FROM versement v INNER JOIN etatversement m ON v.etatVersement = m.ancien
+
+ALTER TABLE versement Add id smallint(10) AUTO_INCREMENT;
+
+
+
+udpate table r_versement_magasin set date = current_date()
+
+select v.id,m.id from versement v, magasin m where m.numVersement=v.numVersement
+
+
+
+
+ALTER TABLE versement ADD COLUMN nature VARCHAR(50) AFTER numVersement;
+ALTER TABLE versement DROP COLUMN nbBoitesStr;
+
+
+update versement set nature="analogique"  where (versement.cotesExtremesBoites!="" or  versement.cotesExtremesBoites is not  null) and (volumeGO=0 and versement.nbreElements=0)
+update versement set nature="numerique"  where (versement.cotesExtremesBoites="" or  versement.cotesExtremesBoites is   null) and (volumeGO>0 and versement.nbreElements>0)
+update versement set nature="hybride"  where (versement.cotesExtremesBoites!="" and versement.cotesExtremesBoites is  not null) and (volumeGO>0 and versement.nbreElements>0)
+update versement set nature=null where (versement.cotesExtremesBoites="" or versement.cotesExtremesBoites is   null) and (volumeGO=0 and versement.nbreElements=0)
+
+************************************stats *******************************************
+
+select YEAR(dateArrivee) as annee,etatTraitement,sum(nbBoites) nbreBoites,sum(metrage)totalMetrage, count(*) as nbreVersements, sum(volumeGO) as volumeTotalGO,sum(nbreElements) nbreTotalElements from versement group by annee,etatTraitement
+select etatTraitement,sum(volumeGO),sum(nbreElements) from versement group by etatTraitement
+
+ update magasin set tablette =SUBSTRING_INDEX(magasin.coordonnees,'-',4)
+ 
+ select count(distinct numVersement) from magasin where  numVersement in (select numVersement from magasin group by numVersement having count(distinct magasin) >1)
+ 
+ 
+ 

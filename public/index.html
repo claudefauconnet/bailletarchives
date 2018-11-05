@@ -118,6 +118,7 @@
             padding: 2px;
             margin: 2px;
             font-size: 10px;
+            color: #0a6aa1;
         }
 
         .dialogTab {
@@ -157,6 +158,11 @@
 
         div.dt-buttons {
             float: left;
+        }
+
+        .ui-accordion-header{
+            font-weight: bold;
+            color: #0a6aa1;
         }
 
 
@@ -236,8 +242,8 @@
                     }
                 }
             });
-            if (false) {
-
+            if (true) {
+                $("#searchTableInput").attr("disabled",true)
                 $("#leftAccordion").css("opacity",0.2);
                 $("#loginDialogDiv").dialog("open");
             }
@@ -270,7 +276,7 @@
         <div id="leftAccordion">
             <h1>Données</h1>
             <div id="versementsDiv" class="accordionInnerDiv">
-                <table align="center" style="left: -30px;position: relative;">
+                <table align="center" >
                     <tr>
                         <td>
                             table
@@ -328,7 +334,7 @@
               </div>
 
 
-            <h1>Statisitiques</h1>
+            <h1>Statistiques</h1>
             <div id="statsDiv" class="accordionInnerDiv">
                 <select id="statsSelect" size="10" style="left: -30px;position: relative;">
 

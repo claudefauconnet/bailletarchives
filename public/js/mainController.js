@@ -22,14 +22,14 @@ var mainController = (function () {
 
         $.ajax({
             type: "POST",
-            url: "../mysql",
+            url: "./mysql",
             data: payload,
             dataType: "json",
             success: function (json) {
                 return callback(null,json);
             },
             error: function (err) {
-                return callback(err);
+                return callback(err.responseText);
             }
         })
     }
@@ -180,7 +180,12 @@ var mainController = (function () {
     self.setOperators = function (field) {
         var type = self.getFieldType(context.currentTable, field);
         var operatorsArray = operators[type];
+        try {
         self.fillSelectOptions("searchOperatorInput", operatorsArray, false)
+        }
+        catch(e){
+            var x=   field
+        }
     }
 
 
@@ -214,7 +219,7 @@ var mainController = (function () {
 
         $.ajax({
             type: "POST",
-            url: "../mysql",
+            url: "./mysql",
             data: payload,
             dataType: "json",
             success: function (json) {
@@ -295,12 +300,13 @@ var mainController = (function () {
             }));
         }
 
-        data.forEach(function (item, index) {
-            $("#" + selectId).append($('<option>', {
-                text: item[textfield] || item,
-                value: item[valueField] || item
-            }));
-        });
+    data.forEach(function (item, index) {
+        $("#" + selectId).append($('<option>', {
+            text: item[textfield] || item,
+            value: item[valueField] || item
+        }));
+    });
+
     }
 
     self.setMessage = function (message) {
@@ -324,8 +330,9 @@ var mainController = (function () {
         var sql = "select login from users where login='" + login + "' and password='" + password + "'";
         mainController.execSql(sql, function (err, json) {
             if (err)
-                mainController.setErrorMessage(err)
+               return mainController.setErrorMessage(err)
                 if (json.length == 1) {
+                    $("#searchTableInput").removeAttr("disabled")
                     $("#leftAccordion").css("opacity", 1);
                     $("#loginDialogDiv").dialog("close");
                 }

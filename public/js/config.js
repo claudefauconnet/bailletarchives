@@ -3,7 +3,7 @@ var config=(function(){
 
     self.tableDefs = {
         "magasin": {
-            defaultSearchField:"coodronnees",
+            defaultSearchField:"coordonnees",
             tabs:["","versement"],
             type:"n-n",
             sortFields: ["magasin"],
