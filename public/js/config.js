@@ -1,20 +1,23 @@
-var config=(function(){
-    var self={}
+var config = (function () {
+    var self = {}
+    self.locale = "FR";
+    self.listHiddenFields=["id"]
+
 
     self.tableDefs = {
         "magasin": {
-            defaultSearchField:"coordonnees",
-            tabs:["","versement"],
-            type:"n-n",
+            defaultSearchField: "coordonnees",
+            tabs: ["", "versement"],
+            type: "n-n",
             sortFields: ["magasin"],
             relations: {
                 "versement": {
                     joinSql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id ",
-                    joinObj:{
-                        tables:"versement,magasin,r_versement_magasin",
+                    joinObj: {
+                        tables: "versement,magasin,r_versement_magasin",
                         where: " magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id "
                     },
-                    createRelSql:"insert into r_versement_magasin (id_versement,id_magasin) values(<%data.id%>,<%context.currentRecordId%>)",
+                    createRelSql: "insert into r_versement_magasin (id_versement,id_magasin) values(<%data.id%>,<%context.currentRecordId%>)",
                     deleteRelSql: "delete from r_versement_magasin where id_versement=<%data.id%>",
 
 
@@ -25,97 +28,87 @@ var config=(function(){
 
         },
         "versement": {
-defaultSearchField:"numVersement",
-            tabs:["","magasin","item"],
+            defaultSearchField: "numVersement",
+            tabs: ["", "magasin", "article"],
             sortFields: ["numVersement desc"],
-            fieldTools:{
-                "cotesExtremesBoites":{
-                    title:"calculer",
-                    toolFn:"SetVersementCotesExtremesFromMagasin"
+            fieldTools: {
+                "cotesExtremesBoites": {
+                    title: "calculer",
+                    toolFn: "SetVersementCotesExtremesFromMagasin"
                 },
-                "nbBoites":{
-                    title:"calculer",
-                    toolFn:"SetVersementnbBoitesFromMagasin"
+                "nbBoites": {
+                    title: "calculer",
+                    toolFn: "SetVersementnbBoitesFromMagasin"
                 }
             },
             relations: {
                 "magasin": {
-                    type:"n-n",
-                       joinObj:{
-                        tables:"versement,magasin,r_versement_magasin",
+                    type: "n-n",
+                    joinObj: {
+                        tables: "versement,magasin,r_versement_magasin",
                         where: " magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id "
                     },
-                   createRelSql: "insert into r_versement_magasin (id_versement,id_magasin) values(<%context.currentRecordId%>,<%data.id%>)",
+                    createRelSql: "insert into r_versement_magasin (id_versement,id_magasin) values(<%context.currentRecordId%>,<%data.id%>)",
                     deleteRelSql: "delete from r_versement_magasin where id_magasin=<%data.id%>",
                     selectfields: ["coordonnees"]
                 }
                 ,
-                "item": {
-                    type:"1-n",
-                    joinSql: "select item.* from item where 1=1 ",
-                    joinObj:{
-                        tables:"versement,item",
-                        where: " item.id_versement=versement.id "
+                "article": {
+                    type: "1-n",
+                    joinSql: "select article.* from article where 1=1 ",
+                    joinObj: {
+                        tables: "versement,article",
+                        where: " article.id_versement=versement.id "
                     },
-                    createRelSql: "update item set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
-                    deleteRelSql: "update item set id_versement=null where id=<%data.id%>",
+                    createRelSql: "update article set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
+                    deleteRelSql: "update article set id_versement=null where id=<%data.id%>",
 
                     selectfields: []
                 }
             },
-            fieldConstraints: {
-                etatTraitement: {
-                    values: ["", "BV", "Rien", "Inv"]
-                },
-                nature: {
-                    values: ["", "analogique", "numérique", "hybride"]
-                }
-
-            }
+            fieldConstraints: {}
             ,
 
 
-
         },
-        "item": {
+        "article": {
 
-            tabs:["","versement"],
+            tabs: ["", "versement"],
             sortFields: ["numBoite desc"],
             relations: {
                 "versement": {
-                    type:"n-n",
-                    joinSql: "select versement.* from versement,item where item.id_versement=versement.id and item.id=",
-                    createRelSql: "update item set id_versement=<%data.id%> where id=<%context.currentRecordId%>",
-                    deleteRelSql:  "update item set id_versement=null where id=<%context.currentRecordId%>",
+                    type: "n-n",
+                    joinSql: "select versement.* from versement,article where article.id_versement=versement.id and article.id=",
+                    joinObj: {
+                        tables: "versement,article",
+                        where: " article.id_versement=versement.id "
+                    },
+                    createRelSql: "update article set id_versement=<%data.id%> where id=<%context.currentRecordId%>",
+                    deleteRelSql: "update article set id_versement=null where id=<%context.currentRecordId%>",
                     selectfields: ["numVersement"]
                 }
 
 
             },
-            fieldConstraints: {
-
-
-            }
+            fieldConstraints: {}
             ,
-
 
 
         }
     }
+    self.lists = {};
 
-    self.tools={
-
-
-        "ChercherTablettesDisponibles ":{htmlPage:"findTablettesDialog.html"},
-
-        "DéplacerBoitesVersement ":{htmlPage:"deplacerBoitesDialog.html"}
+    self.tools = {
 
 
+        "ChercherTablettesDisponibles ": {htmlPage: "findTablettesDialog.html"},
 
+        "DéplacerBoitesVersement ": {htmlPage: "deplacerBoitesDialog.html"},
+
+        "GererLesListes ": {htmlPage: "gererListes.html"}
 
 
     }
-
 
 
     return self;

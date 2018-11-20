@@ -1,0 +1,103 @@
+<script>
+    var listController=(function() {
+        var self={};
+        self.loadValues = function (listName) {
+            var sql = "select valeur  from listes  where liste='" + listName + "' order by ordreNum";
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
+                mainController.fillSelectOptions("gererLists_ValueSelect", json, false, "valeur", "valeur")
+            })
+
+        }
+        self.addValue = function () {
+            var liste = $("#gererLists_listSelect").val()
+            var newValeur = prompt("nouvelle valeur");
+            if (!newValeur || newValeur == "")
+                return;
+            var sql = "insert into listes (liste,valeur) values('" + liste + "','" + newValeur + "')"
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
+                self.loadValues(liste)
+
+
+            })
+        }
+        self.removeValue = function () {
+            var liste = $("#gererLists_listSelect").val()
+            var valeur = $("#gererLists_ValueSelect").val()
+            if (!valeur || valeur == "")
+                return;
+            var sql = "delete from listes where liste='" + liste + "' and valeur='" + valeur + "'"
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
+               self.loadValues(liste)
+
+
+            })
+        }
+
+        return self;
+    })()
+
+</script>
+<table>
+
+    <tr>
+        <td>
+            liste
+        </td>
+        <td>
+            <select id="gererLists_listSelect" onchange="listController.loadValues($(this).val())"></select>
+        </td>
+    </tr>
+    <tr>
+
+        <td>
+            <table>
+                <tr>
+                    <td>
+                        <button onclick="listController.addValue()">+</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button onclick="listController.removeValue()">-</button>
+                    </td>
+                </tr>
+            <!--    <tr>
+                    <td>
+                        <button onclick="listController.moveUp()">^</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button onclick="listController.moveDown()">v</button>
+                    </td>
+                </tr>-->
+            </table>
+
+
+        </td>
+        <td>
+            <select size=10 id="gererLists_ValueSelect" style="width: 200px"></select>
+        </td>
+    </tr>
+
+
+</table>
+Rafraichir les listes sur le client<button onclick="mainController.loadLists()">ok  </button>
+
+<script>
+
+    var sql = "select distinct liste from listes order by liste";
+    mainController.execSql(sql, function (err, json) {
+        if (err)
+            mainController.setErrorMessage(err)
+        mainController.fillSelectOptions("gererLists_listSelect", json, true, "liste", "liste")
+    })
+
+
+</script>

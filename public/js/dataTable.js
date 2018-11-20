@@ -5,11 +5,12 @@ var dataTable = function () {
     this.columns = [];
     this.table;
     this.selectedRow;
-    self.dateColumns = []
-    this.pageLength = 10;
+    self.dateColumns = [];
+    self.numberColumns = [];
+    this.pageLength = 100;
     this.colHeight = 80;
-    this.loadJson = function (table,containerDiv, json, options) {
-        this.table=table
+    this.loadJson = function (table, containerDiv, json, options) {
+        this.table = table
         if (!options)
             options = {};
 
@@ -20,25 +21,30 @@ var dataTable = function () {
         this.dataSet = json
         ;
         var keys = [];
-        var sortColumns= [];
-        if(config.tableDefs[table] && config.tableDefs[table].sortFields )
+        var sortColumns = [];
+        if (config.tableDefs[table] && config.tableDefs[table].sortFields)
             sortColumns = config.tableDefs[table].sortFields;
         var dataTableSortArray = [];
         json.forEach(function (line, index) {
             for (var key in line) {
-                if (keys.indexOf(key) < 0)
+                if (keys.indexOf(key) < 0 && config.listHiddenFields.indexOf(key) < 0)
                     keys.push(key);
             }
         })
         var columns = [];
         self.dateColumns = [];
+        self.numberColumns = [];
         keys.forEach(function (key, index) {
             var type = mainController.getFieldType(table, key);
 
-            var obj = {data: key, title: key};
+            var obj = {data: key, title: key, width: "100px"};
             if (type == "date") {
                 self.dateColumns.push(index);
             }
+            if (type == 'number') {
+                self.numberColumns.push(index);
+            }
+
             columns.push(obj);
 
             //sort datatable
@@ -55,36 +61,26 @@ var dataTable = function () {
 
         this.columns = columns;
 
+
         var htmlStr = "<table style=' z-index:100 ' id='table_" + containerDiv + "'  class='myDatatable cell-border display nowrap'></table>"
 
-        var xxx = $("#" + containerDiv).html();
         $("#" + containerDiv).html(htmlStr);
         $('#' + containerDiv).css("font-size", "10px");
-     /*   var height;
-        var width;
-        if (options.height)
-            height = options.height;
-        else
-            height = $(".dataTableDiv").height() - (mainController.leftPanelWidth + 50);
-        if (options.width)
-            height = options.width;
-        else
-            width = $(".dataTableDiv").width() - 280;
-        $("#table_" + containerDiv).width("400px").height(height);*/
+        var height = $("#" + containerDiv).height() - 120
 
 
-    /*    if (json.length < this.pageLength)
-            height = this.colHeight * json.length;*/
+        /*   $('#' + containerDiv).width(500);
 
-     var dom = '<"top"firptl><"bottom"B><"clear">'
+           $('#' + containerDiv).css("overflow","auto");*/
+
+
         var dom = '<"top"firptl><"bottom"B><"clear">'
-
         if (options.dom)
             dom = options.dom;
 
-
         var table = $("#table_" + containerDiv).DataTable({
-
+            //  responsive: true,
+            fixedHeader: true,
             "dom": dom,
 
             buttons: [
@@ -95,9 +91,20 @@ var dataTable = function () {
             columns: columns,
             "order": dataTableSortArray,
 
+
+            scrollY: height,
+            scrollX: true,
+            scrollCollapse: true,
+            paging: true,
+            pageResize: true,
+            pageLength: this.pageLength,
+            "pager": true,
+
+
             "columnDefs": [
+                {width: 100, targets: 0},
                 {//dates
-                    "render": function (data, type, row) {
+                    "render": function (data, type, row, meta) {
                         var str = "";
                         if (data != null && data != "" && data.indexOf("0000") < 0) {
                             var date = new Date(data);
@@ -107,24 +114,34 @@ var dataTable = function () {
 
                     },
                     "targets": self.dateColumns
+                },
+                {//number
+                    "render": function (data, type, row, meta) {
+                        var str = "";
+                        if (data != null && config.locale == "FR") {
+                            str = ("" + data).replace(".", ",")
+                        }
+                        return str;
+
+                    },
+                    "targets": self.numberColumns
                 }
 
             ],
+            fixedColumns: true,
             select: {
                 style: 'os',
                 selector: 'td:first-child'
             },
 
-            pageLength: this.pageLength,
-            "pager": true,
 
-        /*    "scrollY": "" + height + "px",
-            "scrollX": "" + width + "px",*/
-            scrollCollapse: true,
+
+
 
         })
+
         table.columns.adjust().draw();
-        $("#table_" + containerDiv).css('display', 'block');
+
         this.table = table;
 
 
@@ -144,7 +161,7 @@ var dataTable = function () {
                     this.selectedRow = table.row(this);
                     var line = table.row(this).data();
                     options.onClick(line);
-               //
+                    //
                 }
 
 

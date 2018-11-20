@@ -29,6 +29,7 @@ var mainController = (function () {
                 return callback(null,json);
             },
             error: function (err) {
+                console.log(err.responseText)
                 return callback(err.responseText);
             }
         })
@@ -153,6 +154,24 @@ var mainController = (function () {
         self.fillSelectOptions("statsSelect", stats, true);
         tools.init();
 
+
+    }
+
+    self.loadLists=function(){
+        config.lists={};
+        var sql="select * from listes"
+        mainController.execSql(sql, function (err, json) {
+            if (err)
+                mainController.setErrorMessage(err);
+            json.forEach(function(listObj,index){
+                if(!config.lists[listObj.liste])
+                    config.lists[listObj.liste]=[];
+                config.lists[listObj.liste].push(listObj.valeur)
+
+
+            })
+            mainController.fillSelectOptions("gererLists_ValueSelect", json, false, "valeur", "valeur")
+        })
 
     }
     self.getFieldType = function (table, _field) {

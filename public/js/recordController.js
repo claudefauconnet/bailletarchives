@@ -1,7 +1,7 @@
 var recordController = (function () {
     self = {};
     self.currentRecordChanges = {}
-
+    self.canSave=0;
 
     var setModifyMode = function () {
 
@@ -9,6 +9,7 @@ var recordController = (function () {
     self.displayRecordData = function (obj) {
         context.currentRecordId = obj.id;
         var table = context.currentTable;
+        self.canSave=0;
 
 
         var targetObj = {}
@@ -62,7 +63,7 @@ var recordController = (function () {
                 sql += ","
             var type = mainController.getFieldType(context.currentTable, key)
             if (type == "number")
-                sql += key + "=" + self.currentRecordChanges[key];
+                sql += key + "=" + self.currentRecordChanges[key].replace(",",".");
             else if (type == "string")
                 sql += key + "='" + self.currentRecordChanges[key] + "'";
             else if (type == "date") {
@@ -108,7 +109,7 @@ var recordController = (function () {
             sql1 += key;
             var type = mainController.getFieldType(context.currentTable, key)
             if (type == "number")
-                sql2 += self.currentRecordChanges[key];
+                sql2 += self.currentRecordChanges[key].replace(",",".");
             else if (type == "string")
                 sql2 += "'" + self.currentRecordChanges[key] + "'";
             else if (type == "date") {
@@ -157,16 +158,16 @@ var recordController = (function () {
         mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err)
-                mainController.setMessage("enregistrement supprimé");
-                dialog.dialog("close");
-                listRecords.listRecords();
-                linkedRecordsData.forEach(function (linkedRecord) {
-                    var sql = "delete from r_versement_magasin where id_" + context.currentLinkedTable + "=" + linkedRecord.id;
-                    mainController.execSql(sql, function (err, json) {
-                        if (err)
-                            mainController.setErrorMessage(err)
-                    })
+            mainController.setMessage("enregistrement supprimé");
+            dialog.dialog("close");
+            listRecords.listRecords();
+            linkedRecordsData.forEach(function (linkedRecord) {
+                var sql = "delete from r_versement_magasin where id_" + context.currentLinkedTable + "=" + linkedRecord.id;
+                mainController.execSql(sql, function (err, json) {
+                    if (err)
+                        mainController.setErrorMessage(err)
                 })
+            })
 
         })
 
@@ -176,10 +177,11 @@ var recordController = (function () {
 
     self.setAttributesValue = function (table, targetObj, sourceObj, changeType) {
         self.currentRecordChanges = []
-        var selectFields = config.tableDefs[context.currentTable].fieldConstraints;
+
         if (!changeType)
             changeType = "table";
         for (var key in targetObj) {
+
             var value = "";
             if (sourceObj)
                 var value = sourceObj[key];
@@ -197,14 +199,7 @@ var recordController = (function () {
             var selectValues = null;
 
 
-            if (selectFields) {
-                selectValues = selectFields[key];
-                if (selectValues) {
-                    selectValues = selectValues.values.sort();
-
-                }
-
-            }
+            var selectValues = config.lists[table + "." + key];
 
 
             //if (type && type == 'select' && selectValues) {
@@ -248,6 +243,21 @@ var recordController = (function () {
 
                 }*/
             else if (!type || type == 'string' || type == 'number' || type == 'date') {
+
+                if (type == 'date') {
+                    var date = new Date(value);
+                    if (date instanceof Date && isFinite(date))
+                        value = date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
+                    else
+                        value = "";
+
+                }
+                else if (type == 'number') {
+                    if(config.locale=="FR" && value)
+                    value = (""+value).replace(".", ",");
+                }
+
+
                 var cols = targetObj[key].cols;
                 var rows = targetObj[key].rows;
                 var strCols = ""
@@ -278,25 +288,45 @@ var recordController = (function () {
 
         var fieldName = $(input).attr('id').substring(5);
         var value = $(input).val();
+
+
+
+
         if (!self.currentRecordChanges[fieldName]) {
             self.isModifying += 1;
         }
         var classe = $(input).attr("class");
         if (classe.indexOf("number") > -1) {
-            // if (!value.match(/-?\d*[\.|,]?\d*/))
-            var xx = value.match(/[a-zA-Z]+/)
-            if (value.match(/[a-zA-Z]+/).length > 0)
+            if (!value.match(/^[0-9,.-]*$/)) {
+                //  var matchAlpha = value.match(/[a-zA-Z]+/)
+                //   if (value.match(/[a-zA-Z]+/).length > 0)
                 message = fieldName + " nombre invalide " + value;
-            value = value.replace(",", ".")
+                value = value.replace(",", ".")
+            }
 
 
         }
         if (message) {
+            var position = $(input).position()
+            $("#recordMessageSpan").css("position", "absolute")
+            $("#recordMessageSpan").css("left", position.left + 300)
+            $("#recordMessageSpan").css("top", position.top)
             $("#recordMessageSpan").html(message);
             $("#saveRecordButton").attr("disabled", true);
+
+            $(".objAttrInput").attr("disabled", true);
+            $(input).removeAttr("disabled");
+            $(input).focus();
+
+            self.canSave +=1;
         }
         else {
-            $("#saveRecordButton").removeAttr("disabled");
+            self.canSave -=1;
+            self.canSave=Math.max(self.canSave ,0);
+            if (self.canSave ==0) {
+                $("#saveRecordButton").removeAttr("disabled");
+                $(".objAttrInput").removeAttr("disabled");
+            }
             self.currentRecordChanges[fieldName] = value;
         }
 
@@ -369,20 +399,23 @@ var recordController = (function () {
         var strHidden = "";
         var dateFieldIds = [];
 
-        var fieldTools=config.tableDefs[context.currentTable].fieldTools;
-        if(!fieldTools)
-            fieldTools={};
+        var fieldTools = config.tableDefs[context.currentTable].fieldTools;
+        if (!fieldTools)
+            fieldTools = {};
 
         for (var key in targetObj) {
-var fieldToolStr=""
-            if(fieldTools[key]){
-                fieldToolStr="&nbsp;&nbsp;<Button onclick='tools."+fieldTools[key].toolFn+"("+context.currentRecordId+")'>"+fieldTools[key].title+"</Button>"
+            var fieldToolStr = ""
+            if (fieldTools[key]) {
+                fieldToolStr = "&nbsp;&nbsp;<Button onclick='tools." + fieldTools[key].toolFn + "(" + context.currentRecordId + ")'>" + fieldTools[key].title + "</Button>"
             }
 
 
             var strVal = targetObj[key].value;
-            if (targetObj[key].type == "date")
+
+            if (targetObj[key].type == "date") {
                 dateFieldIds.push("attr_" + key);
+
+            }
 
 
             var fieldTitle = targetObj[key].title;
@@ -407,7 +440,7 @@ var fieldToolStr=""
                     className = 'mandatoryFieldLabel';
 
 
-                str += "<tr><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal +fieldToolStr+ "</span></td></tr>";
+                str += "<tr><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal + fieldToolStr + "</span></td></tr>";
             }
         }
         str += "</table>" + strHidden;

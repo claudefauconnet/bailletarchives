@@ -11,21 +11,28 @@
     <script src="js/jquery/jquery-ui.min.js"></script>
 
 
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.flash.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css"/>
+    <script src="js/dataTable.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"></script>
+
+    <!--   <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+       <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+       <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.flash.min.js"></script>
+       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+       <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+       <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>
+       <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
+
+
+   -->
 
 
 
 
     <script src="js/jsTree/treeController.js"></script>
-    <script src="js/dataTable.js"></script>
+
     <script src="js/recordController.js"></script>
 
 
@@ -48,6 +55,9 @@
             padding: 2px;
             width: 100px;
 
+        }
+        button{
+            width: inherit;
         }
         input{
             width: 150px;
@@ -74,6 +84,8 @@
         .accordionInnerDiv {
             min-height: 300px;
             background-color: #9ca7b3;
+            background-color: snow;
+
 
         }
 
@@ -89,25 +101,30 @@
             border-style: solid;
         }
 
-        .myDatatable td {
+       .myDatatable td {
             border-bottom-style: solid;
             border-bottom-width: 1px;
             border-bottom-color: #93aeca;
             border-left-style: solid;
             border-left-width: 1px;
             border-left-color: #93aeca;
+           width:100px !important;
 
             height: 20px !important;
+        }
+        .dataTables_wrapper{
+            margin:5px;
         }
 
         .dt-buttons {
             left: 200px;
             position: relative;
         }
-
         .dataTables_paginate {
             font-weight: bold;
         }
+
+
 
         #messageDiv {
             font-style: italic;
@@ -242,7 +259,7 @@
                     }
                 }
             });
-            if (true) {
+            if (false) {
                 $("#searchTableInput").attr("disabled",true)
                 $("#leftAccordion").css("opacity",0.2);
                 $("#loginDialogDiv").dialog("open");
@@ -256,6 +273,7 @@
                 if (err)
                     return;
                 mainController.initTablesSelects();
+                mainController.loadLists();
 
 
             });
