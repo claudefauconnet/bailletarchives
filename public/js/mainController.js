@@ -1,5 +1,6 @@
 var mainController = (function () {
     var self = {};
+    var urlPrefix="."
     self.totalDims = {};
 
     self.leftPanelWidth = 250;
@@ -22,7 +23,7 @@ var mainController = (function () {
 
         $.ajax({
             type: "POST",
-            url: "./mysql",
+            url: urlPrefix+"/mysql",
             data: payload,
             dataType: "json",
             success: function (json) {
@@ -57,6 +58,12 @@ var mainController = (function () {
                 $("#searchValueInput").focus();
             }
             $("#searchValueInput").val("");
+
+            if(config.LoadAllrecordsTables===true){
+                listController.addSearchCriteria(true);
+            }
+
+
         })
         $("#searchColumnInput").bind("change", function () {
             mainController.setOperators(this.value);
@@ -78,9 +85,7 @@ var mainController = (function () {
         });
 
 
-        $("#searchMagasinsButton").bind("click", function () {
-            listController.listRecords("magasin");
-        })
+
 
         $("#showHideLeftPanelButton").bind("click", function () {
             mainController.showHideLeftPanel();
@@ -238,7 +243,7 @@ var mainController = (function () {
 
         $.ajax({
             type: "POST",
-            url: "./mysql",
+            url: urlPrefix+"/mysql",
             data: payload,
             dataType: "json",
             success: function (json) {
@@ -246,6 +251,8 @@ var mainController = (function () {
                 return callback(null, json);
 
             }, error: function (err) {
+                var host = window.location.hostname;
+                console.log(host);
                 return callback(err);
             }
 

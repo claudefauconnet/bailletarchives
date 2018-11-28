@@ -128,6 +128,11 @@ var tools = (function () {
         })
     }
 
+    self.getTablettesVidesContigues=function(){
+
+
+    }
+
 
     return self;
 })()

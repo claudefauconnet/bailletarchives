@@ -2,7 +2,7 @@ var config = (function () {
     var self = {}
     self.locale = "FR";
     self.listHiddenFields=["id"]
-
+self.LoadAllrecordsTables=true;
 
     self.tableDefs = {
         "magasin": {
