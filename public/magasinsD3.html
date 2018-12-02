@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<meta charset=utf-8>
+<head>
+    <meta name="description" content="D3.js v4, transition, color, location"/>
+    <script src="js/jquery/jquery.min.js"></script>
+    <script src="js/jquery/jquery-ui.min.js"></script>
+    <script>
+        $(function () {
+            dialog = $("#dialogDiv").dialog({
+                position: {my: "center center", at: "center center-200", of: window},
+                autoOpen: false,
+                height: "300px",
+                width: "300px",
+                modal: false,
+                close: function () {
+                    // allFields.removeClass("ui-state-error");
+                }
+
+            });
+        })
+    </script>
+    <style>
+        body {
+            font-family: Verdana;
+            font-size: 12px;
+        }
+
+        #dialogContentDiv {
+            background-color: #CCCCCC;
+
+        }
+
+    </style>
+</head>
+
+<body>
+<script src="http://d3js.org/d3.v4.min.js"></script>
+
+<script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+<script>
+
+    d3.json("./js/d3/magasin.json", function (data) {
+
+        var nMag = data.children.length;
+        var nBoitesTablette = 13
+        var totalWidth = $("#graphDiv").width();
+        var totalHeight = $("#graphDiv").height();
+
+
+        var svg = d3.select('#graphDiv')
+            .append('svg')
+            .attrs({width: totalWidth, height: totalHeight})
+            .call(d3.zoom().on("zoom", function () {
+                svg.attr("transform", d3.event.transform)
+            }))
+            .append("g");
+        var magW = totalWidth - 200;
+        var magH = totalHeight / nMag;
+        var magX = 150;
+        var magY = 50;
+
+        data.children.forEach(function (magasin) {
+            //  console.log(magasin.name + "  " + magasin.children.length)
+            if (magasin.name == "" || !magasin.name)
+                return;
+            d3.select("g").append("text")
+                .attr("x", magX + (magW / 2))
+                .attr("y", magY - 20)
+                .attr("dy", ".35em")
+                .style("font-size", "18px")
+                .style("font-weight", "bold")
+                .text(function (d) {
+                    return magasin.name
+                });
+            d3.select("g").append('rect')
+                .attrs({
+                    x: magX,
+                    y: magY,
+                    width: magW,
+                    height: magH,
+                    fill: '#ddd',
+                    stroke: "black",
+                    "stroke-width": "3"
+                });
+
+            var epiYOffset = 10
+            var epiW = magW;
+            var epiH = (magH) / magasin.children.length;
+            epiH = epiH - epiYOffset - 1
+            var epiX = magX;
+            var epiY = magY;
+
+            magasin.children.forEach(function (epi, indexEpi) {
+                d3.select("g").append("text")
+                    .attr("x", epiX - 20)
+                    .attr("y", epiY + (epiH / 2))
+                    .attr("dy", ".35em")
+                    .style("text-anchor", "end")
+                    .text(function (d) {
+                        return epi.name
+                    });
+                d3.select("g").append('rect')
+                    .attrs({
+                        x: epiX,
+                        y: epiY,
+                        width: epiW,
+                        height: epiH,
+                        fill: 'none',
+                        stroke: "black",
+                        "stroke-width": "3"
+                    });
+                var traveeW = epiW / epi.children.length;
+                var traveeH = epiH;
+                var traveeX = epiX;
+                var traveeY = epiY;
+
+                epi.children.forEach(function (travee, indexTravee) {
+
+
+                    if (indexEpi == 0) {
+                        d3.select("g").append("text")
+                            .attr("x", traveeX + (traveeW / 2))
+                            .attr("y", traveeY - 10)
+                            .attr("dy", ".35em")
+                            .style("text-anchor", "end")
+                            .text(function (d) {
+                                return indexTravee + 1
+                            })
+                    }
+                    d3.select("g").append('rect')
+                        .attrs({
+                            x: traveeX,
+                            y: traveeY,
+                            width: traveeW,
+                            height: traveeH,
+                            fill: 'none',
+                            stroke: "black",
+                            "stroke-width": "1"
+                        });
+                    var tabW = traveeW
+                    var tabH = traveeH / travee.children.length;
+                    ;
+                    var tabX = traveeX;
+                    var tabY = traveeY;
+
+                    travee.children.forEach(function (tab, indexTab) {
+
+                        if (indexTravee == 0) {
+                            d3.select("g").append("text")
+                                .attr("x", tabX - 5)
+                                .attr("y", tabY + (tabH / 2))
+                                .attr("dy", ".35em")
+                                .style("text-anchor", "end")
+                                .style("font-size", "10px")
+                                .text(function (d) {
+                                    return indexTab + 1
+                                })
+                        }
+                        d3.select("g").append('rect')
+                            .attrs({
+                                x: tabX,
+                                y: tabY,
+                                width: tabW,
+                                height: tabH,
+                                fill: 'none',
+                                stroke: "blue",
+                                "stroke-width": "1"
+                            });
+                        var bteW = tabW / nBoitesTablette
+                        var bteH = tabH - 1;
+                        var bteX = tabX;
+                        var bteY = tabY + 1;
+
+
+                        function getRandomColor() {
+                            var letters = '0123456789ABCDEF';
+                            var color = '#';
+                            for (var i = 0; i < 6; i++) {
+                                color += letters[Math.floor(Math.random() * 16)];
+                            }
+                            return color;
+                        }
+
+                        var oldNumVersement = "";
+                        var boiteColor = "";
+                        tab.children.forEach(function (boite) {
+
+                            if (oldNumVersement != boite.numVersement) {
+                                oldNumVersement = boite.numVersement
+                                boiteColor = getRandomColor();
+                            }
+                            d3.select("g").append('rect')
+                                .attrs({
+                                    x: bteX,
+                                    y: bteY,
+                                    width: bteW,
+                                    height: bteH,
+                                    fill: boiteColor,
+                                    class: "boite",
+                                    stroke: "blue",
+                                    "stroke-width": "1"
+                                })
+                                .on("click", function () {
+                                    onBoitecCick(boite);
+
+
+                                });
+                            bteX += bteW
+                        })
+
+                        tabY += tabH
+
+                    })
+                    traveeX += traveeW
+
+
+                })
+                epiY += epiH + epiYOffset
+
+
+            })
+
+            //  magY += magH + 20;
+            magX += magW + 100;
+        })
+
+
+    })
+
+
+
+    function onBoitecCick(boite) {
+        searchVersement("aa");
+        var urlPrefix = "."
+        var sql = "select * from versement where numVersement='" + boite.numVersement + "'"
+        var payload = {
+            exec: 1,
+            sql: sql
+        }
+
+        $.ajax({
+            type: "POST",
+            url: urlPrefix + "/mysql",
+            data: payload,
+            dataType: "json",
+            success: function (data) {
+                var obj = data[0];
+                var html = "<table>"
+                for (var key in obj) {
+                    html += "<tr><td>" + key + "</td><td>" + obj[key] + "</td>"
+                }
+                html += "</table>"
+
+
+                $("#dialogDiv").dialog("open");
+                $("#dialogContentDiv").html(html);
+            },
+            error: function (err) {
+                console.log(err.responseText)
+
+            }
+        })
+
+    }
+
+    function searchVersement(versement){
+    d3.selectAll(".boite").each(function(d, i) {
+        var x=d;
+        var y=this
+    })
+    }
+
+</script>
+</body>
+<div id="graphDiv" style=" width: 1000px;height: 15000px;"></div>
+<div id="dialogDiv">
+    <div id="dialogContentDiv"></div>
+</div>
+</html>

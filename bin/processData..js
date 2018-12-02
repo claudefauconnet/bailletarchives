@@ -6,7 +6,8 @@ var fs = require('fs')
 var processData = {
     getMagasinTree: function (callback) {
         var tailleMoyenneBoite = 0.09
-        var sql = "select magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette from magasin"
+
+      var sql = "select numVersement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette from magasin"
         mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
             var tree = {
                 name: "Baillet",
@@ -17,6 +18,9 @@ var processData = {
                 longueurOccupee: 0
             };
             result.forEach(function (line) {
+                if(!line.magasin || !line.magasin.match(/[A-Z]/))
+                    return;
+                    var xx=3
                 if (!tree.childrenObjs[line.magasin])
                     tree.childrenObjs[line.magasin] = {
                         type: "magasin",
@@ -86,7 +90,8 @@ var processData = {
                                 tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].childrenObjs[boite] = {
                                     name: boite,
                                     count: 1,
-                                    children: []
+                                    children: [],
+                                    numVersement:line.numVersement
                                 };
                                 tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].countBoites += 1
                                 tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].countBoites += 1;
@@ -152,7 +157,7 @@ var processData = {
 }
 
 module.exports = processData;
-if (false) {
+if (true) {
     processData.getMagasinTree(function (err, result) {
         fs.writeFileSync("D:\\GitHub\\bailletArchives\\bailletarchives\\public\\js\\d3\\magasin.json", JSON.stringify(result, null, 2))
 
