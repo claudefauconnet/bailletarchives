@@ -114,12 +114,7 @@ var mainController = (function () {
         $(".showAddLinkedRecordButton").bind("click", function () {
             $("#dialog2Div").dialog("open");
         })
-        $("#newRecordTableSelect").bind("click", function () {
-            mainController.showNewRecordDialog($(this).val());
-        })
-        /* $("#saveRecordButton").bind("click", function () {
-             recordController.saveRecord();
-         })*/
+
 
         $("#addRecordButton").bind("click", function () {
             mainController.showNewRecordDialog();
@@ -132,6 +127,7 @@ var mainController = (function () {
         $("#toolsSelect").bind("change", function () {
             var str = $(this).val()
             tools.execTool(str);
+            $("#toolsSelect").val("");
         })
 
 
@@ -152,9 +148,15 @@ var mainController = (function () {
     self.initTablesSelects = function () {
 
         var tables = Object.keys(context.dataModel);
+        var visibleTables=[];
+        tables.forEach(function(table){
 
-        self.fillSelectOptions("searchTableInput", tables, true);
-        self.fillSelectOptions("newRecordTableSelect", tables, true);
+            if(config.hiddenTables.indexOf(table)<0)
+                visibleTables.push(table)
+        })
+
+        self.fillSelectOptions("searchTableInput", visibleTables, true);
+
         var stats = Object.keys(statistics.stats);
         self.fillSelectOptions("statsSelect", stats, true);
         tools.init();

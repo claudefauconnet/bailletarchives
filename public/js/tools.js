@@ -12,7 +12,7 @@ var tools = (function () {
         var tool = config.tools[toolName];
 
         if (tool && tool.htmlPage) {
-            $("#dialog3Div").dialog("open");
+            dialog3.dialog("open");
             $("#dialog3Div").attr("title", toolName);
             $("#dialog3Div").load("./htmlSnippets/" + tool.htmlPage), function () {
 
@@ -20,12 +20,17 @@ var tools = (function () {
 
 
         }
+       else if (tool && tool.loadMagasinD3) {
+            dialogCarte.dialog("open")
+            $("#dialogCarte").load("magasinD3.html"), function () {
 
+            }
 
+        }
     }
 
     self.findTablettes = function (magasin, searchLimit, metrage, callback) {
-        var sql = "SELECT coordonnees,DimTabletteMLineaire from magasin where cotesParTablette =\"\" and magasin=\"" + magasin + "\"  order by coordonnees limit " + searchLimit;
+        var sql = "SELECT coordonnees,DimTabletteMLineaire from magasin where cotesParTablette =\"\" and numVersement =\"\" and magasin=\"" + magasin + "\"  order by tablette, travee, epi limit " + searchLimit;
         mainController.execSql(sql, function (err, json) {
             if (err)
                 return callback(err);
@@ -98,7 +103,16 @@ var tools = (function () {
                     var tabletteBoites = [];
                     if (tablette.cotesParTablette)
                         tabletteBoites = tablette.cotesParTablette.split(" ");
+                    tabletteBoites.forEach(function(boite,index){
+                       var p=boite.indexOf("/");
+                        if(p >-1)
+                            tabletteBoites[index]=parseInt( boite.substring(p+1))
+
+                    })
                     infos.tablettes.coteBoites.push.apply(infos.tablettes.coteBoites, tabletteBoites);
+                    infos.tablettes.coteBoites.sort();
+
+
 
                 })
                 infos.tablettes.tailleTotaleTablettes = (Math.round(infos.tablettes.tailleTotaleTablettes * 100)) / 100
@@ -128,7 +142,19 @@ var tools = (function () {
         })
     }
 
-    self.getTablettesVidesContigues=function(){
+    self.getTablettesVidesContigues=function(tablettes, nombre){
+        tablettesContigues=[];
+        var done=false;
+        tablettes.forEach(function(tablettes,index){
+            if(tablettesContigues.length>=nombre)
+                return;
+
+           var tabletteArray=tablette.coordonnees.split("-");
+
+
+
+
+        })
 
 
     }

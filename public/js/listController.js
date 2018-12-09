@@ -16,10 +16,10 @@ var listController = (function () {
     self.addSearchCriteria = function (execute) {
 
         //if simpleSearch previous query execute  dont keep this query
-        if(execute && context.currentCriteria.length==1 && context.currentCriteria[0].execute){
+        if (execute && context.currentCriteria.length == 1 && context.currentCriteria[0].execute) {
             self.removeSearchCriteria(-1);
             // context.currentTable=null;
-            context.currentLinkedTable=null;
+            context.currentLinkedTable = null;
 
 
         }
@@ -92,7 +92,7 @@ var listController = (function () {
             })
 
             if (!criteriaAllreadyExist) {
-                context.currentCriteria.push({text: whereText, sqlWhere: whereStr,execute:execute});
+                context.currentCriteria.push({text: whereText, sqlWhere: whereStr, execute: execute});
                 var indice = context.currentCriteria.length - 1;
                 var str = "<div  class='searchCriteria' id='searchCriteria_" + indice + "'>" + whereText;
                 str += " <img src='images/clear.png' width='15px' style='float: right' onclick='listController.removeSearchCriteria(" + indice + ")'>"
@@ -126,13 +126,15 @@ var listController = (function () {
             }
             var sortClause = "";
             var sortFields = config.tableDefs[table].sortFields;
-            sortFields.forEach(function (field, index) {
-                if (index == 0)
-                    sortClause = " order by "
-                else
-                    sortClause += ","
-                sortClause += field;
-            })
+            if (sortFields) {
+                sortFields.forEach(function (field, index) {
+                    if (index == 0)
+                        sortClause = " order by "
+                    else
+                        sortClause += ","
+                    sortClause += field;
+                })
+            }
 
             sql += sortClause;
             console.log(sql);
@@ -156,18 +158,23 @@ var listController = (function () {
     }
 
     self.listRecords = function (sql) {
+        context.currentListQueries[ context.currentTable]=sql;
         var table = context.currentTable;
-         mainController.execSql(sql, function (err, json) {
-             if(json.length==0){
-                 self.removeSearchCriteria(context.currentCriteria.length-1);
-                 return mainController.setMessage("Pas de resultat")
-             }
+        mainController.execSql(sql, function (err, json) {
+            if (json.length == 0) {
+                self.removeSearchCriteria(context.currentCriteria.length - 1);
+                return mainController.setMessage("Pas de resultat")
+            }
+            if (json.length == 1) {
+                recordController.displayRecordData(json[0])
+                return mainController.setMessage("")
+            }
             if (err)
                 mainController.setErrorMessage(err)
 
             if (!context.dataTables[table])
                 context.dataTables[table] = new dataTable();
-            context.dataTables[table].loadJson(table,"listRecordsDiv", json, {onClick: recordController.displayRecordData})
+            context.dataTables[table].loadJson(table, "listRecordsDiv", json, {onClick: recordController.displayRecordData})
             $("#tabs").tabs("option", "active", 0);
             $("#addLinkedRecordButton").attr("disabled", true);
             $("#deleteLinkedRecordButton").attr("disabled", true);
@@ -175,7 +182,7 @@ var listController = (function () {
         })
     }
 
-    self.loadLinkedRecords = function (linkedTable, dataTableDivName) {
+    self.loadLinkedRecords = function (linkedTable, dataTableDivName, callback) {
         var foreignKey = ""
         var relations = config.tableDefs[context.currentTable].relations;
         context.currentLinkedTable = linkedTable;
@@ -184,15 +191,21 @@ var listController = (function () {
 
         var joinObj = relations[linkedTable].joinObj;
         var sql = " select " + linkedTable + ".* from  " + joinObj.tables + " where " + joinObj.where + " and " + context.currentTable + ".id=" + context.currentRecordId;
-          mainController.execSql(sql, function (err, json) {
+        mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err)
+            if (callback) {
+                if (err)
+                    return callback(err)
+                return callback(err, json);
+
+            }
 
             var width = mainController.totalDims.w * 0.9;
             var height = mainController.totalDims.h - 300;
             if (!context.dataTables["linked_" + linkedTable])
                 context.dataTables["linked_" + linkedTable] = new dataTable();
-            context.dataTables["linked_" + linkedTable].loadJson(linkedTable,dataTableDivName, json, {
+            context.dataTables["linked_" + linkedTable].loadJson(linkedTable, dataTableDivName, json, {
                 dom: "lti",
                 width: width,
                 height: height,
@@ -207,6 +220,8 @@ var listController = (function () {
     self.searchLinkedRecords = function (str) {
         if (!str)
             str = $("#searchLinkedRecordsInput").val();
+
+
         var concatStr = "";
         var i = 0;
         context.dataModel[context.currentLinkedTable].forEach(function (field) {
@@ -216,11 +231,14 @@ var listController = (function () {
         })
         var sql = "";
         var field = $("#linkedRecordsFieldSelect").val();
+
         if (field == "")
             sql = "select * from " + context.currentLinkedTable + "  WHERE CONCAT(" + concatStr + ") LIKE '%" + str + "%'";
         else
             sql = "select * from " + context.currentLinkedTable + "  WHERE " + field + " LIKE '%" + str + "%'";
-         mainController.execSql(sql, function (err, json) {
+        if( context.currentLinkedTable=="magasin")
+            sql+=" and (cotesParTablette is null || cotesParTablette='') and (numVersement is null || numVersement='') "
+        mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err)
 
@@ -228,7 +246,7 @@ var listController = (function () {
             var height = 300
             if (!context.dataTables["newLink_" + context.currentLinkedTable])
                 context.dataTables["newLink_" + context.currentLinkedTable] = new dataTable();
-            context.dataTables["newLink_" + context.currentLinkedTable].loadJson(context.currentLinkedTable,"new_linkedRecordsDiv", json, {
+            context.dataTables["newLink_" + context.currentLinkedTable].loadJson(context.currentLinkedTable, "new_linkedRecordsDiv", json, {
                 dom: "tip",
                 width: width,
                 heightheight: height,

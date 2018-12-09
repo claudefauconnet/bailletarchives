@@ -6,5 +6,6 @@ var context = {
     currentRecordId: "",
     currentTabIndex:0,
     currentCriteria:[],
-    currentVersementInfos:{}
+    currentVersementInfos:{},
+    currentListQueries:{}
 }

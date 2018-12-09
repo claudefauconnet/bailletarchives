@@ -1,7 +1,7 @@
 var recordController = (function () {
     self = {};
     self.currentRecordChanges = {}
-    self.canSave=0;
+    self.canSave = 0;
 
     var setModifyMode = function () {
 
@@ -9,7 +9,7 @@ var recordController = (function () {
     self.displayRecordData = function (obj) {
         context.currentRecordId = obj.id;
         var table = context.currentTable;
-        self.canSave=0;
+        self.canSave = 0;
 
 
         var targetObj = {}
@@ -31,6 +31,9 @@ var recordController = (function () {
             if (field.name == "id") {
                 targetObj[field.name].type = "readOnly"
             }
+            var constaints = null;
+            if (config.tableDefs[context.currentTable] && config.tableDefs[context.currentTable].fieldConstraints[field.name])
+                targetObj[field.name].type = config.tableDefs[context.currentTable].fieldConstraints[field.name]
         })
         recordController.setAttributesValue(table, targetObj, obj);
         recordController.drawAttributes(targetObj, "recordDetailsDiv");
@@ -63,7 +66,7 @@ var recordController = (function () {
                 sql += ","
             var type = mainController.getFieldType(context.currentTable, key)
             if (type == "number")
-                sql += key + "=" + self.currentRecordChanges[key].replace(",",".");
+                sql += key + "=" + self.currentRecordChanges[key].replace(",", ".");
             else if (type == "string")
                 sql += key + "='" + self.currentRecordChanges[key] + "'";
             else if (type == "date") {
@@ -109,7 +112,7 @@ var recordController = (function () {
             sql1 += key;
             var type = mainController.getFieldType(context.currentTable, key)
             if (type == "number")
-                sql2 += self.currentRecordChanges[key].replace(",",".");
+                sql2 += self.currentRecordChanges[key].replace(",", ".");
             else if (type == "string")
                 sql2 += "'" + self.currentRecordChanges[key] + "'";
             else if (type == "date") {
@@ -140,33 +143,44 @@ var recordController = (function () {
     }
 
     self.deleteRecord = function () {
-        listController.loadLinkedRecords();
-        var linkedtable = context.dataTables["linked_" + context.currentLinkedTable];
-        var linkedRecordsData = linkedtable.dataSet;
-        var nlinks = linkedtable.dataSet.length;
-        var ok = ""
-        if (nlinks > 0)
-            ok = confirm("supprimer l'enregsitrement les " + nlinks + " liens associés ?");
-        else
+        var ok = true;
+        var linkedTables = Object.keys(config.tableDefs[context.currentTable].relations);
+        async.eachSeries(linkedTables, function (linkedTable, callbackEach) {
+                listController.loadLinkedRecords(linkedTable, null, function (err, result) {
+                    if (err) {
+                        ok = false
+                        return callbackEach(err);
+                    }
+                    var nlinks = result.length;
+
+                    if (nlinks > 0) {
+                        ok=false;
+                        alert("vous devez au préalable supprimer les  " + nlinks + " liens avec " + context.currentLinkedTable);
+
+                    }
+                    return callbackEach(null);
+                })
+
+            }, function (err) {
+
+            if (!ok)
+                return;
             ok = confirm("supprimer l'enregsitrement ?");
 
-        if (!ok)
-            return;
+            if (!ok)
+                return;
 
 
-        var sql = "delete from " + context.currentTable + " where id=" + context.currentRecordId;
-        mainController.execSql(sql, function (err, json) {
-            if (err)
-                mainController.setErrorMessage(err)
-            mainController.setMessage("enregistrement supprimé");
-            dialog.dialog("close");
-            listRecords.listRecords();
-            linkedRecordsData.forEach(function (linkedRecord) {
-                var sql = "delete from r_versement_magasin where id_" + context.currentLinkedTable + "=" + linkedRecord.id;
-                mainController.execSql(sql, function (err, json) {
-                    if (err)
-                        mainController.setErrorMessage(err)
-                })
+            var sql = "delete from " + context.currentTable + " where id=" + context.currentRecordId;
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
+                mainController.setMessage("enregistrement supprimé");
+                dialog.dialog("close");
+                listController.listRecords( context.currentListQueries[ context.currentTable]);
+           //    context.dataTables[context.currentTable]. deleteSelectedRow()
+
+
             })
 
         })
@@ -253,8 +267,8 @@ var recordController = (function () {
 
                 }
                 else if (type == 'number') {
-                    if(config.locale=="FR" && value)
-                    value = (""+value).replace(".", ",");
+                    if (config.locale == "FR" && value)
+                        value = ("" + value).replace(".", ",");
                 }
 
 
@@ -290,8 +304,6 @@ var recordController = (function () {
         var value = $(input).val();
 
 
-
-
         if (!self.currentRecordChanges[fieldName]) {
             self.isModifying += 1;
         }
@@ -318,12 +330,12 @@ var recordController = (function () {
             $(input).removeAttr("disabled");
             $(input).focus();
 
-            self.canSave +=1;
+            self.canSave += 1;
         }
         else {
-            self.canSave -=1;
-            self.canSave=Math.max(self.canSave ,0);
-            if (self.canSave ==0) {
+            self.canSave -= 1;
+            self.canSave = Math.max(self.canSave, 0);
+            if (self.canSave == 0) {
                 $("#saveRecordButton").removeAttr("disabled");
                 $(".objAttrInput").removeAttr("disabled");
             }

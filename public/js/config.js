@@ -1,7 +1,8 @@
 var config = (function () {
     var self = {}
     self.locale = "FR";
-    self.listHiddenFields=["id"]
+    self.listHiddenFields=["id"];
+    self.hiddenTables=["article","listes"]
 self.LoadAllrecordsTables=true;
 
     self.tableDefs = {
@@ -25,21 +26,28 @@ self.LoadAllrecordsTables=true;
                 }
             },
 
+            fieldConstraints: {
+                numVersement:"readOnly",
 
+    magasin:"readOnly",
+        epi:"readOnly",
+        travee:"readOnly",
+                tablette:"readOnly",
+            }
         },
         "versement": {
             defaultSearchField: "numVersement",
             tabs: ["", "magasin", "article"],
             sortFields: ["numVersement desc"],
             fieldTools: {
-                "cotesExtremesBoites": {
+              /*  "cotesExtremesBoites": {
                     title: "calculer",
                     toolFn: "SetVersementCotesExtremesFromMagasin"
                 },
                 "nbBoites": {
                     title: "calculer",
                     toolFn: "SetVersementnbBoitesFromMagasin"
-                }
+                }*/
             },
             relations: {
                 "magasin": {
@@ -51,6 +59,7 @@ self.LoadAllrecordsTables=true;
                     createRelSql: "insert into r_versement_magasin (id_versement,id_magasin) values(<%context.currentRecordId%>,<%data.id%>)",
                     deleteRelSql: "delete from r_versement_magasin where id_magasin=<%data.id%>",
                     selectfields: ["coordonnees"]
+
                 }
                 ,
                 "article": {
@@ -94,6 +103,9 @@ self.LoadAllrecordsTables=true;
             ,
 
 
+        },
+        "historique_sorties":{
+
         }
     }
     self.lists = {};
@@ -105,7 +117,9 @@ self.LoadAllrecordsTables=true;
 
         "DéplacerBoitesVersement ": {htmlPage: "deplacerBoitesDialog.html"},
 
-        "GererLesListes ": {htmlPage: "gererListes.html"}
+        "GererLesListes ": {htmlPage: "gererListes.html"},
+
+        "carte de magasin ": {loadMagasinD3:true}
 
 
     }

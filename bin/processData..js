@@ -58,6 +58,8 @@ var processData = {
                         name: line.tablette,
                         childrenObjs: {},
                         countBoites: 0,
+                        longueurM:line.longueurTablette,
+                        numVersement:line.numVersement,
                         longueurTotale: 0, longueurOccupee: 0
                     }
 

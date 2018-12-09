@@ -189,5 +189,16 @@ var dataTable = function () {
 
         }
 
+        /*
+
+
+        not working yet
+         */
+        this.deleteSelectedRow=function(){
+        var xx= this.table.row('.selected')
+            this.table.row('.selected').remove().draw(  );
+
+        }
+
 
 }

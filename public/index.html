@@ -9,6 +9,7 @@
 
     <script src="js/jquery/jquery.min.js"></script>
     <script src="js/jquery/jquery-ui.min.js"></script>
+    <script src="js/async.js"></script>
 
 
 
@@ -230,6 +231,20 @@
                     // allFields.removeClass("ui-state-error");
                 }
             });
+            dialogCarte = $("#dialogCarte").dialog({
+                autoOpen: false,
+                height: mainController.totalDims.h * 1.0,
+                width: "100%",
+                modal: true,
+                buttons: {
+                    Fermer: function () {
+                        dialogCarte.dialog("close");
+                    }
+                },
+                close: function () {
+                    // allFields.removeClass("ui-state-error");
+                }
+            });
             dialog3 = $("#dialog3Div").dialog({
                 autoOpen: false,
                 height: 500,
@@ -302,7 +317,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <select id="searchTableInput" size="0"></select>
+                            <select id="searchTableInput" size="5"></select>
                             <button id="addRecordButton"  style="width:60px">Ajouter</button>&nbsp;
                         </td>
                     </tr>
@@ -397,8 +412,8 @@
 
         </div>
         <div id="tabs-linkedRecordDiv2" class="dialogTab">
-            <button id="deleteLinkedRecordButton2">Supprimer lien</button>
-            <button class="showAddLinkedRecordButton">Ajouter lien</button>
+            <button id="deleteLinkedRecordButton2">Délier</button>
+            <button class="showAddLinkedRecordButton">Lier</button>
             <div id="linkedRecordsDiv2" class="dataTableDiv"></div>
 
 
@@ -418,6 +433,11 @@
 <div id="dialog3Div">
 
 </div>
+
+<div id="dialogCarte">
+
+</div>
+
 
 
 
