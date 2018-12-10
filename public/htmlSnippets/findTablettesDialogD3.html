@@ -1,0 +1,197 @@
+<script>
+
+    var findTablettesDialog = (function () {
+        var self = {};
+        var urlPrefix = ".";
+        var tailleMoyenneBoite = 8;
+
+
+        self.init = function () {
+            $("#findTablettesD3_versement").focus()
+            $("#findTablettesD3_applyTablettesToversementButton").prop("disabled", "disabled")
+            $("#findTablettesD3_epaisseurMoyBoite").val(tailleMoyenneBoite);
+            var sql = "select distinct magasin from magasin order by magasin";
+
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
+                var magasins = [];
+                json.forEach(function (line) {
+                    if (line.magasin && line.magasin.match(/[A-Z]/))
+                        magasins.push(line);
+                })
+                mainController.fillSelectOptions("findTablettesD3_magasin", magasins, true, "magasin", "magasin")
+
+            })
+        }
+
+        self.onVersementInput = function (input) {
+            var versement = $(input).val();
+            if (versement.length >= 4) {
+                var sql = "select numVersement,id,metrage ,nbBoites from versement where numVersement='" + versement + "'"
+                var payload = {
+                    exec: 1,
+                    sql: sql
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: urlPrefix + "/mysql",
+                    data: payload,
+                    dataType: "json",
+                    success: function (data) {
+                        var metrage = 0;
+                        var nbBoites=0
+                        if (data.length > 0) {
+                            data.forEach(function (line) {
+                                if (line.metrage)
+                                    metrage += line.metrage
+                                if(line.nbBoites)
+                                    nbBoites+=line.nbBoites
+                            })
+
+                        }
+
+
+                        $("#findTablettesD3_metrage").val(metrage)
+                        $("#findTablettesD3_nbBoites").val(nbBoites)
+                        self.onNbBoites();
+
+                    },
+                    error: function (err) {
+                        console.log(err.responseText)
+
+                    }
+                })
+
+            }
+
+        }
+        self.chercherTablettesPourVersement = function () {
+            var obj = {
+                numVersement: $("#findTablettesD3_versement").val(),
+                magasin: $("#findTablettesD3_magasin").val(),
+                metrage: parseFloat($("#findTablettesD3_metrage").val().replace(",",".")),
+                nbBoites:  parseInt($("#findTablettesD3_nbBoites").val()),
+                epaisseurMoyBoite:  parseFloat($("#findTablettesD3_epaisseurMoyBoite").val())
+
+            }
+
+            magasinD3.chercherTablettesPourVersement(obj)
+        }
+
+
+        self.onNbBoites = function () {
+            var nBoites = parseInt($("#findTablettesD3_nbBoites").val());
+            var epaisseurMoy = parseFloat($("#findTablettesD3_epaisseurMoyBoite").val().replace(",", "."));
+            var longueur = nBoites * epaisseurMoy / 100
+            var longueurStr = ("" + longueur).replace(".", ",");
+            $("#findTablettesD3_metrage").val(longueurStr)
+
+        }
+
+
+        self.applyTablettesToversement = function () {
+            var payload = {
+                data: JSON.stringify(magasinD3.currentVersement)
+            }
+
+            $.ajax({
+                type: "POST",
+                url: urlPrefix + "/applyTablettesToversement",
+                data: payload,
+                dataType: "json",
+                success: function (data) {
+                  var x=data;
+
+
+                    $("#findTablettesD3_metrage").val(metrage)
+
+                },
+                error: function (err) {
+                    console.log(err.responseText)
+
+                }
+            })
+
+
+        }
+        return self;
+    })()
+
+</script>
+
+<table style="vertical-align: center">
+    <tr>
+        <td colspan="2">
+            <span class="title"> Trouver des tablettes</span>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Versement
+        </td>
+        <td>
+            <input id="findTablettesD3_versement" onkeyup="findTablettesDialog.onVersementInput(this)">
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            nombre de boites
+        </td>
+        <td>
+            <input id="findTablettesD3_nbBoites" onkeyup="findTablettesDialog.onNbBoites(this)">
+        </td>
+    </tr>
+    <tr>
+        <td>
+            epaisseur moyenne(cm)
+        </td>
+        <td>
+            <input id="findTablettesD3_epaisseurMoyBoite">
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Métrage
+        </td>
+        <td>
+            <input id="findTablettesD3_metrage">
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Magasin(optionel)
+        </td>
+        <td>
+            <select id="findTablettesD3_magasin"></select>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <button onclick="findTablettesDialog.chercherTablettesPourVersement()">Chercher</button>
+
+
+            <button id="findTablettesD3_applyTablettesToversementButton" onclick="findTablettesDialog.applyTablettesToversement()">
+                Affecter versement
+            </button>
+
+        </td>
+    </tr>
+
+    <div id="findTablettes_message" style="color:#0a6aa1"></div>
+
+</table>
+
+<script>
+
+
+    findTablettesDialog.init();
+
+
+</script>
+
+
+

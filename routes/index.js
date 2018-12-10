@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mysql = require('../bin/mySQLproxy..js')
+var processData = require("../bin/processData..js")
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -28,6 +29,23 @@ router.post('/mysql', function (req, res, next) {
 
 
 });
+router.post('/applyTablettesToversement', function (req, res, next) {
+
+    processData.applyTablettesToversement(JSON.parse(req.body.data), function (err, result) {
+        processResponse(res, err, result)
+    })
+
+});
+
+
+router.get('/magasinD3Tree', function (req, res, next) {
+
+    processData.getMagasinTree(function (err, result) {
+        processResponse(res, err, result)
+    })
+
+});
+
 
 function isRequestLocalHost(req, res) {
     return true;
