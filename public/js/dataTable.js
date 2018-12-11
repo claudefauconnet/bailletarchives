@@ -150,7 +150,7 @@ var dataTable = function () {
                 $(this).removeClass('selected');
                 $("#table_" + containerDiv + " tbody tr").css("height", "20px");
             }
-            else {
+          //  else {
                 if (!event.ctrlKey)
                     $('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
@@ -161,11 +161,11 @@ var dataTable = function () {
                     this.selectedRow = table.row(this);
                     var line = table.row(this).data();
                     options.onClick(line);
-                    //
+
                 }
 
 
-            }
+           // }
 
         });
 
@@ -188,12 +188,6 @@ var dataTable = function () {
 
 
         }
-
-        /*
-
-
-        not working yet
-         */
         this.deleteSelectedRow=function(){
         var xx= this.table.row('.selected')
             this.table.row('.selected').remove().draw(  );

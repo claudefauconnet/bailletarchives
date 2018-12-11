@@ -1,25 +1,24 @@
 var config = (function () {
     var self = {}
     self.locale = "FR";
-    self.listHiddenFields=["id"];
-    self.hiddenTables=["article","listes"]
-self.LoadAllrecordsTables=true;
+    self.listHiddenFields = ["id"];
+    self.hiddenTables = ["article", "listes"]
+    self.LoadAllrecordsTables = true;
 
     self.tableDefs = {
         "magasin": {
             defaultSearchField: "coordonnees",
             tabs: ["", "versement"],
-            type: "n-n",
+            type: "n-1",
             sortFields: ["magasin"],
             relations: {
                 "versement": {
-                    joinSql: "select versement.* from magasin,r_versement_magasin,versement where magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id ",
                     joinObj: {
-                        tables: "versement,magasin,r_versement_magasin",
-                        where: " magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id "
+                        tables: "versement,magasin",
+                        where: "versement.id=magasin.id_versement"
                     },
-                    createRelSql: "insert into r_versement_magasin (id_versement,id_magasin) values(<%data.id%>,<%context.currentRecordId%>)",
-                    deleteRelSql: "delete from r_versement_magasin where id_versement=<%data.id%>",
+                    createRelSql: "update magasin set id_versement=<%data.id%> where  id=<%context.currentRecordId%>\"",
+                    deleteRelSql: "update magasin set id_versement=null where  id=<%context.currentRecordId%>\"",
 
 
                     selectfields: ["numVersement", "theme", "deposant"]
@@ -27,12 +26,12 @@ self.LoadAllrecordsTables=true;
             },
 
             fieldConstraints: {
-                numVersement:"readOnly",
-
-    magasin:"readOnly",
-        epi:"readOnly",
-        travee:"readOnly",
-                tablette:"readOnly",
+                numVersement: "readOnly;mandatory",
+                coordonnees:"mandatory",
+                magasin: "readOnly",
+                epi: "readOnly",
+                travee: "readOnly",
+                tablette: "readOnly",
             }
         },
         "versement": {
@@ -40,24 +39,24 @@ self.LoadAllrecordsTables=true;
             tabs: ["", "magasin", "article"],
             sortFields: ["numVersement desc"],
             fieldTools: {
-              /*  "cotesExtremesBoites": {
-                    title: "calculer",
-                    toolFn: "SetVersementCotesExtremesFromMagasin"
-                },
-                "nbBoites": {
-                    title: "calculer",
-                    toolFn: "SetVersementnbBoitesFromMagasin"
-                }*/
+                /*  "cotesExtremesBoites": {
+                      title: "calculer",
+                      toolFn: "SetVersementCotesExtremesFromMagasin"
+                  },
+                  "nbBoites": {
+                      title: "calculer",
+                      toolFn: "SetVersementnbBoitesFromMagasin"
+                  }*/
             },
             relations: {
                 "magasin": {
-                    type: "n-n",
+                    type: "1-n",
                     joinObj: {
-                        tables: "versement,magasin,r_versement_magasin",
-                        where: " magasin.id=r_versement_magasin.id_magasin and r_versement_magasin.id_versement=versement.id "
+                        tables: "versement,magasin",
+                        where: " magasin.id_versement=versement.id "
                     },
-                    createRelSql: "insert into r_versement_magasin (id_versement,id_magasin) values(<%context.currentRecordId%>,<%data.id%>)",
-                    deleteRelSql: "delete from r_versement_magasin where id_magasin=<%data.id%>",
+                    createRelSql: "update magasin set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
+                    deleteRelSql:"update magasin set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"]
 
                 }
@@ -87,7 +86,6 @@ self.LoadAllrecordsTables=true;
             relations: {
                 "versement": {
                     type: "n-n",
-                    joinSql: "select versement.* from versement,article where article.id_versement=versement.id and article.id=",
                     joinObj: {
                         tables: "versement,article",
                         where: " article.id_versement=versement.id "
@@ -104,9 +102,7 @@ self.LoadAllrecordsTables=true;
 
 
         },
-        "historique_sorties":{
-
-        }
+        "historique_sorties": {}
     }
     self.lists = {};
 
@@ -119,7 +115,7 @@ self.LoadAllrecordsTables=true;
 
         "GererLesListes ": {htmlPage: "gererListes.html"},
 
-        "carte de magasin ": {loadMagasinD3:true}
+        "carte de magasin ": {loadMagasinD3: true}
 
 
     }

@@ -60,4 +60,6 @@ select etatTraitement,sum(volumeGO),sum(nbreElements) from versement group by et
  select count(distinct numVersement) from magasin where  numVersement in (select numVersement from magasin group by numVersement having count(distinct magasin) >1)
  
  
- 
+ ****** changement modele dec2018 (id versement 1-n versement-> magasin)
+
+ update magasin m JOIN versement v ON v.numVersement=m.numVersement set m.id_versement=v.id

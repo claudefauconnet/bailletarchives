@@ -3,10 +3,16 @@ var recordController = (function () {
     self.currentRecordChanges = {}
     self.canSave = 0;
 
+
     var setModifyMode = function () {
 
     }
-    self.displayRecordData = function (obj) {
+
+
+    self.displayDataReadOnly = function (obj) {
+        self.displayRecordData(obj, "readOnly")
+    }
+    self.displayRecordData = function (obj, mode) {
         context.currentRecordId = obj.id;
         var table = context.currentTable;
         self.canSave = 0;
@@ -27,22 +33,25 @@ var recordController = (function () {
             else if (field.maxLength && field.maxLength <= 50)
                 targetObj[field.name].cols = field.maxLength;
 
-
+            if (mode == "readOnly")
+                targetObj[field.name].type = "readOnly"
             if (field.name == "id") {
                 targetObj[field.name].type = "readOnly"
             }
             var constaints = null;
             if (config.tableDefs[context.currentTable] && config.tableDefs[context.currentTable].fieldConstraints[field.name])
-                targetObj[field.name].type = config.tableDefs[context.currentTable].fieldConstraints[field.name]
+                if (config.tableDefs[context.currentTable].fieldConstraints[field.name].indexOf("readOnly") > -1)
+                    targetObj[field.name].type = "readOnly"
         })
         recordController.setAttributesValue(table, targetObj, obj);
         recordController.drawAttributes(targetObj, "recordDetailsDiv");
 
-        if (obj && obj.id)
-            $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
+        if (mode != "readOnly") {
+            if (obj && obj.id)
+                $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
 
-        $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
-
+            $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
+        }
         $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
 
         $("#saveRecordButton").attr("disabled", true);
@@ -57,11 +66,25 @@ var recordController = (function () {
 
 
     self.saveRecord = function () {
+
+        var errors = self.checkConstraints()
+        if (errors.length > 0) {
+            var message = "";
+            errors.forEach(function (err) {
+                message += err + "<br>"
+            })
+            return mainController.setErrorMessage(message);
+        }
+
+
         if (!context.currentRecordId)// new Record
             return self.saveNewRecord();
+
         var sql = "Update " + context.currentTable + " set ";
         var i = 0;
         for (var key in self.currentRecordChanges) {
+
+
             if (i++ > 0)
                 sql += ","
             var type = mainController.getFieldType(context.currentTable, key)
@@ -148,6 +171,7 @@ var recordController = (function () {
 
 
     }
+
 
     self.deleteRecord = function () {
         var ok = true;
@@ -298,6 +322,20 @@ var recordController = (function () {
             }
             targetObj[key].value = value;
         }
+
+    }
+
+    self.checkConstraints = function () {
+        var errors = [];
+        $(".objAttrInput").each(function () {
+            var value = $(this).val();
+            var key = $(this).attr("id").substring(5);
+            var constraints = config.tableDefs[context.currentTable].fieldConstraints[key];
+            if (constraints && constraints.indexOf("mandatory") > -1)
+                if (value == null || value == "")
+                    errors.push(key + " is Mandatory")
+        })
+        return errors;
 
     }
 

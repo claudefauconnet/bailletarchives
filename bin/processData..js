@@ -160,87 +160,214 @@ var processData = {
 
     versementBoitesToTablettes: function (obj, callback) {
         if (obj.numVersement && obj.metrage && obj.tablettes) {
-            var nBoites = obj.nbBoites;
-            var epaisseurMoyBoite = obj.epaisseurMoyBoite;
-            obj.tablettesBoites = []
-            var sql = "select id,DimTabletteMLineaire,coordonnees from magasin where coordonnees in " + JSON.stringify(obj.tablettes).replace("[", "(").replace("]", ")") // get tablettes ids
-            mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin) {
-                if (err)
-                    return callback(err);
-                if (resultMagasin.length == 0)
-                    return callback("noTablettes");
-                var sql = "select id  from versement where numVersement ='" + obj.numVersement + "'" // get versement Id
-                mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement) {
-                    if (err)
-                        return callback(err);
-                    if (resultVersement.length == 0)
-                        return callback("noVersement");
-
-                    var versementId = resultVersement[0].id;
-                    var index = 0;
-                    var boitesrestantaRanger = obj.nbBoites;
-                    var indexBoites = 0;
-                    async.eachSeries(resultMagasin, function (tablette, callbackEach) {// create relation
-
-                        var cotesParTabletteStr = "";
-                        var metrageTablette = 0;
-                        if (obj.nbBoites && obj.epaisseurMoyBoite && tablette.DimTabletteMLineaire) {// boites sur tablette
-                            metrageTablette = obj.nbBoites && obj.epaisseurMoyBoite
-                            var maxBoitesParTablette = Math.round(tablette.DimTabletteMLineaire / obj.epaisseurMoyBoite * 100);
-                            var boitesSurCetteTablette = Math.min(maxBoitesParTablette, boitesrestantaRanger);
-                            boitesrestantaRanger -= boitesSurCetteTablette;
-                            var boitesCotes = [];
-                            for (var i = 0; i < boitesSurCetteTablette; i++) {
-
-                                var indexBoite = (++indexBoites);
-                                if (("" + indexBoite).length == 1)
-                                    indexBoite = "0" + indexBoite;
-                                var cote = obj.numVersement + "/" + indexBoite
-                                if (i > 0)
-                                    cotesParTabletteStr += " "
-                                cotesParTabletteStr += cote
-
-                                boitesCotes.push(cote);
-                            }
-
-                            obj.tablettesBoites.push({tablette: tablette, boites: boitesCotes});
-
-                        }
 
 
-                        var sql = "insert into r_versement_magasin (id_versement,id_magasin) values ('" + versementId + "','" + tablette.id + "')";
+            var versementId;
+            var cotesExtremes = ""
+            async.series([
 
-                        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultRversementMagasin) {
+                    // chercher versement
+                    function (callbackSeries) {
+                        var sql = "select id  from versement where numVersement ='" + obj.numVersement + "'" // get versement Id
+                        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement) {
                             if (err)
-                                return callbackEach(err);
-                            if ((index++) < resultMagasin.length - 1)// update magasin
-                                sql = "update magasin set metrage=0,cotesParTablette='', numVersement='" + obj.numVersement + "', cotesParTablette='" + cotesParTabletteStr + "' where id=" + tablette.id;
-                            else// metrage sur derniere tablette
-                                sql = "update magasin set metrage=" + obj.metrage + ",cotesParTablette='', numVersement='"+obj.numVersement+"' , cotesParTablette='"+cotesParTabletteStr+"' where id=" + tablette.id;
+                                return callback(err);
+                            if (resultVersement.length == 0)
+                                return callback("noVersement");
+
+                            versementId = resultVersement[0].id;
+                            return callbackSeries(null, resultVersement)
+                        })
+                    },
+
+
+                    // chercher et update  tablettes cibles et boites
+                    function (callbackSeries) {
+
+                        var nBoites = obj.nbBoites;
+                        var epaisseurMoyBoite = obj.epaisseurMoyBoite;
+                        obj.tablettesBoites = []
+                        var index = 0;
+                        var boitesrestantaRanger = obj.nbBoites;
+                        var indexBoites = 0;
+
+
+                        var sql = "select id,DimTabletteMLineaire,coordonnees from magasin where coordonnees in " + JSON.stringify(obj.tablettes).replace("[", "(").replace("]", ")") // get tablettes ids
+                        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin) {
+                            if (err)
+                                return callback(err);
+                            if (resultMagasin.length == 0)
+                                return callback("noTablettes");
+
+                            async.eachSeries(resultMagasin, function (tablette, callbackEach) {// create relation
+
+                                var cotesParTabletteStr = "";
+                                var metrageTablette = 0;
+
+                                if (obj.nbBoites && obj.epaisseurMoyBoite && tablette.DimTabletteMLineaire) {// boites sur tablette
+                                    metrageTablette = obj.nbBoites * obj.epaisseurMoyBoite;
+
+                                    var maxBoitesParTablette = Math.round(tablette.DimTabletteMLineaire / obj.epaisseurMoyBoite * 100);
+                                    var boitesSurCetteTablette = Math.min(maxBoitesParTablette, boitesrestantaRanger);
+                                    boitesrestantaRanger -= boitesSurCetteTablette;
+                                    var boitesCotes = [];
+                                    for (var i = 0; i < boitesSurCetteTablette; i++) {
+
+                                        var indexBoiteStr = "" + (++indexBoites);
+                                        if ((indexBoiteStr).length == 1)
+                                            indexBoiteStr = "0" + indexBoiteStr;
+                                        var cote = obj.numVersement + "/" + indexBoiteStr
+                                        if (i > 0)
+                                            cotesParTabletteStr += " "
+                                        cotesParTabletteStr += cote
+
+                                        boitesCotes.push(cote);
+                                        if (indexBoites == 1)
+                                            cotesExtremes += cote
+                                        if (indexBoites >= obj.nbBoites-1)
+                                            cotesExtremes += " " + cote
+
+                                    }
+
+
+                                    obj.tablettesBoites.push({tablette: tablette, boites: boitesCotes});
+
+                                }
+
+                                sql = "update magasin set metrage=" + metrageTablette + ",id_versement=" + versementId + ", numVersement='" + obj.numVersement + "' , cotesParTablette='" + cotesParTabletteStr + "' where id=" + tablette.id;
+
+                                mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin2) {
+                                    if (err)
+                                        return callbackEach(err);
+                                    return callbackEach();
+
+                                })
+
+                            }, function (err) {
+                                if (err)
+                                    return callbackSeries(err);
+                                return callbackSeries(err, obj);
+                            })
+                        })
+
+                    },
+
+
+                    //update  refoulement : effacement des infos des tablettes
+                    function (callbackSeries) {
+                        if (!obj.refoulement)
+                            return callbackSeries(null, [])
+                        async.eachSeries(obj.refoulement, function (tabletteRefoulee, callbackEach) {// create relation
+
+                            sql = "update magasin set metrage=null,id_versement=null, numVersement=null , cotesParTablette='' where id=" + tablette.id;
 
                             mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin2) {
                                 if (err)
                                     return callbackEach(err);
-                                var sql = "update versement set metrage=" + obj.metrage + " where id=" + versementId;
 
-                                mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement2) {
-                                    if (err)
-                                        return callbackEach(err);
-                                    callbackEach();
-                                })
                             })
 
+
+                        } , function (err) {
+                                    if (err)
+                                        return callbackSeries(err);
+                                    return callbackSeries(err, obj);
+                                })
+
+                    },
+                    // update versement metrage et cotes extremes boites
+                    function (callbackSeries) {
+                        var sql = "update versement set metrage=" + obj.metrage + ", cotesExtremesBoites='" + cotesExtremes + "' where id=" + versementId;
+                        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement2) {
+                            if (err)
+                                return callbackSeries(err);
+
+                            return callbackSeries(err, resultVersement2);
                         })
-                    }, function (err) {
-                        if (err)
-                            return callback(err);
-                        return callback(err, obj);
+                    }
 
 
-                    })
+                ]
 
+                //AT THE END !!!
+                , function (err, results) {
+                    if (err)
+                        return callback(err);
+                    return callback(err, results);
                 })
-            })
+
+
+            /*      var sql = "select id,DimTabletteMLineaire,coordonnees from magasin where coordonnees in " + JSON.stringify(obj.tablettes).replace("[", "(").replace("]", ")") // get tablettes ids
+                  mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin) {
+                      if (err)
+                          return callback(err);
+                      if (resultMagasin.length == 0)
+                          return callback("noTablettes");
+                      var sql = "select id  from versement where numVersement ='" + obj.numVersement + "'" // get versement Id
+                      mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement) {
+                          if (err)
+                              return callback(err);
+                          if (resultVersement.length == 0)
+                              return callback("noVersement");
+
+                          var versementId = resultVersement[0].id;
+                          var index = 0;
+                          var boitesrestantaRanger = obj.nbBoites;
+                          var indexBoites = 0;
+                          async.eachSeries(resultMagasin, function (tablette, callbackEach) {// create relation
+
+                              var cotesParTabletteStr = "";
+                              var metrageTablette = 0;
+
+                              if (obj.nbBoites && obj.epaisseurMoyBoite && tablette.DimTabletteMLineaire) {// boites sur tablette
+                                  metrageTablette = obj.nbBoites * obj.epaisseurMoyBoite;
+
+                                  var maxBoitesParTablette = Math.round(tablette.DimTabletteMLineaire / obj.epaisseurMoyBoite * 100);
+                                  var boitesSurCetteTablette = Math.min(maxBoitesParTablette, boitesrestantaRanger);
+                                  boitesrestantaRanger -= boitesSurCetteTablette;
+                                  var boitesCotes = [];
+                                  for (var i = 0; i < boitesSurCetteTablette; i++) {
+
+                                      var indexBoite = (++indexBoites);
+                                      if (("" + indexBoite).length == 1)
+                                          indexBoite = "0" + indexBoite;
+                                      var cote = obj.numVersement + "/" + indexBoite
+                                      if (i > 0)
+                                          cotesParTabletteStr += " "
+                                      cotesParTabletteStr += cote
+
+                                      boitesCotes.push(cote);
+                                  }
+
+                                  obj.tablettesBoites.push({tablette: tablette, boites: boitesCotes});
+
+                              }
+
+                              sql = "update magasin set metrage=" + metrageTablette + ",cotesParTablette='',id_versement=" + versementId + ", numVersement='" + obj.numVersement + "' , cotesParTablette='" + cotesParTabletteStr + "' where id=" + tablette.id;
+
+                              mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin2) {
+                                  if (err)
+                                      return callbackEach(err);
+                                  var sql = "update versement set metrage=" + obj.metrage + " where id=" + versementId;
+
+                                  mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement2) {
+                                      if (err)
+                                          return callbackEach(err);
+                                      callbackEach();
+                                  })
+                              })
+
+                          })
+                      }, function (err) {
+                          if (err)
+                              return callback(err);
+                          return callback(err, obj);
+
+
+                      })
+
+                  })*/
+
         }
     }
 
@@ -256,7 +383,7 @@ if (false) {
 
 
 }
-if (false) {
+if (true) {
 
     var obj =
 

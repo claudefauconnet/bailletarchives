@@ -209,7 +209,8 @@ var listController = (function () {
                 dom: "lti",
                 width: width,
                 height: height,
-                onClick: mainController.enableUnlinkButton
+               // onClick: mainController.enableUnlinkButton
+                onClick:recordController.displayDataReadOnly
             })
         })
 
@@ -290,7 +291,6 @@ var listController = (function () {
         var idx = linksTable.rows('.selected', 0).indexes();
         for (var i = 0; i < idx.length; i++) {
             var data = linksTable.rows(idx[i]).data()[0]
-            //  var sql = "delete from r_versement_magasin where id_" + context.currentLinkedTable + "=" + data.id;
 
             var sql = config.tableDefs[context.currentTable].relations[context.currentLinkedTable].deleteRelSql;
             var array = null;

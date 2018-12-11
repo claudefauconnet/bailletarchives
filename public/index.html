@@ -46,6 +46,11 @@
     <script src="js/context.js"></script>
     <script src="js/util.js"></script>
 
+
+    <script src="js/magasinD3.js"></script>
+    <script src="js/d3/d3.js"></script>
+    <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+
     <style>
         body {
             font-family: Verdana;
@@ -60,6 +65,8 @@
         }
         button{
             width: inherit;
+            margin: 3px;
+            padding: 3px;
         }
         input{
             width: 150px;
@@ -186,6 +193,38 @@
 
 
 
+
+
+
+        #popupD3Div {
+            visibility: hidden;
+            position: absolute;
+            background-color: #ddd;
+            margin: 3px;
+            padding: 3px;
+            border-style: solid;
+            border-width: 1px;
+        }
+
+        #dialogContentDiv {
+
+        }
+
+        #dialogD3 {
+            background-color: #ddd;
+            margin: 3px;
+            padding: 3px;
+            width: 500px;
+            height: 500px;
+        }
+
+        #messageSpan {
+            color: #003eff;
+            font-weight: bold;
+        }
+
+
+
     </style>
 
     <script>
@@ -193,7 +232,16 @@
         $(function () {
 
             mainController.setDivsSize();
-            $("#leftAccordion").accordion();
+            $("#leftAccordion").accordion({
+
+                activate: function( event, ui ) {
+                    var content = ui;
+                    if (ui.newHeader.text() == "Magasins")
+                        magasinD3.init("listRecordsDiv")
+
+                        }
+
+            });
 
             $("#tabs").tabs({
                 activate: function (event, ui) {
@@ -243,6 +291,14 @@
                         dialog3.dialog("close");
                     }
                 },
+                close: function () {
+                    // allFields.removeClass("ui-state-error");
+                }
+            });
+            dialogD3 = $("#dialogD3").dialog({
+                autoOpen: false,
+                modal: false,
+                position: {my: "left top", at: "left top", of: window},
                 close: function () {
                     // allFields.removeClass("ui-state-error");
                 }
@@ -340,10 +396,20 @@
                         <td>
 <div id="searchCriteriaDiv">
 
+
 </div>
                         </td>
                     </tr>
                 </table>
+
+            </div>
+            <h1>Magasins</h1>
+            <div id="MagasinsDiv" class="accordionInnerDiv">
+                <button onclick="magasinD3.searchVersement('0114')">Localisation versement</button>
+                <button onclick="magasinD3.showDialogChercherTablettesPourVersement()">Ranger boites</button>
+                <button onclick="magasinD3.clearHighlights()">effacer</button>
+
+                <span id="messageSpan"></span>
 
             </div>
            <h1>Outils</h1>
@@ -383,7 +449,7 @@
         <ul>
             <li><a href="#tabs-recordDiv">Details</a></li>
             <li><a href="#tabs-linkedRecordDiv1">LinkedRecord</a></li>
-            <li><a href="#tabs-linkedRecordDiv2">LinkedRecord</a></li>
+          <!--  <li><a href="#tabs-linkedRecordDiv2">LinkedRecord</a></li>-->
 
 
         </ul>
@@ -393,20 +459,19 @@
         </div>
         <div id="tabs-linkedRecordDiv1" class="dialogTab">
 
-            <button id="deleteLinkedRecordButton">Supprimer lien</button>
-            <button class="showAddLinkedRecordButton">Ajouter lien</button>
+         <!--   <button id="deleteLinkedRecordButton">Supprimer lien</button>
+            <button class="showAddLinkedRecordButton">Ajouter lien</button>-->
             <div id="linkedRecordsDiv" class="dataTableDiv"></div>
 
 
         </div>
-        <div id="tabs-linkedRecordDiv2" class="dialogTab">
+     <!--   <div id="tabs-linkedRecordDiv2" class="dialogTab">
             <button id="deleteLinkedRecordButton2">Délier</button>
             <button class="showAddLinkedRecordButton">Lier</button>
             <div id="linkedRecordsDiv2" class="dataTableDiv"></div>
 
 
-        </div>
-        -
+        </div>-->
 
 
     </div>
@@ -449,6 +514,11 @@
     <span id="logonMessageDiv"></span>
 
 </div>
+<div id="popupD3Div">
+    <div id="dialogContentDiv"></div>
+</div>
+
+<div id="dialogD3"></div>
 
 </body>
 </html>
