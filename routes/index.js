@@ -29,9 +29,9 @@ router.post('/mysql', function (req, res, next) {
 
 
 });
-router.post('/applyTablettesToversement', function (req, res, next) {
+router.post('/versementBoitesToTablettes', function (req, res, next) {
 
-    processData.applyTablettesToversement(JSON.parse(req.body.data), function (err, result) {
+    processData.versementBoitesToTablettes(JSON.parse(req.body.data), function (err, result) {
         processResponse(res, err, result)
     })
 

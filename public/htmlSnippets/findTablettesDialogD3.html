@@ -8,7 +8,7 @@
 
         self.init = function () {
             $("#findTablettesD3_versement").focus()
-            $("#findTablettesD3_applyTablettesToversementButton").prop("disabled", "disabled")
+            $("#findTablettesD3_versementBoitesToTablettesButton").prop("disabled", "disabled")
             $("#findTablettesD3_epaisseurMoyBoite").val(tailleMoyenneBoite);
             var sql = "select distinct magasin from magasin order by magasin";
 
@@ -91,21 +91,19 @@
         }
 
 
-        self.applyTablettesToversement = function () {
+        self.versementBoitesToTablettes = function () {
             var payload = {
                 data: JSON.stringify(magasinD3.currentVersement)
             }
 
             $.ajax({
                 type: "POST",
-                url: urlPrefix + "/applyTablettesToversement",
+                url: urlPrefix + "/versementBoitesToTablettes",
                 data: payload,
                 dataType: "json",
                 success: function (data) {
-                  var x=data;
-
-
-                    $("#findTablettesD3_metrage").val(metrage)
+                  console.log(JSON.stringify(data,null,2));
+                    magasinD3.drawMagasins()
 
                 },
                 error: function (err) {
@@ -174,7 +172,7 @@
             <button onclick="findTablettesDialog.chercherTablettesPourVersement()">Chercher</button>
 
 
-            <button id="findTablettesD3_applyTablettesToversementButton" onclick="findTablettesDialog.applyTablettesToversement()">
+            <button id="findTablettesD3_versementBoitesToTablettesButton" onclick="findTablettesDialog.versementBoitesToTablettes()">
                 Affecter versement
             </button>
 

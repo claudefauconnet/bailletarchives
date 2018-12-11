@@ -41,6 +41,8 @@
 
             self.drawMagasins = function () {
                 //d3.json("./js/d3/magasin.json", function (data) {
+                d3.select("svg").remove();
+                $("#graphDiv").html("");
                 d3.json(urlPrefix + "/magasinD3Tree", function (data) {
                     var nMag = data.children.length;
                     magasinData = data;
@@ -225,8 +227,8 @@
                                                 coordonnees: tabletteCoordonnees,
                                                 nBoites: nBoites,
                                                 class: "boite",
-                                                stroke: "none",
-                                                "stroke-width": null
+                                                stroke: "black",
+                                                "stroke-width": 1
                                             })
                                             .on("click", function () {
                                                 var position = d3.mouse(this);
@@ -411,7 +413,7 @@
                 self.currentVersement = obj;
                 self.currentVersement.tablettes = tablettesOK
                 $("#findTablettes_message").html("Tablettes contigues libres pour " + obj.metrage + " m : de " + tablettesOK[0] + " à " + tablettesOK[tablettesOK.length - 1])
-                $("#findTablettesD3_applyTablettesToversementButton").removeAttr("disabled")
+                $("#findTablettesD3_versementBoitesToTablettesButton").removeAttr("disabled")
                 var first = true;
                 d3.selectAll(".boite").style("opacity", 0.3)
                 d3.selectAll(".tablette").style("fill", "none").style(" stroke", "blue");

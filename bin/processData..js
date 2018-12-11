@@ -158,12 +158,12 @@ var processData = {
     },
 
 
-    applyTablettesToversement: function (obj, callback) {
+    versementBoitesToTablettes: function (obj, callback) {
         if (obj.numVersement && obj.metrage && obj.tablettes) {
             var nBoites = obj.nbBoites;
             var epaisseurMoyBoite = obj.epaisseurMoyBoite;
-            obj.tablettesBoites=[]
-            var sql = "select id,DimTabletteMLineaire  from magasin where coordonnees in " + JSON.stringify(obj.tablettes).replace("[", "(").replace("]", ")") // get tablettes ids
+            obj.tablettesBoites = []
+            var sql = "select id,DimTabletteMLineaire,coordonnees from magasin where coordonnees in " + JSON.stringify(obj.tablettes).replace("[", "(").replace("]", ")") // get tablettes ids
             mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin) {
                 if (err)
                     return callback(err);
@@ -183,18 +183,24 @@ var processData = {
                     async.eachSeries(resultMagasin, function (tablette, callbackEach) {// create relation
 
                         var cotesParTabletteStr = "";
-
+                        var metrageTablette = 0;
                         if (obj.nbBoites && obj.epaisseurMoyBoite && tablette.DimTabletteMLineaire) {// boites sur tablette
-                            var maxBoitesParTablette = Math.round(tablette.DimTabletteMLineaire / obj.epaisseurMoyBoite*100);
+                            metrageTablette = obj.nbBoites && obj.epaisseurMoyBoite
+                            var maxBoitesParTablette = Math.round(tablette.DimTabletteMLineaire / obj.epaisseurMoyBoite * 100);
                             var boitesSurCetteTablette = Math.min(maxBoitesParTablette, boitesrestantaRanger);
                             boitesrestantaRanger -= boitesSurCetteTablette;
                             var boitesCotes = [];
                             for (var i = 0; i < boitesSurCetteTablette; i++) {
+
+                                var indexBoite = (++indexBoites);
+                                if (("" + indexBoite).length == 1)
+                                    indexBoite = "0" + indexBoite;
+                                var cote = obj.numVersement + "/" + indexBoite
                                 if (i > 0)
                                     cotesParTabletteStr += " "
-                                cotesParTabletteStr += obj.numVersement + "/" + (indexBoites++)
+                                cotesParTabletteStr += cote
 
-                                boitesCotes.push(cotesParTabletteStr);
+                                boitesCotes.push(cote);
                             }
 
                             obj.tablettesBoites.push({tablette: tablette, boites: boitesCotes});
@@ -210,7 +216,7 @@ var processData = {
                             if ((index++) < resultMagasin.length - 1)// update magasin
                                 sql = "update magasin set metrage=0,cotesParTablette='', numVersement='" + obj.numVersement + "', cotesParTablette='" + cotesParTabletteStr + "' where id=" + tablette.id;
                             else// metrage sur derniere tablette
-                                sql = "update magasin set metrage=" + obj.metrage + ",cotesParTablette='', numVersement='\"+obj.numVersement+\"' , cotesParTablette='\"+cotesParTabletteStr+\"' where id=" + tablette.id;
+                                sql = "update magasin set metrage=" + obj.metrage + ",cotesParTablette='', numVersement='"+obj.numVersement+"' , cotesParTablette='"+cotesParTabletteStr+"' where id=" + tablette.id;
 
                             mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin2) {
                                 if (err)
@@ -250,21 +256,23 @@ if (false) {
 
 
 }
-if (true) {
+if (false) {
 
     var obj =
 
-    {
-        "numVersement": "dddd",
-        "magasin": "",
-        "metrage": 0.96,
-        "nbBoites": 12,
-        "epaisseurMoyBoite": 8,
-        "tablettes": [
-        "A-01-09-6"
-    ]
-    }
-    processData.applyTablettesToversement(obj, function (err, result) {
+        {
+            "numVersement": "dddd",
+            "magasin": "",
+            "metrage": 0.96,
+            "nbBoites": 35,
+            "epaisseurMoyBoite": 8,
+            "tablettes": [
+                "A-07-01-1",
+                "A-07-01-2",
+                "A-07-01-3",
+            ]
+        }
+    processData.versementBoitesToTablettes(obj, function (err, result) {
         var x = result;
     })
 }

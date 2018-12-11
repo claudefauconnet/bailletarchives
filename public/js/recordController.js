@@ -65,8 +65,14 @@ var recordController = (function () {
             if (i++ > 0)
                 sql += ","
             var type = mainController.getFieldType(context.currentTable, key)
-            if (type == "number")
-                sql += key + "=" + self.currentRecordChanges[key].replace(",", ".");
+            if (type == "number") {
+                if (self.currentRecordChanges[key] == "")
+                    sql += key + "= null"
+                else
+                    sql += key + "=" + self.currentRecordChanges[key].replace(",", ".");
+
+            }
+
             else if (type == "string")
                 sql += key + "='" + self.currentRecordChanges[key] + "'";
             else if (type == "date") {
@@ -76,6 +82,7 @@ var recordController = (function () {
         }
         sql += " where id= " + context.currentRecordId;
         console.log(sql);
+
 
         mainController.execSql(sql, function (err, json) {
             if (err)
@@ -146,22 +153,22 @@ var recordController = (function () {
         var ok = true;
         var linkedTables = Object.keys(config.tableDefs[context.currentTable].relations);
         async.eachSeries(linkedTables, function (linkedTable, callbackEach) {
-                listController.loadLinkedRecords(linkedTable, null, function (err, result) {
-                    if (err) {
-                        ok = false
-                        return callbackEach(err);
-                    }
-                    var nlinks = result.length;
+            listController.loadLinkedRecords(linkedTable, null, function (err, result) {
+                if (err) {
+                    ok = false
+                    return callbackEach(err);
+                }
+                var nlinks = result.length;
 
-                    if (nlinks > 0) {
-                        ok=false;
-                        alert("vous devez au préalable supprimer les  " + nlinks + " liens avec " + context.currentLinkedTable);
+                if (nlinks > 0) {
+                    ok = false;
+                    alert("vous devez au préalable supprimer les  " + nlinks + " liens avec " + context.currentLinkedTable);
 
-                    }
-                    return callbackEach(null);
-                })
+                }
+                return callbackEach(null);
+            })
 
-            }, function (err) {
+        }, function (err) {
 
             if (!ok)
                 return;
@@ -177,8 +184,8 @@ var recordController = (function () {
                     mainController.setErrorMessage(err)
                 mainController.setMessage("enregistrement supprimé");
                 dialog.dialog("close");
-                listController.listRecords( context.currentListQueries[ context.currentTable]);
-           //    context.dataTables[context.currentTable]. deleteSelectedRow()
+                listController.listRecords(context.currentListQueries[context.currentTable]);
+                //    context.dataTables[context.currentTable]. deleteSelectedRow()
 
 
             })
