@@ -281,7 +281,8 @@ var magasinD3 = (function () {
 
 
             })
-            callback();
+            if (callback)
+                callback();
 
             function onBoiteClick(boite, x, y) {
 
@@ -494,3 +495,6 @@ var magasinD3 = (function () {
 
     return self;
 })()
+
+
+

@@ -1,154 +1,6 @@
 <script>
 
-    var findTablettesDialog = (function () {
-        var self = {};
-        var urlPrefix = ".";
-        var tailleMoyenneBoite = 8;
-        var currentVersement = null;
 
-
-        self.init = function () {
-            $("#findTablettesD3_versement").focus()
-            $("#findTablettesD3_versementBoitesToTablettesButton").prop("disabled", "disabled")
-            $("#findTablettesD3_versementRefoulementButton").prop("disabled", "disabled")
-            $("#findTablettesD3_epaisseurMoyBoite").val(tailleMoyenneBoite);
-            var sql = "select distinct magasin from magasin order by magasin";
-
-            mainController.execSql(sql, function (err, json) {
-                if (err)
-                    mainController.setErrorMessage(err)
-                var magasins = [];
-                json.forEach(function (line) {
-                    if (line.magasin && line.magasin.match(/[A-Z]/))
-                        magasins.push(line);
-                })
-                mainController.fillSelectOptions("findTablettesD3_magasin", magasins, true, "magasin", "magasin")
-
-            })
-        }
-
-        self.onVersementInput = function (input) {
-            $("#findTablettesD3_versementBoitesToTablettesButton").prop("disabled", "disabled")
-            $("#findTablettesD3_versementRefoulementButton").prop("disabled", "disabled")
-            var versement = $(input).val();
-            if (versement.length >= 4) {
-                var sql = "select * from versement where numVersement='" + versement + "'"
-                var payload = {
-                    exec: 1,
-                    sql: sql
-                }
-
-                $.ajax({
-                    type: "POST",
-                    url: urlPrefix + "/mysql",
-                    data: payload,
-                    dataType: "json",
-                    success: function (dataVersement) {
-
-                        var sql = "select * from magasin where numVersement='" + versement + "'"
-                        var payload = {
-                            exec: 1,
-                            sql: sql
-                        }
-
-                        $.ajax({
-                            type: "POST",
-                            url: urlPrefix + "/mysql",
-                            data: payload,
-                            dataType: "json",
-                            success: function (dataMagasin) {
-                                currentVersement = {numVersement: versement}
-                                var metrage = 0;
-                                var nbBoites = 0
-                                if (dataVersement.length > 0) {
-                                    dataVersement.forEach(function (line) {
-                                        if (line.metrage)
-                                            metrage += line.metrage
-                                        if (line.nbBoites)
-                                            nbBoites += line.nbBoites
-                                    })
-
-                                }
-                                if (dataMagasin.length > 0)
-                                    currentVersement.refoulement = dataMagasin;
-
-
-                                $("#findTablettesD3_metrage").val(metrage)
-                                $("#findTablettesD3_nbBoites").val(nbBoites)
-                                self.onNbBoites();
-                            },
-                            error: function (err) {
-                                console.log(err.responseText)
-
-                            }
-
-                        })
-                    },
-                    error: function (err) {
-                        console.log(err.responseText)
-
-                    }
-                })
-
-            }
-
-        }
-        self.chercherTablettesPourVersement = function () {
-            var obj = {
-                numVersement: $("#findTablettesD3_versement").val(),
-                magasin: $("#findTablettesD3_magasin").val(),
-                metrage: parseFloat($("#findTablettesD3_metrage").val().replace(",", ".")),
-                nbBoites: parseInt($("#findTablettesD3_nbBoites").val()),
-                epaisseurMoyBoite: parseFloat($("#findTablettesD3_epaisseurMoyBoite").val())
-
-            }
-
-            magasinD3.chercherTablettesPourVersement(obj);
-            if ( currentVersement && currentVersement.refoulement)
-                $("#findTablettesD3_versementRefoulementButton").removeAttr("disabled")
-            else
-                $("#findTablettesD3_versementBoitesToTablettesButton").removeAttr("disabled")
-        }
-
-
-        self.onNbBoites = function () {
-            var nBoites = parseInt($("#findTablettesD3_nbBoites").val());
-            var epaisseurMoy = parseFloat($("#findTablettesD3_epaisseurMoyBoite").val().replace(",", "."));
-            var longueur = nBoites * epaisseurMoy / 100
-            var longueurStr = ("" + longueur).replace(".", ",");
-            $("#findTablettesD3_metrage").val(longueurStr)
-
-        }
-
-
-        self.versementExecBoitesToTablettes = function (refoulement) {
-            if(refoulement)
-                magasinD3.currentVersement.refoulement=currentVersement.refoulement;
-
-            var payload = {
-                data: JSON.stringify(magasinD3.currentVersement)
-            }
-
-            $.ajax({
-                type: "POST",
-                url: urlPrefix + "/versementBoitesToTablettes",
-                data: payload,
-                dataType: "json",
-                success: function (data) {
-                    console.log(JSON.stringify(data, null, 2));
-                    magasinD3.drawMagasins()
-
-                },
-                error: function (err) {
-                    console.log(err.responseText)
-
-                }
-            })
-
-
-        }
-        return self;
-    })()
 
 </script>
 
@@ -163,7 +15,7 @@
             Versement
         </td>
         <td>
-            <input id="findTablettesD3_versement" onkeyup="findTablettesDialog.onVersementInput(this)">
+            <input id="findTablettesD3_versement" onkeyup="magasinD3dialog.onVersementInput(this)">
         </td>
     </tr>
 
@@ -172,7 +24,7 @@
             nombre de boites
         </td>
         <td>
-            <input id="findTablettesD3_nbBoites" onkeyup="findTablettesDialog.onNbBoites(this)">
+            <input id="findTablettesD3_nbBoites" onkeyup="magasinD3dialog.onNbBoites(this)">
         </td>
     </tr>
     <tr>
@@ -202,16 +54,16 @@
 
     <tr>
         <td colspan="2">
-            <button onclick="findTablettesDialog.chercherTablettesPourVersement()">Chercher</button>
+            <button onclick="magasinD3dialog.chercherTablettesPourVersement()">Chercher</button>
 
 
             <button id="findTablettesD3_versementBoitesToTablettesButton"
-                    onclick="findTablettesDialog.versementExecBoitesToTablettes()">
+                    onclick="magasinD3dialog.versementExecBoitesToTablettes()">
                 Archiver versement
             </button>
 
             <button id="findTablettesD3_versementRefoulementButton"
-                    onclick="findTablettesDialog.versementExecBoitesToTablettes(true)">
+                    onclick="magasinD3dialog.versementExecBoitesToTablettes(true)">
                 Effectuer refoulement
             </button>
 
@@ -225,7 +77,7 @@
 <script>
 
 
-    findTablettesDialog.init();
+    magasinD3dialog.init();
 
 
 </script>

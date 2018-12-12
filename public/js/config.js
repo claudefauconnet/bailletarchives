@@ -109,7 +109,7 @@ var config = (function () {
     self.tools = {
 
 
-        "ChercherTablettesDisponibles ": {htmlPage: "findTablettesDialog.html"},
+        "ChercherTablettesDisponibles ": {htmlPage: "magasinD3dialog.html"},
 
         "DéplacerBoitesVersement ": {htmlPage: "deplacerBoitesDialog.html"},
 
