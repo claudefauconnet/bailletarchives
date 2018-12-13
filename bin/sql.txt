@@ -63,3 +63,6 @@ select etatTraitement,sum(volumeGO),sum(nbreElements) from versement group by et
  ****** changement modele dec2018 (id versement 1-n versement-> magasin)
 
  update magasin m JOIN versement v ON v.numVersement=m.numVersement set m.id_versement=v.id
+
+ suppimer commentaires  dans magasin
+ select versement.numVersement,magasin.coordonnees,versement.commentaires, magasin.commentaires  from versement, magasin where versement.commentaires= magasin.commentaires and versement.commentaires is not null and versement.commentaires!=''

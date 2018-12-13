@@ -7,7 +7,7 @@
 <table style="vertical-align: center">
     <tr>
         <td colspan="2">
-            <span class="title">Affecter versement</span>
+            <span class="title">Integerer versement</span>
         </td>
     </tr>
     <tr>
@@ -29,20 +29,21 @@
     </tr>
     <tr>
         <td>
+            Métrage
+        </td>
+        <td>
+            <input id="findTablettesD3_metrage" onkeyup="magasinD3dialog.onMetrage(this)">
+        </td>
+    </tr>
+    <tr>
+        <td>
             epaisseur moyenne(cm)
         </td>
         <td>
             <input id="findTablettesD3_epaisseurMoyBoite">
         </td>
     </tr>
-    <tr>
-        <td>
-            Métrage
-        </td>
-        <td>
-            <input id="findTablettesD3_metrage">
-        </td>
-    </tr>
+
     <tr>
         <td>
             Magasin(optionel)
@@ -59,7 +60,7 @@
 
             <button id="findTablettesD3_versementBoitesToTablettesButton"
                     onclick="magasinD3dialog.versementExecBoitesToTablettes()">
-                Archiver versement
+                Integrer versement
             </button>
 
             <button id="findTablettesD3_versementRefoulementButton"

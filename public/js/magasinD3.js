@@ -16,7 +16,7 @@ var magasinD3 = (function () {
     var zoom;
     var minZoom = .2
     var maxZoom = 2
-    var nMagByLine = 3
+    var nMagByLine = 10
     var palette = [
         "#0072d5",
         '#FF7D07',

@@ -39,7 +39,7 @@ var recordController = (function () {
                 targetObj[field.name].type = "readOnly"
             }
             var constaints = null;
-            if (config.tableDefs[context.currentTable] && config.tableDefs[context.currentTable].fieldConstraints[field.name])
+            if (config.tableDefs[context.currentTable] && config.tableDefs[context.currentTable].fieldConstraints!=null && config.tableDefs[context.currentTable].fieldConstraints[field.name])
                 if (config.tableDefs[context.currentTable].fieldConstraints[field.name].indexOf("readOnly") > -1)
                     targetObj[field.name].type = "readOnly"
         })

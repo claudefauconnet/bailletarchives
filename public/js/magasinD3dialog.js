@@ -1,7 +1,7 @@
 var magasinD3dialog = (function () {
         var self = {};
         var urlPrefix = ".";
-        var tailleMoyenneBoite = 8;
+        var tailleMoyenneBoite = 11;
         var currentVersement = null;
 
 
@@ -9,7 +9,7 @@ var magasinD3dialog = (function () {
             $("#findTablettesD3_versement").focus()
             $("#findTablettesD3_versementBoitesToTablettesButton").prop("disabled", "disabled")
             $("#findTablettesD3_versementRefoulementButton").prop("disabled", "disabled")
-            $("#findTablettesD3_epaisseurMoyBoite").val(tailleMoyenneBoite);
+         //   $("#findTablettesD3_epaisseurMoyBoite").val(tailleMoyenneBoite);
             var sql = "select distinct magasin from magasin order by magasin";
 
             mainController.execSql(sql, function (err, json) {
@@ -110,6 +110,7 @@ var magasinD3dialog = (function () {
 
 
         self.onNbBoites = function () {
+            return;
             var nBoites = parseInt($("#findTablettesD3_nbBoites").val());
             var epaisseurMoy = parseFloat($("#findTablettesD3_epaisseurMoyBoite").val().replace(",", "."));
             var longueur = nBoites * epaisseurMoy / 100
@@ -117,6 +118,17 @@ var magasinD3dialog = (function () {
             $("#findTablettesD3_metrage").val(longueurStr)
 
         }
+        self.onMetrage = function () {
+            var nBoites = parseInt($("#findTablettesD3_nbBoites").val());
+
+            var metrage = parseFloat($("#findTablettesD3_metrage").val().replace(",", "."));
+            var epaisseurMoyenneBoite= Math.round((metrage /(100*nBoites))*10)/10
+             epaisseurMoyenneBoite = ("" + epaisseurMoyenneBoite).replace(".", ",");
+            $("#findTablettesD3_epaisseurMoyBoite").val(epaisseurMoyenneBoite)
+
+        }
+
+
 
 
         self.versementExecBoitesToTablettes = function (refoulement) {
