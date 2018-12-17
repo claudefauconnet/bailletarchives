@@ -408,7 +408,13 @@ var magasinD3 = (function () {
         var longueurCumulee = 0;
         var tablettesOK = [];
         var done = false;
+
         magasinData.children.forEach(function (magasin) {
+
+            if(obj.magasin && obj.magasin!="")
+                if(magasin.name!=obj.magasin)
+                    return;
+
             if (!done)
                 magasin.children.forEach(function (epi) {
                     if (!done)

@@ -99,6 +99,7 @@ var magasinD3dialog = (function () {
                 nbBoites: parseInt($("#findTablettesD3_nbBoites").val()),
                 epaisseurMoyBoite: parseFloat($("#findTablettesD3_epaisseurMoyBoite").val())
 
+
             }
 
             magasinD3.chercherTablettesPourVersement(obj);
@@ -122,7 +123,7 @@ var magasinD3dialog = (function () {
             var nBoites = parseInt($("#findTablettesD3_nbBoites").val());
 
             var metrage = parseFloat($("#findTablettesD3_metrage").val().replace(",", "."));
-            var epaisseurMoyenneBoite= Math.round((metrage /(100*nBoites))*10)/10
+            var epaisseurMoyenneBoite= Math.round((metrage /nBoites)*10)/10
              epaisseurMoyenneBoite = ("" + epaisseurMoyenneBoite).replace(".", ",");
             $("#findTablettesD3_epaisseurMoyBoite").val(epaisseurMoyenneBoite)
 
