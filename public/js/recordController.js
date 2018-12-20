@@ -39,7 +39,7 @@ var recordController = (function () {
                 targetObj[field.name].type = "readOnly"
             }
             var constaints = null;
-            if (config.tableDefs[context.currentTable] && config.tableDefs[context.currentTable].fieldConstraints!=null && config.tableDefs[context.currentTable].fieldConstraints[field.name])
+            if (config.tableDefs[context.currentTable] && config.tableDefs[context.currentTable].fieldConstraints != null && config.tableDefs[context.currentTable].fieldConstraints[field.name])
                 if (config.tableDefs[context.currentTable].fieldConstraints[field.name].indexOf("readOnly") > -1)
                     targetObj[field.name].type = "readOnly"
         })
@@ -115,13 +115,16 @@ var recordController = (function () {
             dialog.dialog("close");
 
             ///*******************************A finir*******************************************************************************
-            context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
+            if (context.dataTables[context.currentTable])
+                context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
             return;
             // delete linked records
             mainController.execSql(sql, function (err, json) {
                 if (err)
                     mainController.setErrorMessage(err)
                     ;
+
+                $("#dialog").dialog("close");
             })
 
         })
@@ -157,6 +160,7 @@ var recordController = (function () {
         mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err);
+            $("#dialogDiv").dialog("close");
             mainController.setMessage("enregistrement enregistré");
 
             var sql = "SELECT max(id) as id from " + context.currentTable;
@@ -164,7 +168,8 @@ var recordController = (function () {
                 if (err)
                     mainController.setErrorMessage(err)
                 context.currentRecordId = json[0].id;
-                mainController.setTabs();
+                //    mainController.setTabs();
+
 
             })
         })
@@ -175,7 +180,9 @@ var recordController = (function () {
 
     self.deleteRecord = function () {
         var ok = true;
-        var linkedTables = Object.keys(config.tableDefs[context.currentTable].relations);
+        var linkedTables=[];
+        if(config.tableDefs[context.currentTable].relations)
+         linkedTables = Object.keys(config.tableDefs[context.currentTable].relations);
         async.eachSeries(linkedTables, function (linkedTable, callbackEach) {
             listController.loadLinkedRecords(linkedTable, null, function (err, result) {
                 if (err) {

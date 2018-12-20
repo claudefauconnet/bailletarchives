@@ -138,6 +138,8 @@ var magasinD3 = (function () {
                             stroke: "black",
                             "stroke-width": "3"
                         });
+
+
                     var traveeW = epiW / epi.children.length;
                     var traveeH = epiH;
                     var traveeX = epiX;
@@ -166,6 +168,8 @@ var magasinD3 = (function () {
                                 stroke: "black",
                                 "stroke-width": "1"
                             });
+
+                        var tabSpacing=8;
                         var tabW = traveeW
                         var tabH = traveeH / travee.children.length;
                         ;
@@ -175,13 +179,13 @@ var magasinD3 = (function () {
                         travee.children.forEach(function (tab, indexTab) {
                             var tabletteCoordonnees = tab.name;
                             var nBoites = tab.children.length;
-                            if (indexTravee == 0) {
+                            if (true || indexTravee == 0) {
                                 d3.select("g").append("text")
-                                    .attr("x", tabX - 5)
+                                    .attr("x", tabX-1)
                                     .attr("y", tabY + (tabH / 2))
                                     .attr("dy", ".35em")
                                     .style("text-anchor", "end")
-                                    .style("font-size", "10px")
+                                    .style("font-size", "8px")
                                     .text(function (d) {
                                         return indexTab + 1
                                     })
@@ -190,7 +194,7 @@ var magasinD3 = (function () {
                                 .attrs({
                                     x: tabX,
                                     y: tabY,
-                                    width: tabW,
+                                    width: tabW-tabSpacing,
                                     height: tabH,
                                     name: tab.name,
                                     class: "tablette",
@@ -198,7 +202,7 @@ var magasinD3 = (function () {
                                     stroke: "blue",
                                     "stroke-width": "1"
                                 });
-                            var bteW = tabW / nBoitesTablette
+                            var bteW = (tabW-tabSpacing) / nBoitesTablette
                             var bteH = tabH - 1;
                             var bteX = tabX;
                             var bteY = tabY + 1;

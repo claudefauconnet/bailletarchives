@@ -110,22 +110,18 @@ var magasinD3dialog = (function () {
         }
 
 
-        self.onNbBoites = function () {
-            return;
-            var nBoites = parseInt($("#findTablettesD3_nbBoites").val());
-            var epaisseurMoy = parseFloat($("#findTablettesD3_epaisseurMoyBoite").val().replace(",", "."));
-            var longueur = nBoites * epaisseurMoy / 100
-            var longueurStr = ("" + longueur).replace(".", ",");
-            $("#findTablettesD3_metrage").val(longueurStr)
 
-        }
-        self.onMetrage = function () {
-            var nBoites = parseInt($("#findTablettesD3_nbBoites").val());
+        self.onMetrageAndBoite = function () {
+            var nBoites =$("#findTablettesD3_nbBoites").val()
+            var metrage =$("#findTablettesD3_metrage").val()
 
-            var metrage = parseFloat($("#findTablettesD3_metrage").val().replace(",", "."));
-            var epaisseurMoyenneBoite= Math.round((metrage /nBoites)*10)/10
-             epaisseurMoyenneBoite = ("" + epaisseurMoyenneBoite).replace(".", ",");
-            $("#findTablettesD3_epaisseurMoyBoite").val(epaisseurMoyenneBoite)
+            if(nBoites && nBoites!="" && metrage && metrage!="") {
+                var nBoites = parseInt(nBoites);
+                metrage = parseFloat(metrage.replace(",", "."));
+                var epaisseurMoyenneBoite = Math.round((metrage / nBoites) * 10) / 10
+                epaisseurMoyenneBoite = ("" + epaisseurMoyenneBoite).replace(".", ",");
+                $("#findTablettesD3_epaisseurMoyBoite").val(epaisseurMoyenneBoite)
+            }
 
         }
 

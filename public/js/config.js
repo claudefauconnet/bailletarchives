@@ -102,7 +102,10 @@ var config = (function () {
 
 
         },
-        "historique_sorties": {}
+        "historique_sorties": {
+            tabs: [""],
+            fieldConstraints:{}
+        }
     }
     self.lists = {};
 

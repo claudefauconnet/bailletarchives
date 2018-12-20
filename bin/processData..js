@@ -8,7 +8,7 @@ var processData = {
     getMagasinTree: function (callback) {
         var tailleMoyenneBoite = 0.09
 
-        var sql = "select numVersement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette from magasin"
+        var sql = "select id,numVersement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette from magasin"
         mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
             var tree = {
                 name: "Baillet",
