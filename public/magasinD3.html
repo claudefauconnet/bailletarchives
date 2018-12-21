@@ -46,13 +46,15 @@
                 d3.json(urlPrefix + "/magasinD3Tree", function (data) {
                     var nMag = data.children.length;
                     magasinData = data;
-                    totalWidth = $(window).width() - 150
-                    totalHeight = $(window).height() - 150;
-                    $("#graphDiv").width(totalWidth)
-                    $("#graphDiv").height(totalHeight)
+                    svgWidth = $(window).width() -$("#left").width()-10;
+                    svgHeight = $(window).height() - 10;
+                    svgWidth = $("#listRecordsDiv").width() -10;
+                    svgHeight = $("#listRecordsDiv").height() - 10;
 
-                    svgWidth = totalWidth
-                    svgHeight = totalHeight
+                    $("#graphDiv").width(svgWidth)
+                    $("#graphDiv").height(svgHeight)
+
+
                     var zoom = d3.zoom().on("zoom", function () {
                         svg.attr("transform", d3.event.transform)
 
