@@ -37,6 +37,8 @@
 
 
     <script src="js/magasinD3.js"></script>
+
+    <script src="js/tabletteD3.js"></script>
     <script src="js/magasinD3dialog.js"></script>
 
     <script src="js/d3/d3.js"></script>
@@ -396,9 +398,15 @@
             </div>
             <h1>Magasins</h1>
             <div id="MagasinsDiv" class="accordionInnerDiv">
+
+
+                <button onclick="magasinD3.initialZoom()">initial Zoom</button>
                 <button onclick="magasinD3.searchVersement('0114')">Localiser versement</button>
                 <button onclick="magasinD3.showDialogChercherTablettesPourVersement()">Integrer versement</button>
                 <button onclick="magasinD3.clearHighlights()">effacer</button>
+                <button onclick="magasinD3.modifyDrawing('B-07-09')">test</button>
+
+
 <br>
                 <span id="messageSpan"></span>
 

@@ -340,12 +340,14 @@ var mainController = (function () {
     self.setMessage = function (message) {
         $("#messageDiv").css("color", "blue");
         $("#messageDiv").html(message);
+        return message;
 
     }
 
     self.setErrorMessage = function (message) {
         $("#messageDiv").css("color", "red");
         $("#messageDiv").html(message);
+        return message;
 
     }
     self.confirm = function (message) {

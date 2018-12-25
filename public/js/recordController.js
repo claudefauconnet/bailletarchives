@@ -134,23 +134,46 @@ var recordController = (function () {
 
     self.saveNewRecord = function () {
 
-        var sql1 = "insert into " + context.currentTable + " ( ";
+        self.execSqlCreateRecord(context.currentTable,self.currentRecordChanges, function (err, result){
+            if (err)
+                mainController.setErrorMessage(err);
+            $("#dialogDiv").dialog("close");
+            mainController.setMessage("enregistrement sauvé");
+
+            var sql = "SELECT max(id) as id from " + context.currentTable;
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    mainController.setErrorMessage(err)
+                context.currentRecordId = json[0].id;
+            })
+        })
+
+
+    }
+
+
+    self.execSqlCreateRecord=function(table,record, callback){
+        var sql1 = "insert into " + table + " ( ";
         var sql2 = " values ( ";
         var i = 0;
-        for (var key in self.currentRecordChanges) {
+        for (var key in record) {
             if (i++ > 0) {
                 sql1 += ","
                 sql2 += ","
             }
             sql1 += key;
-            var type = mainController.getFieldType(context.currentTable, key)
-            if (type == "number")
-                sql2 += self.currentRecordChanges[key].replace(",", ".");
-            else if (type == "string")
-                sql2 += "'" + self.currentRecordChanges[key] + "'";
-            else if (type == "date") {
-                var str = self.currentRecordChanges[key].replace(/\//g, "-");// date mysql  2018-09-21
-                sql2 += "'" + str + "'";
+            if(!record[key])
+                sql2 +="null";
+            else {
+                var type = mainController.getFieldType(table, key)
+                if (type == "number")
+                    sql2 += (""+record[key]).replace(",", ".");
+                else if (type == "string")
+                    sql2 += "'" + record[key] + "'";
+                else if (type == "date") {
+                    var str = (""+record[key]).replace(/\//g, "-");// date mysql  2018-09-21
+                    sql2 += "'" + str + "'";
+                }
             }
 
         }
@@ -159,30 +182,19 @@ var recordController = (function () {
 
         mainController.execSql(sql, function (err, json) {
             if (err)
-                mainController.setErrorMessage(err);
-            $("#dialogDiv").dialog("close");
-            mainController.setMessage("enregistrement enregistré");
+                return callback(err);
+            return callback(null,"enregistrement crée");
 
-            var sql = "SELECT max(id) as id from " + context.currentTable;
-            mainController.execSql(sql, function (err, json) {
-                if (err)
-                    mainController.setErrorMessage(err)
-                context.currentRecordId = json[0].id;
-                //    mainController.setTabs();
-
-
-            })
         })
-
 
     }
 
 
     self.deleteRecord = function () {
         var ok = true;
-        var linkedTables=[];
-        if(config.tableDefs[context.currentTable].relations)
-         linkedTables = Object.keys(config.tableDefs[context.currentTable].relations);
+        var linkedTables = [];
+        if (config.tableDefs[context.currentTable].relations)
+            linkedTables = Object.keys(config.tableDefs[context.currentTable].relations);
         async.eachSeries(linkedTables, function (linkedTable, callbackEach) {
             listController.loadLinkedRecords(linkedTable, null, function (err, result) {
                 if (err) {
@@ -208,21 +220,31 @@ var recordController = (function () {
             if (!ok)
                 return;
 
-
-            var sql = "delete from " + context.currentTable + " where id=" + context.currentRecordId;
-            mainController.execSql(sql, function (err, json) {
-                if (err)
-                    mainController.setErrorMessage(err)
-                mainController.setMessage("enregistrement supprimé");
+            self.execSQLDeleteRecord(context.currentTable, context.currentRecordId, function (err, result) {
+                if (err) {
+                    return mainController.setErrorMessage(err)
+                }
+                mainController.setMessage(result);
                 dialog.dialog("close");
                 listController.listRecords(context.currentListQueries[context.currentTable]);
-                //    context.dataTables[context.currentTable]. deleteSelectedRow()
-
-
             })
+        })
+    }
+
+
+
+
+
+    self.execSQLDeleteRecord=function(table,recordId, callback){
+        var sql = "delete from " + table + " where id=" + recordId;
+        mainController.execSql(sql, function (err, json) {
+            if (err)
+               return callback(err)
+            return callback(null,"enregistrement supprimé");
+
+
 
         })
-
 
     }
 
