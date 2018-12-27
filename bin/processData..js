@@ -230,7 +230,7 @@ var processData = {
                                     }
 
 
-                                   tablettesBoites.push({tablette: tablette, boites: boitesCotes});
+                                    tablettesBoites.push({tablette: tablette, boites: boitesCotes});
 
                                 }
 
@@ -257,9 +257,9 @@ var processData = {
                     function (callbackSeries) {
                         if (!obj.refoulement)
                             return callbackSeries(null, [])
-                        var tablettesRefoulees=[]
+                        var tablettesRefoulees = []
                         async.eachSeries(obj.refoulement, function (tabletteRefoulee, callbackEach) {// create relation
-                            tablettesRefoulees.push (tabletteRefoulee)
+                            tablettesRefoulees.push(tabletteRefoulee)
                             sql = "update magasin set metrage=null,id_versement=null, numVersement=null , cotesParTablette='' where id=" + tabletteRefoulee.id;
 
                             mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin2) {
@@ -304,12 +304,11 @@ var processData = {
                             "nbBoites": obj.nbBoites,
                             "epaisseurMoyBoite": obj.epaisseurMoyBoite,
                         },
-                        tablettes :results[1],
-                        refoulement :results[2],
-                        date:new Date()
+                        tablettes: results[1],
+                        refoulement: results[2],
+                        date: new Date()
 
                     }
-
 
 
                     return callback(err, resume);
@@ -319,6 +318,220 @@ var processData = {
         }
     }
 
+    ,
+    splitBoitesOnTablettes: function (sourceTablette, targetTablette, percentage) {
+
+        async.series([
+
+            // chercher tablettes
+            function (callbackSeries) {
+                var sql = "select * from tablette where id in =(" + sourceTablette.id + "," + targetTablette.id + ")";
+                mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+                    if (err) {
+                        return callbackSeries(err);
+                    }
+                })
+            },
+            function (callbackSeries) {
+            }], function (err) {
+
+
+        })
+
+
+    },
+    /**
+     *
+     *
+     *
+     *
+     * @param operation add-above,add-under, delete, split-above, split-under
+     * @param tablette de reference
+     * @param options if( split :splitPercentage)
+     * @param callback
+     */
+
+    modifytravee: function (operation, tablette, options, callback) {
+        if (!options)
+            options = {};
+
+        var array = tablette.coordonnees.split("-");
+        var offset = +1
+        if (operation.indexOf("above") > -1)
+            offset = -1
+        var indexNewTablette = parseInt(array[3]) + offset
+        if (array.length < 4)
+            return;
+
+        var magasin = array[0];
+        var epi = array[0] + "-" + array[1];
+        var travee = array[0] + "-" + array[1] + "-" + array[2];
+        var coordonnees = array[0] + "-" + array[1] + "-" + array[2] + "-" + (indexNewTablette);
+        var newTablette = {
+            "coordonnees": coordonnees,
+            "commentaires": null,
+            "numVersement": null,
+            "cotesParTablette": "",
+            "metrage": 0,
+            "id_versement": null,
+            "pretsSorties": null,
+            "DimTabletteCm": Math.round(tablette.DimTabletteMLineaire * 100),
+            "DimTabletteMLineaire": tablette.DimTabletteMLineaire,
+            "magasin": magasin,
+            "epi": epi,
+            "travee": travee,
+            "tablette": coordonnees
+        }
+
+
+        var tablettesTravee = []
+        async.series(
+            [
+                // chercher toutes les tablettes de la travee
+                function (callbackSeries) {
+                    var sql = "select * from magasin where travee='" + travee + "'";
+                    mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        tablettesTravee = result;
+                        return callbackSeries();
+                    })
+
+                },
+                // decaler les numeros
+                function (callbackSeries) {
+                    async.eachSeries(tablettesTravee, function (tablette, callbackEach) {
+                        var array = tablette.coordonnees.split("-")
+                        var index = parseInt(array[3]);
+                        if (index > indexNewTablette) {
+                            var indexStr = "" + index;
+                            if (indexStr.length == 1)
+                                indexStr = "0" + indexStr;
+                            var newCoordonnees = array[0] + "-" + array[1] + "-" + array[2] + "-" + indexStr;
+                            var sql = "update  magasin set coordonnees= '" + newCoordonnees + "' where id=" + tablette.id;
+                            mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+                                if (err) {
+                                    return callbackEach(err);
+                                }
+                                tablettesTravee = result;
+                                return callbackEach();
+                            })
+                        }
+                        else {
+                            return callbackEach();
+                        }
+
+
+                    }, function (err) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        return callbackSeries();
+                    })
+
+
+                },
+                // load DataModel
+                function (callbackSeries) {
+                    if (!mySQLproxy._dataModel)
+                        mySQLproxy.datamodel(mySqlConnectionOptions, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err);
+                            }
+                            return callbackSeries(null, result);
+
+                        })
+
+                },
+                // split boites (if necessary)
+                function (callbackSeries) {
+                    if (options.splitPercentage, tablette.children && tablette.children.length) {
+                        var moveFrom = tablette.children.length - Math.round((tablette.children.length / 100) * options.splitPercentage);
+
+                        var cotesParTabletteOld = ""
+                        var cotesParTabletteNew = ""
+                        tablette.children.forEach(function (boite, index) {
+                            if ((index) >= moveFrom) {
+                                if (cotesParTabletteNew.length > 0)
+                                    cotesParTabletteNew += " ";
+                                cotesParTabletteNew += boite
+                            } else {
+                                if (cotesParTabletteOld.length > 0)
+                                    cotesParTabletteOld += " ";
+                                cotesParTabletteOld += boite
+                            }
+                        })
+                        newTablette.cotesParTablette = cotesParTabletteNew;
+
+                        var sql = "update  magasin set cotesParTablette= '" + cotesParTabletteOld + "' where coordonnees='" + tablette.coordonnees+"'";
+                        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err)
+                            }
+                            return callbackSeries()
+                        })
+
+                    } else {
+                        return callbackSeries()
+                    }
+                }
+                ,
+
+
+                // inserer la nouvelle tablette
+                function (callbackSeries) {
+                    processData.execSqlCreateRecord("magasin", newTablette, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        return callbackSeries(null, result);
+                    })
+
+                }]
+            , function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, "done");
+            })
+    },
+
+
+    execSqlCreateRecord: function (table, record, callback) {
+        var sql1 = "insert into " + table + " ( ";
+        var sql2 = " values ( ";
+        var i = 0;
+        for (var key in record) {
+            if (i++ > 0) {
+                sql1 += ","
+                sql2 += ","
+            }
+            sql1 += key;
+            if (!record[key])
+                sql2 += "null";
+            else {
+                var type = mySQLproxy.getFieldType(table, key)
+                if (type == "number")
+                    sql2 += ("" + record[key]).replace(",", ".");
+                else if (type == "string")
+                    sql2 += "'" + record[key] + "'";
+                else if (type == "date") {
+                    var str = ("" + record[key]).replace(/\//g, "-");// date mysql  2018-09-21
+                    sql2 += "'" + str + "'";
+                }
+            }
+
+        }
+        var sql = sql1 + ")" + sql2 + ")";
+        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+            if (err)
+                return callback(err);
+            return callback(null, "enregistrement crée");
+
+        })
+
+    }
 
 }
 
@@ -355,5 +568,20 @@ if (false) {
     processData.versementBoitesToTablettes(obj, function (err, result) {
         var x = result;
     })
+}
+if (false) {
+    var tablette = {
+        coordonnees: 'A-01-01-3',
+        "DimTabletteCm": 115,
+        "DimTabletteMLineaire": 1.15,
+       // cotesParTablette: "XO79 XO80 XO81 XO82 XO83 XO84 XO85 XO86 XO87 XO88 XO89"
+        children:"XO79 XO80 XO81 XO82 XO83 XO84 XO85 XO86 XO87 XO88 XO89".split(" ")
+    }
+
+    processData.modifytravee("split", tablette, {splitPercentage: 50}, function (err, result) {
+        var w = result();
+    })
+
+
 }
 

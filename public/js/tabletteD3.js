@@ -5,13 +5,14 @@ var tabletteD3 = (function () {
 
     self.ontabletteOperationSelect = function (select) {
         var operation = $(select).val();
+
         if (operation == "createUnder") {
-            html = "<button onclick='tabletteD3.createUnder();'>OK</button>";
+            html = "<button onclick='tabletteD3.create();'>OK</button>";
             $("#popupD3DivOperationDiv").html(html);
 
         }
         else if (operation == "split") {
-            var html = "<br>Pourcentage restant sur l'ancienne tablette : <input id=tablette_percentageRemainingOnTopTablette value='50'> %";
+            var html = "<br>Pourcentage restant sur l'ancienne tablette : <input size='3' id=tablette_percentageRemainingOnTopTablette value='50'> %";
             html += "<button onclick='tabletteD3.split();'>OK</button>";
             $("#popupD3DivOperationDiv").html(html);
 
@@ -28,8 +29,14 @@ var tabletteD3 = (function () {
 
     self.split = function () {
 
+        req.body.operation, req.body.tablette, req.body.options,
+
         var tablette = self.currentTablette;
-        magasinD3.modifyDrawing(tablette.name)
+        var percentage = parseInt($("#tablette_percentageRemainingOnTopTablette").val());
+        self.createUnder(function(err, newTablette){
+var xx=newTablette;
+
+        })
 
 
     }
@@ -46,35 +53,47 @@ var tabletteD3 = (function () {
         recordController.execSQLDeleteRecord("magasin", tablette.id, function (err, result) {
             if (err)
                 return;
-            $("#popupD3Div").css("visibility", "hidden")
+            $("#popupD3Div").css("visibility", "hidden");
             magasinD3.drawMagasins()
+
+
+            /*    var travee = tablette.name.substring(0, tablette.name.lastIndexOf("-"))
+                var subTree = magasinD3.findElementInDataTree(travee);
+                var toRemoveIndex = -1;
+                subTree.children.forEach(function (tabletteOld, index) {
+                    if (tablette.name == tabletteOld.name)
+                        toRemoveIndex = index;
+                })
+                subTree.children.splice(toRemoveIndex, 1);
+
+                magasinD3.drawTravee(subTree, epiG);*/
 
         });
 
 
     }
-    self.createUnder = function () {
+    self.create = function (callback) {
         if (!self.currentTablette)
             return;
-        var array= self.currentTablette.name.split("-");
-        if(array.length<4)
+        var array = self.currentTablette.name.split("-");
+        if (array.length < 4)
             return;
 
-        var magasin=array[0];
-        var epi=array[0]+"-"+array[1];
-        var travee=array[0]+"-"+array[1]+"-"+array[2];
-        var coordonnees=array[0]+"-"+array[1]+"-"+array[2]+"-"+(parseInt(array[3])+1);
+        var magasin = array[0];
+        var epi = array[0] + "-" + array[1];
+        var travee = array[0] + "-" + array[1] + "-" + array[2];
+        var coordonnees = array[0] + "-" + array[1] + "-" + array[2] + "-" + (parseInt(array[3]) + 1);
 
 
-        var newTablette= {
-            "coordonnees":coordonnees,
+        var newTablette = {
+            "coordonnees": coordonnees,
             "commentaires": null,
-            "numVersement":null,
+            "numVersement": null,
             "cotesParTablette": "",
             "metrage": 0,
             "id_versement": null,
             "pretsSorties": null,
-            "DimTabletteCm": self.currentTablette.longueurM*100,
+            "DimTabletteCm": self.currentTablette.longueurM * 100,
             "DimTabletteMLineaire": self.currentTablette.longueurM,
             "magasin": magasin,
             "epi": epi,
@@ -82,10 +101,14 @@ var tabletteD3 = (function () {
             "tablette": coordonnees
         }
 
-        recordController.execSqlCreateRecord("magasin",newTablette,function(err, result){
+        recordController.execSqlCreateRecord("magasin", newTablette, function (err, result) {
             if (err)
+                if(callback)
+                    return callback(err);
                 return;
             $("#popupD3Div").css("visibility", "hidden");
+            if(callback)
+                return callback(null,newTablette);
             magasinD3.drawMagasins()
         })
 

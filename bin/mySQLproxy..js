@@ -3,9 +3,12 @@ var mysql = require('mysql');
 var mySqlConnectionOptions=require("../bin/globalParams..js").mysqlConnection;
 
 
+var numberTypes = ["float", "double", "decimal", "int"];
+var stringTypes = ["char", "varchar", "text",];
 
 var connections = {};
 var mySQLproxy = {
+    _dataModel:null ,
     getConnection: function (connOptions, callback) {
         if(!connOptions)
             connOptions=mySqlConnectionOptions;
@@ -73,7 +76,7 @@ var mySQLproxy = {
                         })
                     }
                 })
-
+                mySQLproxy._dataModel=model;
                 return callback(null, model);
             });
         });
@@ -86,6 +89,24 @@ var mySQLproxy = {
 
 
 
+
+
+    },
+    getFieldType:function(table,fieldName) {
+
+        var type;
+
+        mySQLproxy._dataModel[table].forEach(function (field) {
+            if (field.name == fieldName)
+                type = field.dataType;
+        })
+
+        if (numberTypes.indexOf(type) > -1)
+            return "number";
+        if (stringTypes.indexOf(type) > -1)
+            return "string";
+
+        return type;
 
 
     }

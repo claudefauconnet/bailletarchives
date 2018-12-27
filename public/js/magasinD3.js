@@ -602,59 +602,102 @@ var magasinD3 = (function () {
 
 
     }
+    self.refreshDrawingElement=function(subTree){
+        var d3Obj=d3.select("#"+subTree.name);
 
-    self.modifyDrawing = function (coordonnees, obj, operation) {
-
-
-        function findCoordinates(coordonnees) {
-            var indexArray = [];
-            var obj = null;
-            var coordonneesArray = coordonnees.split("-");
-            magasinData.children.forEach(function (mag, indexMag) {
-                if (coordonneesArray[0] == mag.name) {
-                    indexArray.push(indexMag);
-                    if (!obj && coordonneesArray.length == 1)
-                        obj = magasinData.children[indexMag];
+        d3Obj.selectAll("g").remove()
 
 
-                    mag.children.forEach(function (epi, indexEpi) {
-                        if (coordonneesArray[0] + "-" + coordonneesArray[1] == epi.name) {
-                            indexArray.push(indexEpi);
-                            if (!obj && coordonneesArray.length == 2)
-                                obj = magasinData.children[indexMag].children[indexEpi];
+        var children = d3Obj.select(function () {
+            return this.childNodes;
+        })
+        subTree.children.forEach(function(child){
 
-                            epi.children.forEach(function (travee, indexTravee) {
-                                if (coordonneesArray[0] + "-" + coordonneesArray[1] + "-" + coordonneesArray[2] == travee.name) {
-                                    indexArray.push(indexTravee);
-                                    if (!obj && coordonneesArray.length == 3)
-                                        obj = magasinData.children[indexMag].children[indexEpi].children[indexTravee];
+        })
+        vd3Obj.remove();
 
-                                    travee.children.forEach(function (tablette, indexTablette) {
-                                        if (!obj && coordonnees == tablette.name) {
-                                            indexArray.push(indexEpi);
-                                            obj = magasinData.children[indexMag].children[indexEpi].children[indexTravee].children[indexTablette];
-                                        }
 
-                                    })
-                                }
-                            })
-                        }
-                    })
 
-                }
+
+
+    }
+
+    self.modifyDrawing = function (operation,coordonnees, newObj ) {
+
+        var d3Obj = svg.select("#" + coordonnees);
+        var parentCoords= coordonnees.substring(0, coordonnees.lastIndexOf("-"));
+        var parentObj=svg.select("#" + parentCoords);
+        var siblings = parentObj.select(function () {
+            return this.childNodes;
+        })
+        if( operation=="delete") {
+
+            siblings.each(function(sibling){
+                var xx=d3.select(this);
             })
+            svg.select("#" + coordonnees).remove();
+        }
 
-            return obj;
+
+
+
+        var d3Obj=svg.select("#" + coordonnees)
+        var xxx = d3Obj.attr('class');
+        if(d3Obj.length>0) {
+            d3Obj=d3Obj[0]
+
+            var type = d3Obj.attr("id")
+            var classed = d3Obj.classed()
+
+
 
 
         }
 
-        var d3Obj = svg.selectAll("#" + coordonnees);
+      //  svg.selectAll("#" + coordonnees).remove()
+
+    }
+
+   self.findElementInDataTree=function(coordonnees) {
+        var indexArray = [];
+        var obj = null;
+        var coordonneesArray = coordonnees.split("-");
+        magasinData.children.forEach(function (mag, indexMag) {
+            if (coordonneesArray[0] == mag.name) {
+                indexArray.push(indexMag);
+                if (!obj && coordonneesArray.length == 1)
+                    obj = magasinData.children[indexMag];
 
 
-        var dataOb = findCoordinates(coordonnees);
-        var ss = d3Obj
-        svg.selectAll("#" + coordonnees).remove()
+                mag.children.forEach(function (epi, indexEpi) {
+                    if (coordonneesArray[0] + "-" + coordonneesArray[1] == epi.name) {
+                        indexArray.push(indexEpi);
+                        if (!obj && coordonneesArray.length == 2)
+                            obj = magasinData.children[indexMag].children[indexEpi];
+
+                        epi.children.forEach(function (travee, indexTravee) {
+                            if (coordonneesArray[0] + "-" + coordonneesArray[1] + "-" + coordonneesArray[2] == travee.name) {
+                                indexArray.push(indexTravee);
+                                if (!obj && coordonneesArray.length == 3)
+                                    obj = magasinData.children[indexMag].children[indexEpi].children[indexTravee];
+
+                                travee.children.forEach(function (tablette, indexTablette) {
+                                    if (!obj && coordonnees == tablette.name) {
+                                        indexArray.push(indexEpi);
+                                        obj = magasinData.children[indexMag].children[indexEpi].children[indexTravee].children[indexTablette];
+                                    }
+
+                                })
+                            }
+                        })
+                    }
+                })
+
+            }
+        })
+
+        return obj;
+
 
     }
 
