@@ -1,6 +1,5 @@
 var magasinD3dialog = (function () {
         var self = {};
-        var urlPrefix = ".";
         var tailleMoyenneBoite = 11;
         var currentVersement = null;
 
@@ -38,7 +37,7 @@ var magasinD3dialog = (function () {
 
                 $.ajax({
                     type: "POST",
-                    url: urlPrefix + "/mysql",
+                    url: mainController.urlPrefix + "/mysql",
                     data: payload,
                     dataType: "json",
                     success: function (dataVersement) {
@@ -51,7 +50,7 @@ var magasinD3dialog = (function () {
 
                         $.ajax({
                             type: "POST",
-                            url: urlPrefix + "/mysql",
+                            url: mainController.urlPrefix + "/mysql",
                             data: payload,
                             dataType: "json",
                             success: function (dataMagasin) {
@@ -138,7 +137,7 @@ var magasinD3dialog = (function () {
 
             $.ajax({
                 type: "POST",
-                url: urlPrefix + "/versementBoitesToTablettes",
+                url: mainController.urlPrefix + "/versementBoitesToTablettes",
                 data: payload,
                 dataType: "json",
                 success: function (data) {

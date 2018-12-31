@@ -4,7 +4,7 @@ var magasinD3 = (function () {
     self.currentTablette = {}
     self.currentBoite = {}
 
-    var urlPrefix = "."
+
     var magasinData;
     var svg;
     var totalWidth;
@@ -68,7 +68,7 @@ var magasinD3 = (function () {
         //d3.json("./js/d3/magasin.json", function (data) {
         d3.select("svg").remove();
         $("#graphDiv").html("");
-        d3.json(urlPrefix + "/magasinD3Tree", function (data) {
+        d3.json(mainController.urlPrefix + "/magasinD3Tree", function (data) {
             var nMag = data.children.length;
             magasinData = data;
 
@@ -388,7 +388,6 @@ var magasinD3 = (function () {
 
         function onBoiteClick(boite, x, y) {
             self.currentBoite = boite;
-            var urlPrefix = "."
             var sql = "select * from versement where numVersement='" + boite.numVersement + "'"
             var payload = {
                 exec: 1,
@@ -397,7 +396,7 @@ var magasinD3 = (function () {
 
             $.ajax({
                 type: "POST",
-                url: urlPrefix + "/mysql",
+                url: mainController.urlPrefix + "/mysql",
                 data: payload,
                 dataType: "json",
                 success: function (data) {

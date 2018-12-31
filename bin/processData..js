@@ -355,18 +355,18 @@ var processData = {
         if (!options)
             options = {};
 
-        var array = tablette.coordonnees.split("-");
+        var array = tablette.name.split("-");
         var offset = +1
-        if (operation.indexOf("above") > -1)
+        if (options.above)
             offset = -1
-        var indexNewTablette = parseInt(array[3]) + offset
+        var indexTablette = parseInt(array[3]) + offset
         if (array.length < 4)
             return;
 
         var magasin = array[0];
         var epi = array[0] + "-" + array[1];
         var travee = array[0] + "-" + array[1] + "-" + array[2];
-        var coordonnees = array[0] + "-" + array[1] + "-" + array[2] + "-" + (indexNewTablette);
+        var coordonnees = array[0] + "-" + array[1] + "-" + array[2] + "-" + (indexTablette);
         var newTablette = {
             "coordonnees": coordonnees,
             "commentaires": null,
@@ -401,15 +401,33 @@ var processData = {
                 },
                 // decaler les numeros
                 function (callbackSeries) {
-                    async.eachSeries(tablettesTravee, function (tablette, callbackEach) {
-                        var array = tablette.coordonnees.split("-")
+                    var offset = 1
+                    async.eachSeries(tablettesTravee, function (tablette2, callbackEach) {
+                        var array = tablette2.coordonnees.split("-");
+
                         var index = parseInt(array[3]);
-                        if (index > indexNewTablette) {
+
+                        if (operation == "delete" && index <= indexTablette) {
+                            return callbackEach();
+                            offset = -1;
+                        }
+
+                        else if (options.above && index < indexTablette) {
+                            return callbackEach();
+                        }
+
+
+                        else if (index <= indexTablette) {
+                            return callbackEach();
+                        }
+                        else {
+
+                            index += offset;
                             var indexStr = "" + index;
                             if (indexStr.length == 1)
                                 indexStr = "0" + indexStr;
                             var newCoordonnees = array[0] + "-" + array[1] + "-" + array[2] + "-" + indexStr;
-                            var sql = "update  magasin set coordonnees= '" + newCoordonnees + "' where id=" + tablette.id;
+                            var sql = "update  magasin set coordonnees= '" + newCoordonnees + "' where id=" + tablette2.id;
                             mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
                                 if (err) {
                                     return callbackEach(err);
@@ -417,9 +435,6 @@ var processData = {
                                 tablettesTravee = result;
                                 return callbackEach();
                             })
-                        }
-                        else {
-                            return callbackEach();
                         }
 
 
@@ -432,21 +447,10 @@ var processData = {
 
 
                 },
-                // load DataModel
-                function (callbackSeries) {
-                    if (!mySQLproxy._dataModel)
-                        mySQLproxy.datamodel(mySqlConnectionOptions, function (err, result) {
-                            if (err) {
-                                return callbackSeries(err);
-                            }
-                            return callbackSeries(null, result);
 
-                        })
-
-                },
                 // split boites (if necessary)
                 function (callbackSeries) {
-                    if (options.splitPercentage, tablette.children && tablette.children.length) {
+                    if (operation == "split" && options.splitPercentage, tablette.children && tablette.children.length) {
                         var moveFrom = tablette.children.length - Math.round((tablette.children.length / 100) * options.splitPercentage);
 
                         var cotesParTabletteOld = ""
@@ -464,7 +468,7 @@ var processData = {
                         })
                         newTablette.cotesParTablette = cotesParTabletteNew;
 
-                        var sql = "update  magasin set cotesParTablette= '" + cotesParTabletteOld + "' where coordonnees='" + tablette.coordonnees+"'";
+                        var sql = "update  magasin set cotesParTablette= '" + cotesParTabletteOld + "' where coordonnees='" + tablette.coordonnees + "'";
                         mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
                             if (err) {
                                 return callbackSeries(err)
@@ -478,16 +482,26 @@ var processData = {
                 }
                 ,
 
-
-                // inserer la nouvelle tablette
+                // inserer la nouvelle tablette ou detruire l'ancienne
                 function (callbackSeries) {
-                    processData.execSqlCreateRecord("magasin", newTablette, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        return callbackSeries(null, result);
-                    })
+                    if (operation == 'delete') {
+                        var sql = "delete from  magasin  where id=" + tablette.id;
+                        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err)
+                            }
+                            return callbackSeries()
+                        })
 
+
+                    } else {
+                        processData.execSqlCreateRecord("magasin", newTablette, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err);
+                            }
+                            return callbackSeries(null, result);
+                        })
+                    }
                 }]
             , function (err) {
                 if (err) {
@@ -499,39 +513,60 @@ var processData = {
 
 
     execSqlCreateRecord: function (table, record, callback) {
-        var sql1 = "insert into " + table + " ( ";
-        var sql2 = " values ( ";
-        var i = 0;
-        for (var key in record) {
-            if (i++ > 0) {
-                sql1 += ","
-                sql2 += ","
-            }
-            sql1 += key;
-            if (!record[key])
-                sql2 += "null";
-            else {
-                var type = mySQLproxy.getFieldType(table, key)
-                if (type == "number")
-                    sql2 += ("" + record[key]).replace(",", ".");
-                else if (type == "string")
-                    sql2 += "'" + record[key] + "'";
-                else if (type == "date") {
-                    var str = ("" + record[key]).replace(/\//g, "-");// date mysql  2018-09-21
-                    sql2 += "'" + str + "'";
-                }
-            }
+        async.series(
+            [
+                // loadDataModel
+                function (callbackSeries) {
 
-        }
-        var sql = sql1 + ")" + sql2 + ")";
-        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
-            if (err)
-                return callback(err);
-            return callback(null, "enregistrement crée");
+                    if (!mySQLproxy._dataModel)
+                        mySQLproxy.datamodel(mySqlConnectionOptions, function (err, result) {
+                            return callbackSeries(err, result);
+                        })
+                    else
+                        return callbackSeries();
+                },
+                // exec create sql
+                function (callbackSeries) {
 
-        })
+                    var sql1 = "insert into " + table + " ( ";
+                    var sql2 = " values ( ";
+                    var i = 0;
+                    for (var key in record) {
+                        if (i++ > 0) {
+                            sql1 += ","
+                            sql2 += ","
+                        }
+                        sql1 += key;
+                        if (!record[key])
+                            sql2 += "null";
+                        else {
+                            var type = mySQLproxy.getFieldType(table, key)
+                            if (type == "number")
+                                sql2 += ("" + record[key]).replace(",", ".");
+                            else if (type == "string")
+                                sql2 += "'" + record[key] + "'";
+                            else if (type == "date") {
+                                var str = ("" + record[key]).replace(/\//g, "-");// date mysql  2018-09-21
+                                sql2 += "'" + str + "'";
+                            }
+                        }
 
+                    }
+                    var sql = sql1 + ")" + sql2 + ")";
+                    mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+                        return callbackSeries(err, result);
+
+                    })
+
+
+                }], function (err) {
+                if (err)
+                    return callback(err);
+                return callback(null, "enregistrement crée");
+
+            })
     }
+
 
 }
 
@@ -574,8 +609,8 @@ if (false) {
         coordonnees: 'A-01-01-3',
         "DimTabletteCm": 115,
         "DimTabletteMLineaire": 1.15,
-       // cotesParTablette: "XO79 XO80 XO81 XO82 XO83 XO84 XO85 XO86 XO87 XO88 XO89"
-        children:"XO79 XO80 XO81 XO82 XO83 XO84 XO85 XO86 XO87 XO88 XO89".split(" ")
+        // cotesParTablette: "XO79 XO80 XO81 XO82 XO83 XO84 XO85 XO86 XO87 XO88 XO89"
+        children: "XO79 XO80 XO81 XO82 XO83 XO84 XO85 XO86 XO87 XO88 XO89".split(" ")
     }
 
     processData.modifytravee("split", tablette, {splitPercentage: 50}, function (err, result) {

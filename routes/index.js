@@ -37,6 +37,13 @@ router.post('/versementBoitesToTablettes', function (req, res, next) {
 
 });
 
+router.post('/modifytravee', function (req, res, next) {
+    processData.modifytravee (req.body.operation,JSON.parse( req.body.tablette), JSON.parse(req.body.options),  function (err, result) {
+        processResponse(res, err, result)
+    })
+
+});
+
 
 router.get('/magasinD3Tree', function (req, res, next) {
 

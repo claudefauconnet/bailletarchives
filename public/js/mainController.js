@@ -1,6 +1,6 @@
 var mainController = (function () {
     var self = {};
-    var urlPrefix="."
+   self.urlPrefix="."
     self.totalDims = {};
 
     self.leftPanelWidth = 250;
@@ -23,7 +23,7 @@ var mainController = (function () {
 
         $.ajax({
             type: "POST",
-            url: urlPrefix+"/mysql",
+            url: mainController.urlPrefix+"/mysql",
             data: payload,
             dataType: "json",
             success: function (json) {
@@ -245,7 +245,7 @@ var mainController = (function () {
 
         $.ajax({
             type: "POST",
-            url: urlPrefix+"/mysql",
+            url: mainController.urlPrefix+"/mysql",
             data: payload,
             dataType: "json",
             success: function (json) {
