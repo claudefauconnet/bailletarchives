@@ -12,13 +12,11 @@
     <script src="js/async.js"></script>
 
 
-
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css"/>
     <script src="js/dataTable.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"></script>
-
-
-
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"></script>
 
 
     <script src="js/jsTree/treeController.js"></script>
@@ -37,6 +35,7 @@
 
 
     <script src="js/magasinD3.js"></script>
+    <script src="js/sorties.js"></script>
 
     <script src="js/tabletteD3.js"></script>
     <script src="js/magasinD3dialog.js"></script>
@@ -56,12 +55,15 @@
             width: 100px;
 
         }
-        button{
+
+        button {
             width: inherit;
             margin: 3px;
             padding: 3px;
+            font-size: 12px;
         }
-        input{
+
+        input {
             width: 150px;
         }
 
@@ -88,50 +90,50 @@
             background-color: #9ca7b3;
             background-color: snow;
 
-
         }
 
         #listRecordsDiv, #linkedRecordsDiv {
 
-            overflow:auto ;
+            overflow: auto;
 
         }
 
-       #listRecordsDiv{
+        #listRecordsDiv {
             border: #0a6aa1;
             border-width: 2px;
             border-style: solid;
         }
 
-       .myDatatable td {
+        .myDatatable td {
             border-bottom-style: solid;
             border-bottom-width: 1px;
             border-bottom-color: #93aeca;
             border-left-style: solid;
             border-left-width: 1px;
             border-left-color: #93aeca;
-           width:100px !important;
+            width: 100px !important;
 
             height: 20px !important;
         }
-        .dataTables_wrapper{
-            margin:5px;
+
+        .dataTables_wrapper {
+            margin: 5px;
         }
 
         .dt-buttons {
             left: 200px;
             position: relative;
         }
+
         .dataTables_paginate {
             font-weight: bold;
         }
 
-
-
         #messageDiv {
             font-style: italic;
         }
-        .searchCriteria{
+
+        .searchCriteria {
             background-color: white;
             border-radius: 5px;
             padding: 2px;
@@ -160,34 +162,30 @@
             color: #0a6aa1;
 
         }
-        #recordMessageSpan{
 
-            font :bold 14px Serif;
-            color :red;
+        #recordMessageSpan {
+
+            font: bold 14px Serif;
+            color: red;
         }
 
-     /*   table thead th {
-            transform: rotate(-45deg);
-            transform-origin: top left;
-        }
+        /*   table thead th {
+               transform: rotate(-45deg);
+               transform-origin: top left;
+           }
 
-        .table-scrollable{
-            overflow: visible;
-        }*/
+           .table-scrollable{
+               overflow: visible;
+           }*/
 
         div.dt-buttons {
             float: left;
         }
 
-        .ui-accordion-header{
+        .ui-accordion-header {
             font-weight: bold;
             color: #0a6aa1;
         }
-
-
-
-
-
 
         #popupD3Div {
             visibility: hidden;
@@ -216,38 +214,53 @@
             font-weight: bold;
         }
 
+        .alignCenterFlex {
+            display: flex;
+            align-content: center
+        }
 
 
     </style>
 
     <script>
-        var dialog,dialog2,dialog3;
+        var dialog, dialog2, dialog3;
         $(function () {
 
             mainController.setDivsSize();
             $("#leftAccordion").accordion({
 
-                activate: function( event, ui ) {
+                activate: function (event, ui) {
                     var content = ui;
                     if (ui.newHeader.text() == "Magasins")
                         magasinD3.init("listRecordsDiv")
 
-                        }
+                }
 
             });
 
             $("#tabs").tabs({
                 activate: function (event, ui) {
                     var index = ui.newTab.index();
-                    if (index>0) {
+                    if (index > 0) {
                         mainController.loadTab(index)
                     }
 
                 }
             });
+
+            $("#magasinsDivTabs").tabs({
+                activate: function (event, ui) {
+                    var index = ui.newTab.index();
+                    if (index > 0) {
+
+                    }
+
+                }
+            });
+
             dialog = $("#dialogDiv").dialog({
                 autoOpen: false,
-                height: mainController.totalDims.h  -100,
+                height: mainController.totalDims.h - 100,
                 width: "100%",
                 modal: true,
                 buttons: {
@@ -298,7 +311,6 @@
             });
 
 
-
             $("#loginDialogDiv").dialog({
                 autoOpen: false,
                 modal: true,
@@ -312,13 +324,11 @@
                 }
             });
             if (false) {
-                $("#searchTableInput").attr("disabled",true)
-                $("#leftAccordion").css("opacity",0.2);
+                $("#searchTableInput").attr("disabled", true)
+                $("#leftAccordion").css("opacity", 0.2);
                 $("#loginDialogDiv").dialog("open");
             }
             mainController.bindActions();
-
-
 
 
             mainController.loadDataModel(function (err, result) {
@@ -331,8 +341,6 @@
             });
 
 
-
-
         })
 
     </script>
@@ -341,12 +349,12 @@
 <div id="messageDiv"></div>
 <div id="main">
 
-    <div id="left" >
+    <div id="left">
 
         <div id="leftAccordion">
             <h1>Données</h1>
             <div id="versementsDiv" class="accordionInnerDiv">
-                <table align="center" >
+                <table align="center">
                     <tr>
                         <td>
                             table
@@ -355,7 +363,7 @@
                     <tr>
                         <td>
                             <select id="searchTableInput" size="5"></select>
-                            <button id="addRecordButton"  style="width:60px">Ajouter</button>&nbsp;
+                            <button id="addRecordButton" style="width:60px">Ajouter</button>&nbsp;
                         </td>
                     </tr>
                     <tr>
@@ -371,26 +379,28 @@
 
                     <tr>
                         <td>
-                            <select id="searchOperatorInput"></select>  <input id="searchValueInput" style="width:100px"/>
+                            <select id="searchOperatorInput"></select> <input id="searchValueInput"
+                                                                              style="width:100px"/>
                         </td>
                     </tr>
 
                     <tr>
                         <td>
 
-                            <button id="andSearchButton" style="width:20px">  + </button>
-                            <img src='images/clear.png' style="vertical-align: middle" width='20px'  onclick='listController.removeSearchCriteria(-1)'>
-                            <button id="searchButton" > chercher</button>
+                            <button id="andSearchButton" style="width:20px"> +</button>
+                            <img src='images/clear.png' style="vertical-align: middle" width='20px'
+                                 onclick='listController.removeSearchCriteria(-1)'>
+                            <button id="searchButton"> chercher</button>
 
 
                         </td>
                     </tr>
                     <tr>
                         <td>
-<div id="searchCriteriaDiv">
+                            <div id="searchCriteriaDiv">
 
 
-</div>
+                            </div>
                         </td>
                     </tr>
                 </table>
@@ -398,26 +408,47 @@
             </div>
             <h1>Magasins</h1>
             <div id="MagasinsDiv" class="accordionInnerDiv">
-
-
-                <button onclick="magasinD3.initialZoom()">initial Zoom</button>
-                <button onclick="magasinD3.searchVersement('0114')">Localiser versement</button>
-                <button onclick="magasinD3.showDialogChercherTablettesPourVersement()">Integrer versement</button>
                 <button onclick="magasinD3.clearHighlights()">effacer</button>
+                <button onclick="magasinD3.initialZoom()">initial Zoom</button>
                 <button onclick="magasinD3.modifyDrawing('delete','B-07-09-03')">test</button>
+                <button onclick="magasinD3.writeInCache()">savecache</button>
+                <button onclick="magasinD3.loadCache()">loadcache</button>
 
 
-<br>
+
+                <div id="magasinsDivTabs" style=" width: 220px;min-height: 300px;left: -20px;">
+                    <ul>
+                        <li><a href="#magasinsDivTabs_versement">versements</a></li>
+                        <li><a href="#magasinsDivTabs_sorties">sorties</a></li>
+
+                    </ul>
+
+                    <div id="magasinsDivTabs_sorties" class="alignCenterFlex">
+                        <button onclick="sorties.highlightSorties()">voir les sorties</button>
+                        <button onclick="sorties.manageSorties()">gérer sorties</button>
+                    </div>
+
+
+                    <div id="magasinsDivTabs_boites"  class="alignCenterFlex">
+                        <button onclick="magasinD3.searchVersement('0114')">Localiser versement</button>
+                        <button onclick="magasinD3.showDialogChercherTablettesPourVersement()">Integrer versement
+                        </button>
+                    </div>
+
+
+                </div>
+
+                <br>
                 <span id="messageSpan"></span>
 
             </div>
-           <h1>Outils</h1>
-              <div id="tooldsDiv" class="accordionInnerDiv">
+            <h1>Outils</h1>
+            <div id="tooldsDiv" class="accordionInnerDiv">
 
-                  <select id="toolsSelect" size="10" style="left: -30px;position: relative;">
-                  </select>
+                <select id="toolsSelect" size="10" style="left: -30px;position: relative;">
+                </select>
 
-              </div>
+            </div>
 
 
             <h1>Statistiques</h1>
@@ -448,7 +479,7 @@
         <ul>
             <li><a href="#tabs-recordDiv">Details</a></li>
             <li><a href="#tabs-linkedRecordDiv1">LinkedRecord</a></li>
-          <!--  <li><a href="#tabs-linkedRecordDiv2">LinkedRecord</a></li>-->
+            <!--  <li><a href="#tabs-linkedRecordDiv2">LinkedRecord</a></li>-->
 
 
         </ul>
@@ -458,25 +489,25 @@
         </div>
         <div id="tabs-linkedRecordDiv1" class="dialogTab">
 
-         <!--   <button id="deleteLinkedRecordButton">Supprimer lien</button>
-            <button class="showAddLinkedRecordButton">Ajouter lien</button>-->
+            <!--   <button id="deleteLinkedRecordButton">Supprimer lien</button>
+               <button class="showAddLinkedRecordButton">Ajouter lien</button>-->
             <div id="linkedRecordsDiv" class="dataTableDiv"></div>
 
 
         </div>
-     <!--   <div id="tabs-linkedRecordDiv2" class="dialogTab">
-            <button id="deleteLinkedRecordButton2">Délier</button>
-            <button class="showAddLinkedRecordButton">Lier</button>
-            <div id="linkedRecordsDiv2" class="dataTableDiv"></div>
+        <!--   <div id="tabs-linkedRecordDiv2" class="dialogTab">
+               <button id="deleteLinkedRecordButton2">Délier</button>
+               <button class="showAddLinkedRecordButton">Lier</button>
+               <div id="linkedRecordsDiv2" class="dataTableDiv"></div>
 
 
-        </div>-->
+           </div>-->
 
 
     </div>
 </div>
 <div id="dialog2Div">
-     <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput">
+    <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput">
     <button id="searchLinkedRecordsButton">chercher</button>
     <button id="addLinkedRecordButton">ajouter lien</button>
     <div id="new_linkedRecordsDiv" class="dataTableDiv"></div>
@@ -485,10 +516,6 @@
 <div id="dialog3Div">
 
 </div>
-
-
-
-
 
 
 <div id="loginDialogDiv" title="Connexion">

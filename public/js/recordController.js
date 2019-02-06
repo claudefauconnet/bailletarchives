@@ -320,10 +320,7 @@ var recordController = (function () {
 
                 if (type == 'date') {
                     var date = new Date(value);
-                    if (date instanceof Date && isFinite(date))
-                        value = date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
-                    else
-                        value = "";
+                  value=util.dateToStringFR(date);
 
                 }
                 else if (type == 'number') {

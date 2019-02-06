@@ -107,11 +107,11 @@ var dataTable = function () {
                     "render": function (data, type, row, meta) {
                         var str = "";
                         if (data != null && data != "" && data.indexOf("0000") < 0) {
+
                             var date = new Date(data);
-                            str = date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
+                           str=util.dateToStringFR(date);
                         }
                         return str;
-
                     },
                     "targets": self.dateColumns
                 },
@@ -135,9 +135,6 @@ var dataTable = function () {
             },
 
 
-
-
-
         })
 
         table.columns.adjust().draw();
@@ -150,22 +147,22 @@ var dataTable = function () {
                 $(this).removeClass('selected');
                 $("#table_" + containerDiv + " tbody tr").css("height", "20px");
             }
-          //  else {
-                if (!event.ctrlKey)
-                    $('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
-                if (options.onClick) {
+            //  else {
+            if (!event.ctrlKey)
+                $('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+            if (options.onClick) {
 
-                    var px = event.clientX;
-                    var py = event.clientY;
-                    this.selectedRow = table.row(this);
-                    var line = table.row(this).data();
-                    options.onClick(line);
+                var px = event.clientX;
+                var py = event.clientY;
+                this.selectedRow = table.row(this);
+                var line = table.row(this).data();
+                options.onClick(line);
 
-                }
+            }
 
 
-           // }
+            // }
 
         });
 
@@ -188,11 +185,11 @@ var dataTable = function () {
 
 
         }
-        this.deleteSelectedRow=function(){
-        var xx= this.table.row('.selected')
-            this.table.row('.selected').remove().draw(  );
+    this.deleteSelectedRow = function () {
+        var xx = this.table.row('.selected')
+        this.table.row('.selected').remove().draw();
 
-        }
+    }
 
 
 }

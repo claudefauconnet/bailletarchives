@@ -3,6 +3,7 @@ var magasinD3 = (function () {
     self.currentVersement = {}
     self.currentTablette = {}
     self.currentBoite = {}
+    var svgCache="";
 
 
     var magasinData;
@@ -23,6 +24,12 @@ var magasinD3 = (function () {
     var nMagByLine = 10;
     var drawEpis = true;
     var drawTravees = true;
+    var drawTablettes = true;
+    var drawBoites = true;
+    var drawTraveeNumber=true;
+    var drawTabletteNumber=true;
+
+
     var palette = [
         "#0072d5",
         '#FF7D07',
@@ -68,6 +75,8 @@ var magasinD3 = (function () {
         //d3.json("./js/d3/magasin.json", function (data) {
         d3.select("svg").remove();
         $("#graphDiv").html("");
+
+        var startTime=new Date();
         d3.json(mainController.urlPrefix + "/magasinD3Tree", function (data) {
             var nMag = data.children.length;
             magasinData = data;
@@ -106,8 +115,10 @@ var magasinD3 = (function () {
                     magasin.w = magW;
                     var gMag = self.drawMagasin(magasin, svg);
 
+
+                    // draw epi
                     if (drawEpis) {
-                        var epiYOffset = 10
+                        var epiYOffset = 20
                         var epiW = magW;
                         var epiH = (magH) / magasin.children.length;
                         epiH = epiH - epiYOffset - 1
@@ -120,23 +131,24 @@ var magasinD3 = (function () {
                                 epi.y = epiY;
                                 epi.w = epiW;
                                 epi.h = epiH;
+                                var gEpi = self.drawEpi(epi, gMag);
 
-
-                                var traveeW = epiW / epi.children.length;
-                                var traveeH = epiH;
-                                var traveeX = epiX;
-                                var traveeY = epiY;
                                 if (drawTravees) {
+                                    // draw travee
+                                    var traveeW = epiW / epi.children.length;
+                                    var traveeH = epiH;
+                                    var traveeX = epiX+10;
+                                    var traveeY = epiY;
                                     epi.children.forEach(function (travee, indexTravee) {
-                                        var gEpi = self.drawEpi(epi, gMag);
-
-                                        // draw epi
                                         travee.x = traveeX;
                                         travee.y = traveeY;
                                         travee.w = traveeW;
                                         travee.h = traveeH;
                                         travee.indexEpi = indexEpi;
                                         travee.indexTravee = indexTravee;
+                                        if(indexTravee== epi.children.length-1)
+                                            travee.w -= 30;
+
                                         var gTravee = self.drawTravee(travee, gEpi);
 
 
@@ -145,49 +157,53 @@ var magasinD3 = (function () {
                                         var tabH = traveeH / travee.children.length;
                                         var tabX = traveeX;
                                         var tabY = traveeY;
-                                        travee.children.forEach(function (tab, indexTab) {
-                                            tab.x = tabX;
-                                            tab.y = tabY;
-                                            tab.h = tabH;
-                                            tab.w = tabW;
-                                            tab.index = indexTab
-                                            var gTablette = self.drawTablette(tab, gTravee)
+                                        if (drawTablettes) {
+                                            travee.children.forEach(function (tab, indexTab) {
+                                                tab.x = tabX;
+                                                tab.y = tabY;
+                                                tab.h = tabH;
+                                                tab.w = tabW;
+                                                tab.index = indexTab
+                                                var gTablette = self.drawTablette(tab, gTravee)
 
 
-                                            // draw boites
-                                            var bteW = (tabW - tabletteTextSpacing) / nBoitesTablette
-                                            var bteH = tabH - 1;
-                                            var bteX = tabX;
-                                            var bteY = tabY + 1;
+                                                // draw boites
+                                                var bteW = (tabW - tabletteTextSpacing) / nBoitesTablette
+                                                var bteH = tabH - 1;
+                                                var bteX = tabX;
+                                                var bteY = tabY + 1;
 
-                                            function getRandomColor() {
-                                                var letters = '0123456789ABCDEF';
-                                                var color = '#';
-                                                for (var i = 0; i < 6; i++) {
-                                                    color += letters[Math.floor(Math.random() * 16)];
+                                                if(drawBoites) {
+                                                    function getRandomColor() {
+                                                        var letters = '0123456789ABCDEF';
+                                                        var color = '#';
+                                                        for (var i = 0; i < 6; i++) {
+                                                            color += letters[Math.floor(Math.random() * 16)];
+                                                        }
+                                                        return color;
+                                                    }
+
+                                                    tab.children.forEach(function (boite, boiteIndex) {
+                                                        boite.tablette = tab;
+                                                        boite.x = bteX;
+                                                        boite.y = bteY;
+                                                        boite.w = bteW;
+                                                        boite.h = bteH;
+
+                                                        if (oldNumVersement != boite.numVersement) {
+                                                            oldNumVersement = boite.numVersement
+                                                            // boiteColor = getRandomColor();
+                                                            currentBoiteColor = palette[Math.floor(Math.random() * palette.length)]
+                                                        }
+                                                        boite.color = currentBoiteColor;
+                                                        var gBoite = self.drawBoite(boite, gTablette);
+
+                                                        bteX += bteW;
+                                                    })
                                                 }
-                                                return color;
-                                            }
-
-                                            tab.children.forEach(function (boite, boiteIndex) {
-                                                boite.tablette = tab;
-                                                boite.x = bteX;
-                                                boite.y = bteY;
-                                                boite.w = bteW;
-                                                boite.h = bteH;
-
-                                                if (oldNumVersement != boite.numVersement) {
-                                                    oldNumVersement = boite.numVersement
-                                                    // boiteColor = getRandomColor();
-                                                    currentBoiteColor = palette[Math.floor(Math.random() * palette.length)]
-                                                }
-                                                boite.color = currentBoiteColor;
-                                                var gBoite = self.drawBoite(boite, gTablette);
-
-                                                bteX += bteW;
+                                                tabY += tabH;
                                             })
-                                            tabY += tabH;
-                                        })
+                                        }
                                         traveeX += traveeW;
                                     })
                                 }
@@ -209,6 +225,8 @@ var magasinD3 = (function () {
 
                 }
             )
+            var endTime=new Date();
+            console.log("duration " +(endTime-startTime)*1000)
             if (callback)
                 callback();
 
@@ -275,7 +293,7 @@ var magasinD3 = (function () {
     self.drawTravee = function (travee, parentG) {
         var gTravee = parentG.append("g").attr("class", "travee").attr("id", travee.name);
 
-        if (gTravee.indexEpi == 0) {
+       if (drawTraveeNumber) {
             gTravee.append("text")
                 .attr("x", travee.x + (travee.w / 2))
                 .attr("y", travee.y - 10)
@@ -284,7 +302,7 @@ var magasinD3 = (function () {
                 .text(function (d) {
                     return travee.indexTravee + 1
                 })
-        }
+      }
         gTravee.append('rect')
             .attrs({
                 x: travee.x,
@@ -301,16 +319,17 @@ var magasinD3 = (function () {
     self.drawTablette = function (tablette, parentG) {
         var gTablette = parentG.append("g").attr("class", "tablette").attr("id", tablette.name);
 
-        gTablette.append("text")
-            .attr("x", tablette.x - 1)
-            .attr("y", tablette.y + (tablette.h / 2))
-            .attr("dy", ".35em")
-            .style("text-anchor", "end")
-            .style("font-size", "8px")
-            .text(function (d) {
-                return tablette.index;
-            })
-
+        if (drawTabletteNumber) {
+            gTablette.append("text")
+                .attr("x", tablette.x - 1)
+                .attr("y", tablette.y + (tablette.h / 2))
+                .attr("dy", ".35em")
+                .style("text-anchor", "end")
+                .style("font-size", "8px")
+                .text(function (d) {
+                    return tablette.index;
+                })
+        }
         gTablette.append('rect')
             .attrs({
                 x: tablette.x,
@@ -601,8 +620,8 @@ var magasinD3 = (function () {
 
 
     }
-    self.refreshDrawingElement=function(subTree){
-        var d3Obj=d3.select("#"+subTree.name);
+    self.refreshDrawingElement = function (subTree) {
+        var d3Obj = d3.select("#" + subTree.name);
 
         d3Obj.selectAll("g").remove()
 
@@ -610,54 +629,47 @@ var magasinD3 = (function () {
         var children = d3Obj.select(function () {
             return this.childNodes;
         })
-        subTree.children.forEach(function(child){
+        subTree.children.forEach(function (child) {
 
         })
         vd3Obj.remove();
 
 
-
-
-
     }
 
-    self.modifyDrawing = function (operation,coordonnees, newObj ) {
+    self.modifyDrawing = function (operation, coordonnees, newObj) {
 
         var d3Obj = svg.select("#" + coordonnees);
-        var parentCoords= coordonnees.substring(0, coordonnees.lastIndexOf("-"));
-        var parentObj=svg.select("#" + parentCoords);
+        var parentCoords = coordonnees.substring(0, coordonnees.lastIndexOf("-"));
+        var parentObj = svg.select("#" + parentCoords);
         var siblings = parentObj.select(function () {
             return this.childNodes;
         })
-        if( operation=="delete") {
+        if (operation == "delete") {
 
-            siblings.each(function(sibling){
-                var xx=d3.select(this);
+            siblings.each(function (sibling) {
+                var xx = d3.select(this);
             })
             svg.select("#" + coordonnees).remove();
         }
 
 
-
-
-        var d3Obj=svg.select("#" + coordonnees)
+        var d3Obj = svg.select("#" + coordonnees)
         var xxx = d3Obj.attr('class');
-        if(d3Obj.length>0) {
-            d3Obj=d3Obj[0]
+        if (d3Obj.length > 0) {
+            d3Obj = d3Obj[0]
 
             var type = d3Obj.attr("id")
             var classed = d3Obj.classed()
 
 
-
-
         }
 
-      //  svg.selectAll("#" + coordonnees).remove()
+        //  svg.selectAll("#" + coordonnees).remove()
 
     }
 
-   self.findElementInDataTree=function(coordonnees) {
+    self.findElementInDataTree = function (coordonnees) {
         var indexArray = [];
         var obj = null;
         var coordonneesArray = coordonnees.split("-");
@@ -699,6 +711,30 @@ var magasinD3 = (function () {
 
 
     }
+
+    self.writeInCache=function(){
+      var html = d3.select("svg")
+            .attr("title", "test2")
+            .attr("version", 1.1)
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .node().parentNode.innerHTML;
+        svgCache=html;
+        d3.select("svg").remove();
+        $("#graphDiv").html("");
+
+
+
+
+        }
+
+       self.loadCache=function(){
+           $("#GraphDiv").html(svgCache);
+       }
+
+
+       // var blob = new Blob([html], {type: "image/svg+xml"});
+
+
 
     return self;
 })

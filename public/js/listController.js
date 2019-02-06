@@ -56,6 +56,9 @@ var listController = (function () {
             if (operator == "LIKE") {
                 value = "'%" + value + "%'"
             }
+            if (operator == "NOT LIKE") {
+                value = "'%" + value + "%'"
+            }
             else {
                 var type = mainController.getFieldType(table, column);
                 if (type == "string")
