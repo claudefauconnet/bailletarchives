@@ -36,32 +36,13 @@ var mainController = (function () {
         })
     }
 
+
+
     self.bindActions = function () {
 
         $("#searchTableInput").bind("change", function () {
-            if (context.currentCriteria.length >0 &&  context.currentTable != this.value) {// search sur plusieurs tables
-                context.currentJoinTable = context.currentTable;
-                context.currentTable = this.value;
+            self.onchangeTable(this.value)
 
-            } else {
-                context.currentTable = this.value;
-
-            }
-
-           var  defaultSearchField=config.tableDefs[context.currentTable].defaultSearchField;
-            if(!defaultSearchField)
-                defaultSearchField="";
-            self.fillSelectOptions("searchColumnInput", context.dataModel[this.value], true, "name", "name");
-            $("#searchColumnInput").val(defaultSearchField);
-            if(defaultSearchField!="") {
-                mainController.setOperators(defaultSearchField);
-                $("#searchValueInput").focus();
-            }
-            $("#searchValueInput").val("");
-
-            if(config.LoadAllrecordsTables===true){
-                listController.addSearchCriteria(true);
-            }
 
 
         })
@@ -72,7 +53,16 @@ var mainController = (function () {
         })
 
         $("#searchButton").bind("click", function () {
-            listController.addSearchCriteria(true);
+            self.showInMainDiv("list")
+            listController.addSearchCriteria( listController.listRecords);
+        })
+
+        $("#locateButton").bind("click", function () {
+            self.showInMainDiv("graph")
+            context.currentCriteria=[];
+            listController.addSearchCriteria( magasinD3.locateVersements);
+            context.currentCriteria=[];
+
         })
 
         $("#andSearchButton").bind("click", function () {
@@ -80,7 +70,7 @@ var mainController = (function () {
         })
         $("#searchValueInput").keyup(function(event) {
             if (event.keyCode === 13 || event.keyCode === 9) {
-                listController.addSearchCriteria(true);
+                listController.addSearchCriteria(listController.listRecords);
             }
         });
 
@@ -132,6 +122,7 @@ var mainController = (function () {
 
 
     }
+
 
     self.showHideLeftPanel = function () {
         var width = $("#left").width();
@@ -221,7 +212,7 @@ var mainController = (function () {
         mainController.totalDims.w = $(window).width();
         mainController.totalDims.h = $(window).height();
         var dataTableWidth = mainController.totalDims.w - (self.leftPanelWidth);
-        $("#listRecordsDiv").width(mainController.totalDims.w - (self.leftPanelWidth + 20)).height(mainController.totalDims.h - 20);
+        $("#mainDiv").width(mainController.totalDims.w - (self.leftPanelWidth + 20)).height(mainController.totalDims.h - 20);
         //  $("#dataTableDiv").width(dataTableWidth).height(500);
         //  $(".dataTableDiv").width(dataTableWidth).height(mainController.totalDims.h - 50);
 
@@ -295,13 +286,59 @@ var mainController = (function () {
         $("#tabs").tabs("option", "active", 0);
     }
 
+
+
+    self.onChangeMainAccordionTab=function(tabName){
+        if (tabName == "Versements") {
+            self.onchangeTable ("versement");
+            mainController.showSearchDiv("searchDiv-Versements");
+        }
+        else if (tabName == "Sorties") {
+            context.currentTable = "historique_sorties"
+            context.currentTable = "historique_Sorties"
+            mainController.showSearchDiv("searchDiv-Sorties");
+        }
+        else if (tabName == "Autres") {
+            self.onchangeTable ("versement");
+            mainController.showSearchDiv("searchDiv-Autres");
+        }
+
+    }
+
+    self.onchangeTable=function(table) {
+        if (context.currentCriteria.length > 0 && context.currentTable != table) {// search sur plusieurs tables
+            context.currentJoinTable = context.currentTable;
+            context.currentTable = table;
+
+        } else {
+            context.currentTable = table;
+
+        }
+
+
+        var defaultSearchField = config.tableDefs[context.currentTable].defaultSearchField;
+        if (!defaultSearchField)
+            defaultSearchField = "";
+        self.fillSelectOptions("searchColumnInput", context.dataModel[table], true, "name", "name");
+        $("#searchColumnInput").val(defaultSearchField);
+        if (defaultSearchField != "") {
+            mainController.setOperators(defaultSearchField);
+            $("#searchValueInput").focus();
+        }
+        $("#searchValueInput").val("");
+
+        if (config.LoadAllrecordsTables === true) {
+            listController.addSearchCriteria(listController.listRecords);
+        }
+    }
+
+
     self.showNewRecordDialog = function () {
-        var table = $("#searchTableInput").val();
-        if (!table) {
+
+        if (!context.currentTable) {
             return mainController.setErrorMessage("selectionnez une table")
         }
         context.currentRecordId = null;
-        context.currentTable = table;
         recordController.displayRecordData({});
         $(dialog.dialog("open"))
         $("#tabs").tabs({disabled: [1, 2]});
@@ -362,11 +399,42 @@ var mainController = (function () {
             if (err)
                return mainController.setErrorMessage(err)
                 if (json.length == 1) {
-                    $("#searchTableInput").removeAttr("disabled")
+                   // $("#searchTableInput").removeAttr("disabled")
                     $("#leftAccordion").css("opacity", 1);
                     $("#loginDialogDiv").dialog("close");
                 }
         })
+
+    }
+    self.showSearchDiv=function(targetDiv){
+        $("#movableSearchDiv").css("display","block")
+       var searchhDiv= $("#movableSearchDiv").detach();
+        searchhDiv.appendTo("#"+targetDiv)
+
+
+    }
+
+    self.showInMainDiv=function(type){
+        if( context.hiddenMainDivContent) {
+            $("#mainDiv").html("")
+            context.hiddenMainDivContent.appendTo("#mainDiv")
+        }
+
+        if( type=="list") {
+
+           context.hiddenMainDivContent = $("#graphDiv").detach();
+
+        }
+        else if( type=="graph"){
+
+            context.hiddenMainDivContent = $("#table_mainDiv_wrapper").detach();
+        
+
+        }
+
+
+
+
 
     }
 

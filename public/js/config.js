@@ -4,6 +4,7 @@ var config = (function () {
     self.listHiddenFields = ["id"];
     self.hiddenTables = ["article", "listes"]
     self.LoadAllrecordsTables = false;
+    self.maxVersementsToLocate=5;
 
     self.tableDefs = {
         "magasin": {

@@ -32,7 +32,7 @@ var statistics = (function () {
                 mainController.setErrorMessage(err)
             if (!context.dataTables["stats"])
                 context.dataTables["stats"] = new dataTable();
-            context.dataTables["stats"].loadJson(null,"listRecordsDiv", json, {dom: "ltiB",})
+            context.dataTables["stats"].loadJson(null,"mainDiv", json, {dom: "ltiB",})
 
 
         })

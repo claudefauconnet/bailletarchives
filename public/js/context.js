@@ -7,5 +7,6 @@ var context = {
     currentTabIndex:0,
     currentCriteria:[],
     currentVersementInfos:{},
-    currentListQueries:{}
+    currentListQueries:{},
+    hiddenMainDivContent:null,
 }

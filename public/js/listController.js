@@ -13,10 +13,10 @@ var listController = (function () {
             return console.log(e);
         }
     }
-    self.addSearchCriteria = function (execute) {
+    self.addSearchCriteria = function (callback) {
 
         //if simpleSearch previous query execute  dont keep this query
-        if (execute && context.currentCriteria.length == 1 && context.currentCriteria[0].execute) {
+        if (callback && context.currentCriteria.length == 1 && context.currentCriteria[0].execute) {
             self.removeSearchCriteria(-1);
             // context.currentTable=null;
             context.currentLinkedTable = null;
@@ -56,7 +56,7 @@ var listController = (function () {
             if (operator == "LIKE") {
                 value = "'%" + value + "%'"
             }
-            if (operator == "NOT LIKE") {
+           else if (operator == "NOT LIKE") {
                 value = "'%" + value + "%'"
             }
             else {
@@ -95,7 +95,7 @@ var listController = (function () {
             })
 
             if (!criteriaAllreadyExist) {
-                context.currentCriteria.push({text: whereText, sqlWhere: whereStr, execute: execute});
+                context.currentCriteria.push({text: whereText, sqlWhere: whereStr, execute: callback});
                 var indice = context.currentCriteria.length - 1;
                 var str = "<div  class='searchCriteria' id='searchCriteria_" + indice + "'>" + whereText;
                 str += " <img src='images/clear.png' width='15px' style='float: right' onclick='listController.removeSearchCriteria(" + indice + ")'>"
@@ -105,7 +105,7 @@ var listController = (function () {
             }
         }
 
-        if (execute) {
+        if (callback) {
             var whereStrAll = "";
             context.currentCriteria.forEach(function (criteria, indice) {
                 if (indice > 0)
@@ -141,7 +141,8 @@ var listController = (function () {
 
             sql += sortClause;
             console.log(sql);
-            self.listRecords(sql);
+            callback(sql)
+
         }
 
 
@@ -177,7 +178,7 @@ var listController = (function () {
 
             if (!context.dataTables[table])
                 context.dataTables[table] = new dataTable();
-            context.dataTables[table].loadJson(table, "listRecordsDiv", json, {onClick: recordController.displayRecordData})
+            context.dataTables[table].loadJson(table, "mainDiv", json, {onClick: recordController.displayRecordData})
             $("#tabs").tabs("option", "active", 0);
             $("#addLinkedRecordButton").attr("disabled", true);
             $("#deleteLinkedRecordButton").attr("disabled", true);

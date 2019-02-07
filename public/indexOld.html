@@ -216,7 +216,7 @@
             font-weight: bold;
         }
 
-        .alignCenterFlex0 {
+        .alignCenterFlex {
             display: flex;
             align-content: center
         }
@@ -227,14 +227,14 @@
     <script>
         var dialog, dialog2, dialog3;
         $(function () {
-           magasinD3.init("mainDiv");
+
             mainController.setDivsSize();
             $("#leftAccordion").accordion({
 
                 activate: function (event, ui) {
                     var content = ui;
-                    var tabName = ui.newHeader.text()
-                    mainController.onChangeMainAccordionTab(tabName)
+                    if (ui.newHeader.text() == "Magasins")
+                        magasinD3.init("mainDiv")
 
                 }
 
@@ -354,71 +354,61 @@
     <div id="left">
 
         <div id="leftAccordion">
-            <h1>Accueil</h1>
-            <div id="acceuilDiv" class="accordionInnerDiv">
-                Bienvenue !!
-            </div>
-
-            <h1>Magasins</h1>
-            <div id="MagasinsDiv" class="accordionInnerDiv">
-                <div id="searchDiv-Magasins"></div>
-            </div>
-
-
-            <h1>Versements</h1>
+            <h1>Données</h1>
             <div id="versementsDiv" class="accordionInnerDiv">
-                <div id="searchDiv-Versements"></div>
-                <button onclick="magasinD3.showDialogChercherTablettesPourVersement()">Integrer versement
+                <table align="center">
+                    <tr>
+                        <td>
+                            table
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="searchTableInput" size="5"></select>
+                            <button id="addRecordButton" style="width:60px">Ajouter</button>&nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            champ
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="searchColumnInput"></select>
+                        </td>
+                    </tr>
 
+                    <tr>
+                        <td>
+                            <select id="searchOperatorInput"></select> <input id="searchValueInput"
+                                                                              style="width:100px"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+
+                            <button id="andSearchButton" style="width:20px"> +</button>
+                            <img src='images/clear.png' style="vertical-align: middle" width='20px'
+                                 onclick='listController.removeSearchCriteria(-1)'>
+                            <button id="searchButton"> chercher</button>
+
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="searchCriteriaDiv">
+
+
+                            </div>
+                        </td>
+                    </tr>
+                </table>
 
             </div>
-
-
-            <h1>Sorties</h1>
-            <div id="sortiesDiv" class="alignCenterFlex">
-                <button onclick="sorties.highlightSorties()">voir les sorties</button>
-                <button onclick="sorties.manageSorties()">gérer sorties</button>
-            </div>
-
-
-            <h1>Tablettes</h1>
-
-            <div id="tablettesDiv" class="alignCenterFlex">
-                <button onclick="magasinD3.searchVersement('0114')">Localiser versement</button>
-                <button onclick="magasinD3.showDialogChercherTablettesPourVersement()">Integrer versement
-                </button>
-            </div>
-
-
-            <h1>Boites</h1>
-            <div id="boitesDiv" class="alignCenterFlex">
-                <button onclick="magasinD3.searchVersement('0114')">Localiser versement</button>
-                <button onclick="magasinD3.showDialogChercherTablettesPourVersement()">Integrer versement
-                </button>
-            </div>
-            <h1>Autres</h1>
-            <div id=autresDiv" class="alignCenterFlex">
-            <table align="center">
-                <tr>
-                    <td>
-                        table
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <select id="searchTableInput" size="5"></select>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <div id="searchDiv-Autres"></div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <!--    <h1>Magasins</h1>
+            <h1>Magasins</h1>
             <div id="MagasinsDiv" class="accordionInnerDiv">
                 <button onclick="magasinD3.clearHighlights()">effacer</button>
                 <button onclick="magasinD3.initialZoom()">initial Zoom</button>
@@ -462,35 +452,34 @@
                 <span id="messageSpan"></span>
 
             </div>
-            -->
-        <h1>Outils</h1>
-        <div id="tooldsDiv" class="accordionInnerDiv">
+            <h1>Outils</h1>
+            <div id="tooldsDiv" class="accordionInnerDiv">
 
-            <select id="toolsSelect" size="10" style="left: -30px;position: relative;">
-            </select>
+                <select id="toolsSelect" size="10" style="left: -30px;position: relative;">
+                </select>
 
-        </div>
+            </div>
 
 
-        <h1>Statistiques</h1>
-        <div id="statsDiv" class="accordionInnerDiv">
-            <select id="statsSelect" size="10" style="left: -30px;position: relative;">
+            <h1>Statistiques</h1>
+            <div id="statsDiv" class="accordionInnerDiv">
+                <select id="statsSelect" size="10" style="left: -30px;position: relative;">
 
-            </select>
+                </select>
+
+            </div>
 
         </div>
 
     </div>
 
-</div>
-
-<div id="right">
-    <!--   <button id="showHideLeftPanelButton"><< >></button>-->
-    <div id="mainDiv" class="dataTableDiv">
+    <div id="right">
+        <!--   <button id="showHideLeftPanelButton"><< >></button>-->
+        <div id="mainDiv" class="dataTableDiv">
 
 
+        </div>
     </div>
-</div>
 
 </div>
 
@@ -566,56 +555,6 @@
 </div>
 
 <div id="dialogD3"></div>
-
-<div id="movableSearchDiv" style="display: none">
-    <table>
-        <tr>
-            <td>
-                <button id="addRecordButton" style="width:60px">Ajouter</button>&nbsp;
-            </td>
-        </tr>
-        <tr>
-            <td>
-                champ
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <select id="searchColumnInput"></select>
-            </td>
-        </tr>
-
-        <tr>
-            <td>
-                <select id="searchOperatorInput"></select> <input id="searchValueInput"
-                                                                  style="width:100px"/>
-            </td>
-        </tr>
-
-        <tr>
-            <td>
-
-                <button id="andSearchButton" style="width:20px"> +</button>
-                <img src='images/clear.png' style="vertical-align: middle" width='20px'
-                     onclick='listController.removeSearchCriteria(-1)'>
-                <br>
-                <button id="searchButton"> Lister</button>
-                <button id="locateButton"> Localiser</button>
-
-
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div id="searchCriteriaDiv">
-
-
-                </div>
-            </td>
-        </tr>
-    </table>
-</div>
 
 </body>
 </html>

@@ -11,7 +11,7 @@
 
         var dialogD3;
         $(function () {
-            magasinD3.drawMagasins()
+            magasinD3.drawMagasins(["A"])
 
             dialogD3 = $("#dialogD3").dialog({
                 autoOpen: false,
@@ -48,8 +48,8 @@
                     magasinData = data;
                     svgWidth = $(window).width() -$("#left").width()-10;
                     svgHeight = $(window).height() - 10;
-                    svgWidth = $("#listRecordsDiv").width() -10;
-                    svgHeight = $("#listRecordsDiv").height() - 10;
+                    svgWidth = $("#mainDiv").width() -10;
+                    svgHeight = $("#mainDiv").height() - 10;
 
                     $("#graphDiv").width(svgWidth)
                     $("#graphDiv").height(svgHeight)
