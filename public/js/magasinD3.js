@@ -52,13 +52,12 @@ var magasinD3 = (function () {
     var tabletteFillColor = "#ddd"
 
 
-
-
-
     self.init = function (_containerDiv) {
         containerDiv = _containerDiv;
 
-        var htmlStr = "<table style=' z-index:100 ' id='graphDiv'  class='myDatatable cell-border display nowrap'></table>"
+        var htmlStr = "<div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
+            "<button onclick='magasinD3.initialZoom()'>zoom out</button></div> " +
+            "<div style=' z-index:100 ' id='graphDiv'  class='myDatatable cell-border display nowrap'></div>"
 
         $("#" + containerDiv).html(htmlStr);
         $('#' + containerDiv).css("font-size", "10px");
@@ -67,12 +66,12 @@ var magasinD3 = (function () {
         var startTime = new Date();
         var endTime = new Date();
         console.log("duration " + Math.floor((endTime - startTime) / 1000));
-     // magasinD3.drawBoites(["A"], function () {
-       // magasinD3.drawBoites(null, function () {
-         magasinD3.drawMagasins(null, function () {
+        // magasinD3.drawBoites(["A"], function () {
+        // magasinD3.drawBoites(null, function () {
+        magasinD3.drawMagasins(null, function () {
             cachedHtml = $("#graphDiv").html();
 
-            var zzz= d3.select("svg")
+            var zzz = d3.select("svg")
 
             self.initialZoom()
 
@@ -102,8 +101,6 @@ var magasinD3 = (function () {
         $("#graphDiv").html(cachedHtml).promise().done(function () {
 
 
-
-
             $(".boite").click(function (event, b) {
                 var coords = {x: event.pageX, y: event.pageY}
                 var boite = getDataFromEventThis($(this));
@@ -127,9 +124,9 @@ var magasinD3 = (function () {
 
     self.drawMagasins = function (magasinsToDraw, callback) {
 
-        if (cachedHtml) {
-            return self.drawFromCache();
-        }
+        /*  if (cachedHtml) {
+              return self.drawFromCache();
+          }*/
 
         d3.select("svg").remove();
         $("#graphDiv").html("");
@@ -344,7 +341,7 @@ var magasinD3 = (function () {
                     magasin.y = magY;
                     magasin.h = magH;
                     magasin.w = magW;
-              //      var gMag = self.drawMagasin(magasin, svg);
+                    //      var gMag = self.drawMagasin(magasin, svg);
 
 
                     // draw epi
@@ -362,7 +359,7 @@ var magasinD3 = (function () {
                                 epi.y = epiY;
                                 epi.w = epiW;
                                 epi.h = epiH;
-                              //  var gEpi = self.drawEpi(epi, gMag);
+                                //  var gEpi = self.drawEpi(epi, gMag);
 
                                 if (drawTravees) {
                                     // draw travee
@@ -380,7 +377,7 @@ var magasinD3 = (function () {
                                         if (indexTravee == epi.children.length - 1)
                                             travee.w -= 30;
 
-                                     //   var gTravee = self.drawTravee(travee, gEpi);
+                                        //   var gTravee = self.drawTravee(travee, gEpi);
 
 
                                         // draw tablettes
@@ -395,7 +392,7 @@ var magasinD3 = (function () {
                                                 tab.h = tabH;
                                                 tab.w = tabW;
                                                 tab.index = indexTab
-                                             //   var gTablette = self.drawTablette(tab, gTravee)
+                                                //   var gTablette = self.drawTablette(tab, gTravee)
 
 
                                                 // draw boites
@@ -588,9 +585,13 @@ var magasinD3 = (function () {
             var html = "tablette " + tablette.name + "<br>"
             html += "operation tablette :<select onchange='tabletteD3.ontabletteOperationSelect(this)'>" +
                 " <option></option>" +
+                "<option value='applyVersement'> affecter versement</option>" +
+                "<option value='decalerBoites'> décaler boites </option>" +
                 "<option value='createUnder'> creer nouvelle</option>" +
                 "<option value='split'> diviser </option>" +
                 "<option value='delete'> supprimer </option>"
+
+
             html += "</select>";
             html += "<div id='popupD3DivOperationDiv'></div>"
 
@@ -699,62 +700,109 @@ var magasinD3 = (function () {
         // .on("end", function(){ svg.call(zoom.transform, d3.zoomIdentity.translate((totalWidth/2 - xx),(totalHeight/2 - yy)).scale(1))});
     }
 
+    self.locate = function (property, array) {
 
 
-    self.locateVersements= function(sql){
+        var found = 0;
+        var firstBoiteName = ""
+        var coordonnees = "";
 
-        mainController.execSql(sql, function (err, json) {
-            if(json.length>config.maxVersementsToLocate){
-                return mainController.setMessage("trop de résultats :"+json.length+" précisez la requête");
+        $("#popupD3Div").css("visibility", "hidden")
+        d3.selectAll(".boite").each(function (d, i) {
+            d3.select(this).style("opacity", 0.1)
+            var x = d;
+            var d3Prop = d3.select(this).attr(property);
+
+            if (d3Prop != null) {
+                var firstbox = true;
+                if (array.indexOf(d3Prop) > -1) {
+                    found += 1
+                    if (firstbox) {
+
+                        firstbox = false
+                        self.centerOnElt(this)
+
+                    }
+                    d3.select(this).style("opacity", 1)
+                    d3.select(this).style("fill", "red")
+                    d3.select(this).style("stroke", "black")
+
+                    /*   $(this).css("opacity", 1)
+                       $(this).css("stroke", "red")*/
+
+
+                }
             }
 
-            var numVersements=[];
-            json.forEach(function(line){
+        })
+
+        return;
+        if (found > 0) {
+            var message = "versement " + numVersement + " , localisation : " + coordonnees + " nombre de boites +" + found + "+ première boite " + firstBoiteName;
+            $("#messageSpan").html(message);
+            zoom.scaleTo(svg, avgZoom);
+        }
+        else
+            $("#messageSpan").html("aucune boite correspond au versement " + numVersement)
+
+
+    }
+
+
+    self.locateVersements = function (sql) {
+
+        mainController.execSql(sql, function (err, json) {
+            if (json.length > config.maxVersementsToLocate) {
+                return mainController.setMessage("trop de résultats :" + json.length + " précisez la requête");
+            }
+
+            var numVersements = [];
+            json.forEach(function (line) {
                 numVersements.push(line.numVersement);
             })
             var found = 0;
             var firstBoiteName = ""
             var coordonnees = "";
 
-                $("#popupD3Div").css("visibility", "hidden")
-                d3.selectAll(".boite").each(function (d, i) {
-                    d3.select(this).style("opacity", 0.1)
-                    var x = d;
-                    var numVersement = d3.select(this).attr("numVersement");
-                    if (!numVersement)
-                        numVersement = d3.select(this).attr("numversement");
+            $("#popupD3Div").css("visibility", "hidden")
+            d3.selectAll(".boite").each(function (d, i) {
+                d3.select(this).style("opacity", 0.1)
+                var x = d;
+                var numVersement = d3.select(this).attr("numVersement");
+                if (!numVersement)
+                    numVersement = d3.select(this).attr("numversement");
 
-                    var firstbox = true;
-                    if (numVersements.indexOf( numVersement) >-1){
-                        found += 1
-                        if (firstbox) {
-                            firstBoiteName = d3.select(this).attr("name");
-                            coordonnees = d3.select(this).attr("coordonnees");
+                var firstbox = true;
+                if (numVersements.indexOf(numVersement) > -1) {
+                    found += 1
+                    if (firstbox) {
+                        firstBoiteName = d3.select(this).attr("name");
+                        coordonnees = d3.select(this).attr("coordonnees");
 
 
-                            $("#messageSpan").html(message)
-                            firstbox = false
-                            self.centerOnElt(this)
-
-                        }
-                        d3.select(this).style("opacity", 1)
-                        d3.select(this).style("fill", "red")
-                        d3.select(this).style("stroke", "black")
-
-                        /*   $(this).css("opacity", 1)
-                           $(this).css("stroke", "red")*/
-
+                        $("#messageSpan").html(message)
+                        firstbox = false
+                        self.centerOnElt(this)
 
                     }
+                    d3.select(this).style("opacity", 1)
+                    d3.select(this).style("fill", "red")
+                    d3.select(this).style("stroke", "black")
 
-                })
-                if (found > 0) {
-                    var message = "versement " + numVersement + " , localisation : " + coordonnees + " nombre de boites +" + found + "+ première boite " + firstBoiteName;
-                    $("#messageSpan").html(message);
-                    zoom.scaleTo(svg, avgZoom);
+                    /*   $(this).css("opacity", 1)
+                       $(this).css("stroke", "red")*/
+
+
                 }
-                else
-                    $("#messageSpan").html("aucune boite correspond au versement " + numVersement)
+
+            })
+            if (found > 0) {
+                var message = "versement " + numVersement + " , localisation : " + coordonnees + " nombre de boites +" + found + "+ première boite " + firstBoiteName;
+                $("#messageSpan").html(message);
+                zoom.scaleTo(svg, avgZoom);
+            }
+            else
+                $("#messageSpan").html("aucune boite correspond au versement " + numVersement)
 
         })
 
@@ -770,8 +818,8 @@ var magasinD3 = (function () {
                 d3.select(this).style("opacity", 0.1)
                 var x = d;
                 var numVersement = d3.select(this).attr("numVersement");
-                if(!numVersement)
-                     numVersement =d3.select(this).attr("numversement");
+                if (!numVersement)
+                    numVersement = d3.select(this).attr("numversement");
 
                 var firstbox = true;
                 if (versement == numVersement) {
@@ -790,8 +838,8 @@ var magasinD3 = (function () {
                     d3.select(this).style("fill", "red")
                     d3.select(this).style("stroke", "black")
 
-                 /*   $(this).css("opacity", 1)
-                    $(this).css("stroke", "red")*/
+                    /*   $(this).css("opacity", 1)
+                       $(this).css("stroke", "red")*/
 
 
                 }

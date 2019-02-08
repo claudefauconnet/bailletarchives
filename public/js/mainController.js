@@ -41,7 +41,9 @@ var mainController = (function () {
     self.bindActions = function () {
 
         $("#searchTableInput").bind("change", function () {
-            self.onchangeTable(this.value)
+
+            mainController.showSearchDiv("searchDiv-Autres");
+
 
 
 
@@ -289,15 +291,20 @@ var mainController = (function () {
 
 
     self.onChangeMainAccordionTab=function(tabName){
-        if (tabName == "Versements") {
+        if (tabName == "Accueil") {
+            magasinD3.init("graphDiv")
+
+        }
+
+       else if (tabName == "Versements") {
             self.onchangeTable ("versement");
             mainController.showSearchDiv("searchDiv-Versements");
         }
-        else if (tabName == "Sorties") {
+    /*    else if (tabName == "Sorties") {
             context.currentTable = "historique_sorties"
-            context.currentTable = "historique_Sorties"
             mainController.showSearchDiv("searchDiv-Sorties");
-        }
+        }*/
+
         else if (tabName == "Autres") {
             self.onchangeTable ("versement");
             mainController.showSearchDiv("searchDiv-Autres");
@@ -407,14 +414,24 @@ var mainController = (function () {
 
     }
     self.showSearchDiv=function(targetDiv){
+
+
         $("#movableSearchDiv").css("display","block")
        var searchhDiv= $("#movableSearchDiv").detach();
         searchhDiv.appendTo("#"+targetDiv)
+        if( targetDiv="searchDiv-Versements")
+           $("#locateButton").css("visibility","visible");
+        else
+            $("#locateButton").css("visibility","hidden");
+
+
 
 
     }
 
     self.showInMainDiv=function(type){
+
+
         if( context.hiddenMainDivContent) {
             $("#mainDiv").html("")
             context.hiddenMainDivContent.appendTo("#mainDiv")
@@ -428,7 +445,7 @@ var mainController = (function () {
         else if( type=="graph"){
 
             context.hiddenMainDivContent = $("#table_mainDiv_wrapper").detach();
-        
+
 
         }
 
