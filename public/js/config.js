@@ -87,10 +87,12 @@ var config = (function () {
                 }
             },
             fieldConstraints: {
-                etatTraitement:"mandatory",
+
                 numVersement:"mandatory",
-                dateArrivee:"mandatory",
-                nature:"mandatory"
+                nature:"mandatory",
+                etatTraitement:"mandatory",
+                etatTraitementAuteur:"mandatory",
+                etatTraitementDate:"mandatory",
             },
             onAfterSave:versement.updateRecordHistory
 

@@ -153,6 +153,9 @@ var recordController = (function () {
                 if (err)
                     mainController.setErrorMessage(err)
                 context.currentRecordId = json[0].id;
+                var fn=config.tableDefs[context.currentTable].onAfterSave
+                if(fn)
+                    fn(context.currentRecordId)
             })
         })
 
