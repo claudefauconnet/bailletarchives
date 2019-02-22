@@ -37,7 +37,7 @@ var config = (function () {
         },
         "versement": {
             defaultSearchField: "numVersement",
-            tabs: ["", "magasin", "article"],
+            tabs: ["","versement_historique", "magasin", "article"],
             sortFields: ["numVersement desc"],
             fieldTools: {
                 /*  "cotesExtremesBoites": {
@@ -50,6 +50,17 @@ var config = (function () {
                   }*/
             },
             relations: {
+                "versement_historique": {
+                    type: "1-n",
+                    joinObj: {
+                        tables: "versement,versement_historique",
+                        where: " versement_historique.id_versement=versement.id "
+                    },
+                    createRelSql: "update versement_historique set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
+                    deleteRelSql:"update versement_historique set id_versement=null where id=<%data.id%>",
+                    selectfields: ["coordonnees"]
+
+                },
                 "magasin": {
                     type: "1-n",
                     joinObj: {
@@ -75,8 +86,13 @@ var config = (function () {
                     selectfields: []
                 }
             },
-            fieldConstraints: {}
-            ,
+            fieldConstraints: {
+                etatTraitement:"mandatory",
+                numVersement:"mandatory",
+                dateArrivee:"mandatory",
+                nature:"mandatory"
+            },
+            onAfterSave:versement.updateRecordHistory
 
 
         },

@@ -77,6 +77,9 @@ var recordController = (function () {
         }
 
 
+
+
+
         if (!context.currentRecordId)// new Record
             return self.saveNewRecord();
 
@@ -120,9 +123,14 @@ var recordController = (function () {
             return;
             // delete linked records
             mainController.execSql(sql, function (err, json) {
-                if (err)
-                    mainController.setErrorMessage(err)
-                    ;
+                if (err) {
+                    mainController.setErrorMessage(err);
+                }
+                else{
+                    var fn=config.tableDefs[context.currentTable].onAfterSave
+                    if(fn)
+                        fn(context.currentRecordId)
+                }
 
                 $("#dialog").dialog("close");
             })
@@ -183,6 +191,13 @@ var recordController = (function () {
         mainController.execSql(sql, function (err, json) {
             if (err)
                 return callback(err);
+            var newId=json.insertId;
+            var fn=config.tableDefs[context.currentTable].onAfterSave
+            if(fn)
+                fn(newId)
+
+
+
             return callback(null,"enregistrement crée");
 
         })
@@ -359,7 +374,7 @@ var recordController = (function () {
             var constraints = config.tableDefs[context.currentTable].fieldConstraints[key];
             if (constraints && constraints.indexOf("mandatory") > -1)
                 if (value == null || value == "")
-                    errors.push(key + " is Mandatory")
+                    errors.push(key + " est obligatoire")
         })
         return errors;
 

@@ -16,11 +16,13 @@ var magasinD3 = (function () {
     var tabletteTextSpacing = 8;
     var oldNumVersement = "";
     var currentBoiteColor = "#ddd";
+    var currentBoiteColor = "#d5d7cc";
+
     var boiteColor = "";
     var containerDiv = null;
     var zoom;
     var minZoom = .2
-    var maxZoom = 2
+    var maxZoom = 3
     var avgZoom = 0.8
     var nMagByLine = 10;
     var drawEpis = true;
@@ -30,6 +32,15 @@ var magasinD3 = (function () {
     var drawTraveeNumber = true;
     var drawTabletteNumber = true;
 
+
+    self.colors = {
+        "magasin": "#e8c8b3",
+        "epi": "#e0d5ff",
+        "travee": "#e8e6e8",
+        "tablette": "#fff0f0",
+        //  "tablette": "#e8c8b3",
+
+    }
 
     var palette = [
         "#0072d5",
@@ -49,15 +60,18 @@ var magasinD3 = (function () {
         "#7fef11",
         '#B3B005',
     ]
-    var tabletteFillColor = "#ddd"
+    var tabletteFillColor = "#d5d7cc"
 
 
     self.init = function (_containerDiv) {
         containerDiv = _containerDiv;
 
         var htmlStr = "<div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
-            "<button onclick='magasinD3.initialZoom()'>zoom out</button></div> " +
+            "<button onclick='magasinD3.initialZoom()'>zoom out</button><span id='magasind3MouseInfo'></span></div> " +
+
             "<div style=' z-index:100 ' id='graphDiv'  class='myDatatable cell-border display nowrap'></div>"
+
+
 
         $("#" + containerDiv).html(htmlStr);
         $('#' + containerDiv).css("font-size", "10px");
@@ -392,7 +406,7 @@ var magasinD3 = (function () {
                                                 tab.h = tabH;
                                                 tab.w = tabW;
                                                 tab.index = indexTab
-                                                //   var gTablette = self.drawTablette(tab, gTravee)
+                                                var gTablette = self.drawTablette(tab, gTravee)
 
 
                                                 // draw boites
@@ -481,13 +495,16 @@ var magasinD3 = (function () {
                 y: magasin.y,
                 width: magasin.w,
                 height: magasin.h,
-                fill: '#ddd',
+                fill: magasinD3.colors["magasin"],
                 stroke: "black",
                 "stroke-width": "3"
             })
             .on("click", function () {
                 $("#popupD3Div").css("visibility", "hidden")
-            });
+            }).on("mouseover", function(){
+            magasinD3.onMouseOver(magasin)
+
+        });;
         return gMag;
     }
 
@@ -510,10 +527,13 @@ var magasinD3 = (function () {
                 y: epi.y,
                 width: epi.w,
                 height: epi.h,
-                fill: 'none',
+                fill: magasinD3.colors["epi"],
                 stroke: "black",
                 "stroke-width": "3"
-            });
+            }).on("mouseover", function(){
+            magasinD3.onMouseOver(epi)
+
+        });;
         return gEpi;
 
     }
@@ -537,10 +557,14 @@ var magasinD3 = (function () {
                 y: travee.y,
                 width: travee.w,
                 height: travee.h,
-                fill: 'none',
+                fill: magasinD3.colors["travee"],
                 stroke: "black",
                 "stroke-width": "1"
-            });
+            })
+            .on("mouseover", function(){
+                magasinD3.onMouseOver(travee)
+
+            });;
         return gTravee;
     }
 
@@ -555,7 +579,7 @@ var magasinD3 = (function () {
                 .style("text-anchor", "end")
                 .style("font-size", "8px")
                 .text(function (d) {
-                    return tablette.index;
+                    return tablette.index + 1;
                 })
         }
         gTablette.append('rect')
@@ -566,19 +590,21 @@ var magasinD3 = (function () {
                 height: tablette.h,
                 name: tablette.name,
                 class: "tablette",
-                fill: tabletteFillColor,
+                fill: magasinD3.colors["tablette"],
                 stroke: "blue",
                 "stroke-width": "1"
             }).on("click", function (e) {
-            var position = d3.mouse(this);
-            // onTabletteClick(tab, position[0], position[1]);
             var coords = d3.event;
 
             onTabletteClick(tablette, coords.x, coords.y);
             return false;
 
 
+        }).on("mouseover", function(){
+            magasinD3.onMouseOver(tablette)
+
         });
+
 
         function onTabletteClick(tablette, x, y) {
             tabletteD3.currentTablette = tablette;
@@ -623,7 +649,7 @@ var magasinD3 = (function () {
                 coordonnees: boite.tablette.coordonnees,
                 nBoites: boite.tablette.nBoites,
                 class: "boite",
-                stroke: "#ddd",
+                stroke: "black",
                 "stroke-width": 0.5
             })
             .on("click", function () {
@@ -1060,6 +1086,24 @@ var magasinD3 = (function () {
         return obj;
 
 
+    }
+
+    self.onMouseOver = function (obj) {
+       var array=obj.name.split("-");
+       var str=""
+       array.forEach(function(elt, index){
+           if(index==0)
+               str+=" magasin : "+elt;
+           if(index==1)
+               str+=" epi : "+elt;
+           if(index==2)
+               str+=" travee : "+elt;
+           if(index==3)
+               str+=" tablette : "+elt;
+
+       })
+
+        $("#magasind3MouseInfo").html(str)
     }
 
 
