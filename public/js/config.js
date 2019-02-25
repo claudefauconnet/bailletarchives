@@ -4,7 +4,7 @@ var config = (function () {
     self.listHiddenFields = ["id"];
     self.hiddenTables = ["article", "listes"]
     self.LoadAllrecordsTables = false;
-    self.maxVersementsToLocate=5;
+    self.maxVersementsToLocate = 5;
 
     self.tableDefs = {
         "magasin": {
@@ -28,7 +28,7 @@ var config = (function () {
 
             fieldConstraints: {
                 numVersement: "readOnly;mandatory",
-                coordonnees:"mandatory",
+                coordonnees: "mandatory",
                 magasin: "readOnly",
                 epi: "readOnly",
                 travee: "readOnly",
@@ -37,7 +37,7 @@ var config = (function () {
         },
         "versement": {
             defaultSearchField: "numVersement",
-            tabs: ["","versement_historique", "magasin", "article"],
+            tabs: ["versement_historique", "magasin", "sortie_boite"],
             sortFields: ["numVersement desc"],
             fieldTools: {
                 /*  "cotesExtremesBoites": {
@@ -57,7 +57,7 @@ var config = (function () {
                         where: " versement_historique.id_versement=versement.id "
                     },
                     createRelSql: "update versement_historique set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
-                    deleteRelSql:"update versement_historique set id_versement=null where id=<%data.id%>",
+                    deleteRelSql: "update versement_historique set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"]
 
                 },
@@ -68,12 +68,23 @@ var config = (function () {
                         where: " magasin.id_versement=versement.id "
                     },
                     createRelSql: "update magasin set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
-                    deleteRelSql:"update magasin set id_versement=null where id=<%data.id%>",
+                    deleteRelSql: "update magasin set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"]
 
                 }
                 ,
-                "article": {
+                "sortie_boite": {
+                    type: "1-n",
+                    joinObj: {
+                        tables: "versement,sortie_boite",
+                        where: " sortie_boite.id_versement=versement.id "
+                    },
+                    createRelSql: "update sortie_boite set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
+                    deleteRelSql: "update sortie_boite set id_versement=null where id=<%data.id%>",
+
+
+                }
+               /* "article": {
                     type: "1-n",
                     joinSql: "select article.* from article where 1=1 ",
                     joinObj: {
@@ -84,17 +95,17 @@ var config = (function () {
                     deleteRelSql: "update article set id_versement=null where id=<%data.id%>",
 
                     selectfields: []
-                }
+                }*/
             },
             fieldConstraints: {
 
-                numVersement:"mandatory",
-                nature:"mandatory",
-                etatTraitement:"mandatory",
-                etatTraitementAuteur:"mandatory",
-                etatTraitementDate:"mandatory",
+                numVersement: "mandatory",
+                nature: "mandatory",
+                etatTraitement: "mandatory",
+                etatTraitementAuteur: "mandatory",
+                etatTraitementDate: "mandatory",
             },
-            onAfterSave:versement.updateRecordHistory
+            onAfterSave: versement.updateRecordHistory
 
 
         },
@@ -121,9 +132,23 @@ var config = (function () {
 
 
         },
-        "historique_sorties": {
-            tabs: [""],
-            fieldConstraints:{}
+        "sortie_boite": {
+            tableConstraints:{
+                cannotDelete :true
+            },
+            tabs: [],
+            fieldConstraints: {
+                id_versement:"hidden"
+
+            },
+        fieldTools: {
+                numVersement:{
+                    title:"selectionner boites",
+                    toolFn:"sortiesShowBoitesCbx"
+                }
+
+
+            }
         }
     }
     self.lists = {};
@@ -143,7 +168,18 @@ var config = (function () {
     }
 
 
-    return self;
+    self.default = {
+        textArea: {
+            cols: 30,
+            rows: 2
+        }
 
 
-})()
+}
+
+
+return self;
+
+
+})
+()

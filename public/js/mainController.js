@@ -1,6 +1,6 @@
 var mainController = (function () {
     var self = {};
-   self.urlPrefix="."
+    self.urlPrefix = "."
     self.totalDims = {};
 
     self.leftPanelWidth = 250;
@@ -9,13 +9,13 @@ var mainController = (function () {
     var numberTypes = ["float", "double", "decimal", "int"];
     var stringTypes = ["char", "varchar", "text",];
     var operators = {
-        string: ["LIKE", "NOT LIKE","=", "!="],
+        string: ["LIKE", "NOT LIKE", "=", "!="],
         number: ["=", "<", "<=", ">", ">=", "!="],
         date: ["=", "<", "<=", ">", ">=", "!="],
 
     }
 
-    self.execSql=function(sql,callback){
+    self.execSql = function (sql, callback) {
         var payload = {
             exec: 1,
             sql: sql
@@ -23,11 +23,11 @@ var mainController = (function () {
 
         $.ajax({
             type: "POST",
-            url: mainController.urlPrefix+"/mysql",
+            url: mainController.urlPrefix + "/mysql",
             data: payload,
             dataType: "json",
             success: function (json) {
-                return callback(null,json);
+                return callback(null, json);
             },
             error: function (err) {
                 console.log(err.responseText)
@@ -37,14 +37,11 @@ var mainController = (function () {
     }
 
 
-
     self.bindActions = function () {
 
         $("#searchTableInput").bind("change", function () {
 
             mainController.showSearchDiv("searchDiv-Autres");
-
-
 
 
         })
@@ -55,28 +52,26 @@ var mainController = (function () {
         })
 
         $("#searchButton").bind("click", function () {
-            self.showInMainDiv("list")
-            listController.addSearchCriteria( listController.listRecords);
+
+            listController.addSearchCriteria(listController.listRecords);
         })
 
         $("#locateButton").bind("click", function () {
             self.showInMainDiv("graph")
-            context.currentCriteria=[];
-            listController.addSearchCriteria( magasinD3.locateVersements);
-            context.currentCriteria=[];
+            context.currentCriteria = [];
+            listController.addSearchCriteria(versement.locate);
+            context.currentCriteria = [];
 
         })
 
         $("#andSearchButton").bind("click", function () {
             listController.addSearchCriteria();
         })
-        $("#searchValueInput").keyup(function(event) {
+        $("#searchValueInput").keyup(function (event) {
             if (event.keyCode === 13 || event.keyCode === 9) {
                 listController.addSearchCriteria(listController.listRecords);
             }
         });
-
-
 
 
         $("#showHideLeftPanelButton").bind("click", function () {
@@ -141,10 +136,10 @@ var mainController = (function () {
     self.initTablesSelects = function () {
 
         var tables = Object.keys(context.dataModel);
-        var visibleTables=[];
-        tables.forEach(function(table){
+        var visibleTables = [];
+        tables.forEach(function (table) {
 
-            if(config.hiddenTables.indexOf(table)<0)
+            if (config.hiddenTables.indexOf(table) < 0)
                 visibleTables.push(table)
         })
 
@@ -157,15 +152,15 @@ var mainController = (function () {
 
     }
 
-    self.loadLists=function(){
-        config.lists={};
-        var sql="select * from listes"
+    self.loadLists = function () {
+        config.lists = {};
+        var sql = "select * from listes"
         mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err);
-            json.forEach(function(listObj,index){
-                if(!config.lists[listObj.liste])
-                    config.lists[listObj.liste]=[];
+            json.forEach(function (listObj, index) {
+                if (!config.lists[listObj.liste])
+                    config.lists[listObj.liste] = [];
                 config.lists[listObj.liste].push(listObj.valeur)
 
 
@@ -200,10 +195,10 @@ var mainController = (function () {
         var type = self.getFieldType(context.currentTable, field);
         var operatorsArray = operators[type];
         try {
-        self.fillSelectOptions("searchOperatorInput", operatorsArray, false)
+            self.fillSelectOptions("searchOperatorInput", operatorsArray, false)
         }
-        catch(e){
-            var x=   field
+        catch (e) {
+            var x = field
         }
     }
 
@@ -238,7 +233,7 @@ var mainController = (function () {
 
         $.ajax({
             type: "POST",
-            url: mainController.urlPrefix+"/mysql",
+            url: mainController.urlPrefix + "/mysql",
             data: payload,
             dataType: "json",
             success: function (json) {
@@ -257,6 +252,7 @@ var mainController = (function () {
     }
 
     self.loadTab = function (tabIndex) {
+        return;
         context.currentTabIndex = tabIndex;
         if (tabIndex > 0) {
             var linkedTable = config.tableDefs[context.currentTable].tabs[tabIndex];
@@ -273,6 +269,7 @@ var mainController = (function () {
 
 
     self.setTabs = function () {
+        return;
         // title of tabs for linked records depending on config
         var tabNames = config.tableDefs[context.currentTable].tabs;
 
@@ -289,30 +286,29 @@ var mainController = (function () {
     }
 
 
-
-    self.onChangeMainAccordionTab=function(tabName){
+    self.onChangeMainAccordionTab = function (tabName) {
         if (tabName == "Accueil") {
             magasinD3.init("graphDiv")
 
         }
 
-       else if (tabName == "Versements") {
-            self.onchangeTable ("versement");
+        else if (tabName == "Versements") {
+            self.onchangeTable("versement");
             mainController.showSearchDiv("searchDiv-Versements");
         }
-    /*    else if (tabName == "Sorties") {
-            context.currentTable = "historique_sorties"
-            mainController.showSearchDiv("searchDiv-Sorties");
-        }*/
+        /*    else if (tabName == "Sorties") {
+                context.currentTable = "sortie_boite"
+                mainController.showSearchDiv("searchDiv-Sorties");
+            }*/
 
         else if (tabName == "Autres") {
-            self.onchangeTable ("versement");
+            self.onchangeTable("versement");
             mainController.showSearchDiv("searchDiv-Autres");
         }
 
     }
 
-    self.onchangeTable=function(table) {
+    self.onchangeTable = function (table) {
         if (context.currentCriteria.length > 0 && context.currentTable != table) {// search sur plusieurs tables
             context.currentJoinTable = context.currentTable;
             context.currentTable = table;
@@ -348,7 +344,7 @@ var mainController = (function () {
         context.currentRecordId = null;
         recordController.displayRecordData({});
         $(dialog.dialog("open"))
-        $("#tabs").tabs({disabled: [1, 2]});
+        //  $("#tabs").tabs({disabled: [1, 2]});
         self.execCustomization({type: "newRecord"});
 
     }
@@ -372,12 +368,12 @@ var mainController = (function () {
             }));
         }
 
-    data.forEach(function (item, index) {
-        $("#" + selectId).append($('<option>', {
-            text: item[textfield] || item,
-            value: item[valueField] || item
-        }));
-    });
+        data.forEach(function (item, index) {
+            $("#" + selectId).append($('<option>', {
+                text: item[textfield] || item,
+                value: item[valueField] || item
+            }));
+        });
 
     }
 
@@ -388,12 +384,27 @@ var mainController = (function () {
 
     }
 
+
     self.setErrorMessage = function (message) {
         $("#messageDiv").css("color", "red");
         $("#messageDiv").html(message);
         return message;
 
     }
+    self.setRecordMessage = function (message) {
+        $("#recordMessageDiv").css("color", "blue");
+        $("#recordMessageDiv").html(message);
+        return message;
+
+    }
+    self.setRecordErrorMessage = function (message) {
+        $("#recordMessageDiv").css("color", "red");
+        $("#recordMessageDiv").html(message);
+        return message;
+
+    }
+
+
     self.confirm = function (message) {
         $("#confirmDialogDiv").html(message);
     }
@@ -404,53 +415,47 @@ var mainController = (function () {
         var sql = "select login from users where login='" + login + "' and password='" + password + "'";
         mainController.execSql(sql, function (err, json) {
             if (err)
-               return mainController.setErrorMessage(err)
-                if (json.length == 1) {
-                   // $("#searchTableInput").removeAttr("disabled")
-                    $("#leftAccordion").css("opacity", 1);
-                    $("#loginDialogDiv").dialog("close");
-                }
+                return mainController.setErrorMessage(err)
+            if (json.length == 1) {
+                // $("#searchTableInput").removeAttr("disabled")
+                $("#leftAccordion").css("opacity", 1);
+                $("#loginDialogDiv").dialog("close");
+            }
         })
 
     }
-    self.showSearchDiv=function(targetDiv){
+    self.showSearchDiv = function (targetDiv) {
 
 
-        $("#movableSearchDiv").css("display","block")
-       var searchhDiv= $("#movableSearchDiv").detach();
-        searchhDiv.appendTo("#"+targetDiv)
-        if( targetDiv="searchDiv-Versements")
-           $("#locateButton").css("visibility","visible");
+        $("#movableSearchDiv").css("display", "block")
+        var searchhDiv = $("#movableSearchDiv").detach();
+        searchhDiv.appendTo("#" + targetDiv)
+        if (targetDiv = "searchDiv-Versements")
+            $("#locateButton").css("visibility", "visible");
         else
-            $("#locateButton").css("visibility","hidden");
-
-
+            $("#locateButton").css("visibility", "hidden");
 
 
     }
 
-    self.showInMainDiv=function(type){
+    self.showInMainDiv = function (type) {
 
-
-        if( context.hiddenMainDivContent) {
-            $("#mainDiv").html("")
-            context.hiddenMainDivContent.appendTo("#mainDiv")
+        var html = $("#mainDiv").html();
+        if (html.indexOf("graphDiv") > -1) {
+            context.hiddenMainDivContent["graph"] = $("#graphDiv").detach();
         }
-
-        if( type=="list") {
-
-           context.hiddenMainDivContent = $("#graphDiv").detach();
-
-        }
-        else if( type=="graph"){
-
-            context.hiddenMainDivContent = $("#table_mainDiv_wrapper").detach();
-
-
+        else {
+            context.hiddenMainDivContent["list"] = $("#table_mainDiv_wrapper").detach();
         }
 
 
+        if (type == "graph" && context.hiddenMainDivContent["graph"]) {
+            context.hiddenMainDivContent["graph"].appendTo($("#mainDiv"))
+        }
+        if (type == "list" && context.hiddenMainDivContent["list"]) {
+            context.hiddenMainDivContent["list"].appendTo($("#mainDiv"))
 
+        }
 
 
     }

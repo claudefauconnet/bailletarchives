@@ -29,7 +29,10 @@ var listController = (function () {
         var whereStr = "";
         var table = context.currentTable;
         if (!table || table == "")
-            mainController.setErrorMessage("selectionnez une table");
+           return mainController.setErrorMessage("selectionnez une table");
+
+
+        context.currentJoinTable=null;
 
         // gestion des requetes sur plusieurs tables
         var joinTable = context.currentJoinTable;// see mainController lines 21 to 25
@@ -56,7 +59,7 @@ var listController = (function () {
             if (operator == "LIKE") {
                 value = "'%" + value + "%'"
             }
-           else if (operator == "NOT LIKE") {
+            else if (operator == "NOT LIKE") {
                 value = "'%" + value + "%'"
             }
             else {
@@ -162,7 +165,8 @@ var listController = (function () {
     }
 
     self.listRecords = function (sql) {
-        context.currentListQueries[ context.currentTable]=sql;
+        mainController.showInMainDiv("list")
+        context.currentListQueries[context.currentTable] = sql;
         var table = context.currentTable;
         mainController.execSql(sql, function (err, json) {
             if (json.length == 0) {
@@ -179,43 +183,106 @@ var listController = (function () {
             if (!context.dataTables[table])
                 context.dataTables[table] = new dataTable();
             context.dataTables[table].loadJson(table, "mainDiv", json, {onClick: recordController.displayRecordData})
-            $("#tabs").tabs("option", "active", 0);
+            //   $("#tabs").tabs("option", "active", 0);
             $("#addLinkedRecordButton").attr("disabled", true);
             $("#deleteLinkedRecordButton").attr("disabled", true);
 
         })
     }
 
+    self.loadLinkedDivs = function () {
+
+
+        var relations = config.tableDefs[context.currentTable].tabs;
+        $("#recordLinkedDivs").html("")
+        var index = 0;
+        async.eachSeries(relations, function (relation, callbackEach) {
+            var dataTableDivName = "linkedRecordsDiv_" + Math.round(Math.random() * 10000);
+
+
+            $.when($('#' + dataTableDivName).remove()).then(function () {
+                $("#recordLinkedDivs").append("<div class='recordLinkedDiv'  id='" + dataTableDivName + "'></div><br>");
+                listController.loadLinkedRecords(relation, dataTableDivName, function (err, result) {
+                    return callbackEach();
+                });
+            });
+        });
+
+
+    }
+
     self.loadLinkedRecords = function (linkedTable, dataTableDivName, callback) {
         var foreignKey = ""
         var relations = config.tableDefs[context.currentTable].relations;
         context.currentLinkedTable = linkedTable;
-        var selectfields = relations[linkedTable].selectfields;
-        mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
+     //   var selectfields = relations[linkedTable].selectfields;
+    //    mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
 
         var joinObj = relations[linkedTable].joinObj;
         var sql = " select " + linkedTable + ".* from  " + joinObj.tables + " where " + joinObj.where + " and " + context.currentTable + ".id=" + context.currentRecordId;
         mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err)
-            if (callback) {
-                if (err)
-                    return callback(err)
-                return callback(err, json);
 
+            if (json.length == 0) {
+                $("#" + dataTableDivName).css("border-style", "none")
+                $("#" + dataTableDivName).html(linkedTable + " 0 ");
+                $("#" + dataTableDivName).height(50).css("padding", "20px");
+                return callback();
             }
 
-            var width = mainController.totalDims.w * 0.9;
-            var height = mainController.totalDims.h - 300;
+            var width = mainController.totalDims.w - $("#recordDetailsDiv").width() - 150
+            var height = Math.min((json.length * 20) + 100, 300);
+
+
+          $("#recordLinkedDivs").removeAttr( "overflow" )
+            $("#" + dataTableDivName).width(width).height(height).css("padding", "20px");
             if (!context.dataTables["linked_" + linkedTable])
                 context.dataTables["linked_" + linkedTable] = new dataTable();
-            context.dataTables["linked_" + linkedTable].loadJson(linkedTable, dataTableDivName, json, {
-                dom: "lti",
-                width: width,
-                height: height,
-               // onClick: mainController.enableUnlinkButton
-                onClick:recordController.displayDataReadOnly
+
+
+            var columns = context.dataTables["linked_" + linkedTable].getColumns(json);
+            var htmlStr = "<div class='title'>" + linkedTable + "</div>"
+            htmlStr += "<table  id='table_" + dataTableDivName + "'  class='dataTables_wrapper  display nowrap' ></table>"
+            $('#' + dataTableDivName).css("font-size", "10px");
+            $("#" + dataTableDivName).html(htmlStr);
+            console.log(dataTableDivName)
+            var table = $("#table_" + dataTableDivName).DataTable({
+
+                fixedHeader: true,
+                "dom": "",
+                data: json,
+                columns: columns,
+                fixedColumns: true,
+                scrollY: height,
+                scrollX: true,
+                scrollCollapse: true,
+
+
+
+                drawCallback: function (settings, json) {
+
+                    callback(json)
+                }
+
+
+            }).on('click', 'tr', function (event) {
+                this.selectedRow = table.row(this);
+                var line = table.row(this).data();
+                recordController.displayDataReadOnly()
+
             })
+            table.ajax.reload();
+
+            /*
+                        context.dataTables["linked_" + linkedTable].loadJson(linkedTable, dataTableDivName, json, {
+                            dom: "",
+                            title: linkedTable,
+                            width: width,
+                            //   height: height,
+                            // onClick: mainController.enableUnlinkButton
+                            //   onClick: recordController.displayDataReadOnly
+                        })*/
         })
 
 
@@ -241,8 +308,8 @@ var listController = (function () {
             sql = "select * from " + context.currentLinkedTable + "  WHERE CONCAT(" + concatStr + ") LIKE '%" + str + "%'";
         else
             sql = "select * from " + context.currentLinkedTable + "  WHERE " + field + " LIKE '%" + str + "%'";
-        if( context.currentLinkedTable=="magasin")
-            sql+=" and (cotesParTablette is null || cotesParTablette='') and (numVersement is null || numVersement='') "
+        if (context.currentLinkedTable == "magasin")
+            sql += " and (cotesParTablette is null || cotesParTablette='') and (numVersement is null || numVersement='') "
         mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err)
@@ -318,4 +385,5 @@ var listController = (function () {
 
 
     return self;
-})()
+})
+()

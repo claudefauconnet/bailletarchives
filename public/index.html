@@ -68,6 +68,9 @@
             padding: 3px;
             font-size: 12px;
         }
+        .locateButton{
+            background-color: #efec9f;
+        }
 
         input {
             width: 150px;
@@ -110,6 +113,12 @@
             border-style: solid;
         }
 
+        .myDatatable {
+            width: 600px;
+            height: 200px;
+
+        }
+
         .myDatatable td {
             border-bottom-style: solid;
             border-bottom-width: 1px;
@@ -122,8 +131,9 @@
             height: 20px !important;
         }
 
-        .dataTables_wrapper {
+        div.dataTables_wrapper {
             margin: 5px;
+
         }
 
         .dt-buttons {
@@ -135,7 +145,7 @@
             font-weight: bold;
         }
 
-        #messageDiv {
+        .message {
             font-style: italic;
         }
 
@@ -235,14 +245,60 @@
 
 
     </style>
+    <style>
+        #recordDiv {
+            display: flex;
+            flex-direction: row;
+            width: 800px;
+
+        }
+
+        .recordDetailsDiv {
+
+            margin: 10px;
+            padding: 10px;
+            background-color: #e9e9e9;
+            border: #261803 solid 2px;
+            border-radius: 10px;
+            display: block;
+        }
+
+        .recordLinkedDiv {
+            width: 500px;
+            height: 200px;
+            background-color: #e9e9e9;
+            border: #261803 solid 2px;
+            border-radius: 10px;
+            display: block;
+            overflow: auto;
+
+        }
+
+        #recordLinkedDivs {
+
+            background-color: #d3f4f2e3;
+            max-height: 800px;
+
+            border: #261803 solid 2px;
+            border-radius: 10px;
+            display: flex;
+            margin: 10px;
+            padding: 10px;
+            margin-bottom: 40px;
+            flex-direction: column;
+
+        }
+
+
+    </style>
 
     <script>
         var dialog, dialog2, dialog3;
         $(function () {
-            if(false)
-            setTimeout(function () {
-                magasinD3.init("mainDiv");
-            }, 100)
+            if (true)
+                setTimeout(function () {
+                    magasinD3.init("mainDiv");
+                }, 100)
             mainController.setDivsSize();
             $("#leftAccordion").accordion({
 
@@ -255,15 +311,15 @@
 
             });
 
-            $("#tabs").tabs({
-                activate: function (event, ui) {
-                    var index = ui.newTab.index();
-                    if (index > 0) {
-                        mainController.loadTab(index)
-                    }
+            /* $("#tabs").tabs({
+                 activate: function (event, ui) {
+                     var index = ui.newTab.index();
+                     if (index > 0) {
+                         mainController.loadTab(index)
+                     }
 
-                }
-            });
+                 }
+             });*/
 
             $("#magasinsDivTabs").tabs({
                 activate: function (event, ui) {
@@ -363,7 +419,7 @@
     </script>
 </head>
 <body>
-<div id="messageDiv"></div>
+<div id="messageDiv" class="message"></div>
 <div id="main">
 
     <div id="left">
@@ -394,9 +450,11 @@
                 <button onclick="sorties.create()">Creer</button>
                 <br>
                 <button onclick="sorties.listActives()">Lister en cours</button>
-                <button onclick="sorties.highlightSorties()">voir en cours</button>
-                <br>
+             <br>
                 <button onclick="sorties.listHistory()">Lister historique</button>
+                <br>
+                <button onclick="sorties.highlightSorties()" class="locateButton">voir en cours</button>
+                <br>
 
 
             </div>
@@ -514,127 +572,98 @@
 
         </div>
 
-        <div id="dialogDiv">
 
-            <div id="tabs">
-                <ul>
-                    <li><a href="#tabs-recordDiv">Details</a></li>
-                    <li><a href="#tabs-linkedRecordDiv1">LinkedRecord</a></li>
-                    <!--  <li><a href="#tabs-linkedRecordDiv2">LinkedRecord</a></li>-->
+    </div>
 
+    <div id="dialogDiv"></div>
+    <div id="dialog2Div">
+        <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput">
+        <button id="searchLinkedRecordsButton">chercher</button>
+        <button id="addLinkedRecordButton">ajouter lien</button>
+        <div id="new_linkedRecordsDiv" class="dataTableDiv"></div>
+    </div>
 
-                </ul>
-                <div id="tabs-recordDiv" class="dialogTab">
-                    <div id="recordDetailsDiv"></div>
+    <div id="dialog3Div">
 
-                </div>
-                <div id="tabs-linkedRecordDiv1" class="dialogTab">
-
-                    <!--   <button id="deleteLinkedRecordButton">Supprimer lien</button>
-                       <button class="showAddLinkedRecordButton">Ajouter lien</button>-->
-                    <div id="linkedRecordsDiv" class="dataTableDiv"></div>
+    </div>
 
 
-                </div>
-                <!--   <div id="tabs-linkedRecordDiv2" class="dialogTab">
-                       <button id="deleteLinkedRecordButton2">Délier</button>
-                       <button class="showAddLinkedRecordButton">Lier</button>
-                       <div id="linkedRecordsDiv2" class="dataTableDiv"></div>
+    <div id="loginDialogDiv" title="Connexion">
+        <table>
+            <tr>
+                <td>
+                    Utilisateur
+                </td>
+                <td>
+                    <input id="login">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    mot de passe
+                </td>
+                <td>
+                    <input type="password" id="password">
+                </td>
+            </tr>
+        </table>
+        <span id="logonMessageDiv"></span>
+
+    </div>
+    <div id="popupD3Div">
+        <div id="dialogContentDiv"></div>
+    </div>
+
+    <div id="dialogD3"></div>
+
+    <div id="movableSearchDiv" style="display: none">
+        <table>
+            <tr>
+                <td>
+                    <button id="addRecordButton" style="width:60px">Ajouter</button>&nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    champ
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <select id="searchColumnInput"></select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <select id="searchOperatorInput"></select> <input id="searchValueInput"
+                                                                      style="width:100px"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+
+                    <button id="andSearchButton" style="width:20px"> +</button>
+                    <img src='images/clear.png' style="vertical-align: middle" width='20px'
+                         onclick='listController.removeSearchCriteria(-1)'>
+                    <br>
+                    <button id="searchButton"> Lister</button>
+                    <button id="locateButton" class="locateButton"> Localiser</button>
 
 
-                   </div>-->
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="searchCriteriaDiv">
 
 
-            </div>
-        </div>
-        <div id="dialog2Div">
-            <select id="linkedRecordsFieldSelect"></select></select><input id="searchLinkedRecordsInput">
-            <button id="searchLinkedRecordsButton">chercher</button>
-            <button id="addLinkedRecordButton">ajouter lien</button>
-            <div id="new_linkedRecordsDiv" class="dataTableDiv"></div>
-        </div>
-
-        <div id="dialog3Div">
-
-        </div>
-
-
-        <div id="loginDialogDiv" title="Connexion">
-            <table>
-                <tr>
-                    <td>
-                        Utilisateur
-                    </td>
-                    <td>
-                        <input id="login">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        mot de passe
-                    </td>
-                    <td>
-                        <input type="password" id="password">
-                    </td>
-                </tr>
-            </table>
-            <span id="logonMessageDiv"></span>
-
-        </div>
-        <div id="popupD3Div">
-            <div id="dialogContentDiv"></div>
-        </div>
-
-        <div id="dialogD3"></div>
-
-        <div id="movableSearchDiv" style="display: none">
-            <table>
-                <tr>
-                    <td>
-                        <button id="addRecordButton" style="width:60px">Ajouter</button>&nbsp;
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        champ
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <select id="searchColumnInput"></select>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-                        <select id="searchOperatorInput"></select> <input id="searchValueInput"
-                                                                          style="width:100px"/>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>
-
-                        <button id="andSearchButton" style="width:20px"> +</button>
-                        <img src='images/clear.png' style="vertical-align: middle" width='20px'
-                             onclick='listController.removeSearchCriteria(-1)'>
-                        <br>
-                        <button id="searchButton"> Lister</button>
-                        <button id="locateButton"> Localiser</button>
-
-
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div id="searchCriteriaDiv">
-
-
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
 
 </body>
 </html>

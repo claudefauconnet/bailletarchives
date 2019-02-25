@@ -20,7 +20,7 @@ var tools = (function () {
 
 
         }
-       else if (tool && tool.loadMagasinD3) {
+        else if (tool && tool.loadMagasinD3) {
             dialogCarte.dialog("open")
             $("#dialogCarte").load("magasinD3.html"), function () {
 
@@ -103,15 +103,14 @@ var tools = (function () {
                     var tabletteBoites = [];
                     if (tablette.cotesParTablette)
                         tabletteBoites = tablette.cotesParTablette.split(" ");
-                    tabletteBoites.forEach(function(boite,index){
-                       var p=boite.indexOf("/");
-                        if(p >-1)
-                            tabletteBoites[index]=parseInt( boite.substring(p+1))
+                    tabletteBoites.forEach(function (boite, index) {
+                        var p = boite.indexOf("/");
+                        if (p > -1)
+                            tabletteBoites[index] = parseInt(boite.substring(p + 1))
 
                     })
                     infos.tablettes.coteBoites.push.apply(infos.tablettes.coteBoites, tabletteBoites);
                     infos.tablettes.coteBoites.sort();
-
 
 
                 })
@@ -142,16 +141,14 @@ var tools = (function () {
         })
     }
 
-    self.getTablettesVidesContigues=function(tablettes, nombre){
-        tablettesContigues=[];
-        var done=false;
-        tablettes.forEach(function(tablettes,index){
-            if(tablettesContigues.length>=nombre)
+    self.getTablettesVidesContigues = function (tablettes, nombre) {
+        tablettesContigues = [];
+        var done = false;
+        tablettes.forEach(function (tablettes, index) {
+            if (tablettesContigues.length >= nombre)
                 return;
 
-           var tabletteArray=tablette.coordonnees.split("-");
-
-
+            var tabletteArray = tablette.coordonnees.split("-");
 
 
         })
@@ -159,6 +156,49 @@ var tools = (function () {
 
     }
 
+    self.sortiesShowBoitesCbx = function () {
+        var numVersement = $("#attr_numVersement").val();
+        if (!numVersement || numVersement == "")
+            mainController.setRecordErrorMessage("saisissez un versement")
+        var sql = "select * from magasin, versement where versement.id=magasin.id_versement and versement.numVersement="+ numVersement;
+        mainController.execSql(sql, function (err, json) {
+            if (err)
+                return mainController.setRecordErrorMessage(err);
+            var html = "";
+            if (json.length == 0)
+                html = " pas de boites correspondantse";
+            else {
+
+                $('#attr_id_versement').val(json[0].id_versement)
+                recordController.incrementChanges(document.getElementById("attr_id_versement"));
+                var allBoites=[];
+                json.forEach(function (tablette) {
+                    var boitesStr=tablette.cotesParTablette;
+                    if(boitesStr!=null && boitesStr!="")
+                    boites=boitesStr.split(" ");
+                    allBoites=allBoites.concat(boites)
+                })
+                html="Boites<br><div>"
+                allBoites.sort();
+                allBoites.forEach(function(boite){
+                    html+="<input type='checkbox' id='"+boite+"'class='boite_cbx'>"+boite+"<br>"
+                })
+                html+="</div>"
+
+                html+="<script>$('.boite_cbx').on('click',function(){$('#attr_cotesBoites').append(' '+$(this).attr('id'));  recordController.incrementChanges(document.getElementById(\"attr_cotesBoites\"));})"
+
+
+
+
+            }
+
+            $("#recordLinkedDivs").css("overflow","auto")
+            $("#recordLinkedDivs").html(html);
+
+        })
+
+
+    }
 
 
     return self;

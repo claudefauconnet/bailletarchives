@@ -8,5 +8,5 @@ var context = {
     currentCriteria:[],
     currentVersementInfos:{},
     currentListQueries:{},
-    hiddenMainDivContent:null,
+    hiddenMainDivContent:{graph:"",table:""},
 }

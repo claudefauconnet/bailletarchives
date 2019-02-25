@@ -27,8 +27,8 @@ var recordController = (function () {
             if (targetObj.type == "number")
                 targetObj[field.name].cols = 10;
             if ((field.maxLength && field.maxLength > 50) || field.dataType == "text") {
-                targetObj[field.name].cols = 60;
-                targetObj[field.name].rows = 2;
+                targetObj[field.name].cols = config.default.textArea.cols;
+                targetObj[field.name].rows =  config.default.textArea.rows
             }
             else if (field.maxLength && field.maxLength <= 50)
                 targetObj[field.name].cols = field.maxLength;
@@ -44,25 +44,50 @@ var recordController = (function () {
                     targetObj[field.name].type = "readOnly"
         })
         recordController.setAttributesValue(table, targetObj, obj);
-        recordController.drawAttributes(targetObj, "recordDetailsDiv");
-
-        if (mode != "readOnly") {
-            if (obj && obj.id)
-                $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
-
-            $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
-        }
-        $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
-
-        $("#saveRecordButton").attr("disabled", true);
-        $(dialog.dialog("open"))
 
 
-        mainController.setTabs();
+        $("#dialogDiv").dialog({title: table});
 
-        $("#dialog").dialog({title: table});
+        //$("#dialogDiv").load("./htmlSnippets/versement.html", function () {
+
+            $("#dialogDiv").html(  "<div id=\"recordDiv\">\n" +
+                "    <div id=\"recordDetailsDiv\" class=\"recordDetailsDiv\"></div>\n" +
+                "    <div id=\"recordLinkedDivs\"></div>\n" +
+                "</div>");
+
+
+            recordController.drawAttributes(targetObj, "recordDetailsDiv");
+                if (mode != "readOnly") {
+                    if (obj && obj.id && !config.tableDefs[context.currentTable].tableConstraints.cannotDelete==true)
+                        $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
+
+                    $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
+                    $("#recordDetailsDiv").prepend("<div id='recordMessageDiv' class='message'></div>")
+                }
+                $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
+
+
+           listController.loadLinkedDivs()
+
+
+
+                $("#saveRecordButton").attr("disabled", true);
+            $("#dialogDiv").dialog("open");
+
+
+
+
+
+
+
+     //   mainController.setTabs();
+
+
 
     }
+
+
+
 
 
     self.saveRecord = function () {
@@ -73,7 +98,7 @@ var recordController = (function () {
             errors.forEach(function (err) {
                 message += err + "<br>"
             })
-            return mainController.setErrorMessage(message);
+            return mainController.setRecordErrorMessage(message);
         }
 
 
@@ -112,28 +137,24 @@ var recordController = (function () {
 
         mainController.execSql(sql, function (err, json) {
             if (err)
-                mainController.setErrorMessage(err)
+               return  mainController.setRecordErrorMessage(err)
 
-            mainController.setMessage("enregistrement sauvé");
+            mainController.setRecordMessage("enregistrement sauvé");
             dialog.dialog("close");
+
+            var fn=config.tableDefs[context.currentTable].onAfterSave
+            if(fn)
+                fn(context.currentRecordId)
+
+
 
             ///*******************************A finir*******************************************************************************
             if (context.dataTables[context.currentTable])
                 context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
-            return;
-            // delete linked records
-            mainController.execSql(sql, function (err, json) {
-                if (err) {
-                    mainController.setErrorMessage(err);
-                }
-                else{
-                    var fn=config.tableDefs[context.currentTable].onAfterSave
-                    if(fn)
-                        fn(context.currentRecordId)
-                }
 
-                $("#dialog").dialog("close");
-            })
+
+
+
 
         })
 
@@ -142,21 +163,18 @@ var recordController = (function () {
 
     self.saveNewRecord = function () {
 
-        self.execSqlCreateRecord(context.currentTable,self.currentRecordChanges, function (err, result){
+        self.execSqlCreateRecord(context.currentTable,self.currentRecordChanges, function (err, newId){
             if (err)
-                mainController.setErrorMessage(err);
-            $("#dialogDiv").dialog("close");
-            mainController.setMessage("enregistrement sauvé");
+                return mainController.setRecordErrorMessage(err);
+            context.currentRecordId = newId;
 
-            var sql = "SELECT max(id) as id from " + context.currentTable;
-            mainController.execSql(sql, function (err, json) {
-                if (err)
-                    mainController.setErrorMessage(err)
-                context.currentRecordId = json[0].id;
-                var fn=config.tableDefs[context.currentTable].onAfterSave
-                if(fn)
-                    fn(context.currentRecordId)
-            })
+            var fn=config.tableDefs[context.currentTable].onAfterSave
+            if(fn)
+                fn(newId)
+
+            mainController.setRecordMessage("enregistrement sauvé");
+
+
         })
 
 
@@ -195,13 +213,7 @@ var recordController = (function () {
             if (err)
                 return callback(err);
             var newId=json.insertId;
-            var fn=config.tableDefs[context.currentTable].onAfterSave
-            if(fn)
-                fn(newId)
-
-
-
-            return callback(null,"enregistrement crée");
+            return callback(null,newId);
 
         })
 
@@ -240,9 +252,9 @@ var recordController = (function () {
 
             self.execSQLDeleteRecord(context.currentTable, context.currentRecordId, function (err, result) {
                 if (err) {
-                    return mainController.setErrorMessage(err)
+                    return mainController.setRecordErrorMessage(err)
                 }
-                mainController.setMessage(result);
+                mainController.setRecordMessage(result);
                 dialog.dialog("close");
                 listController.listRecords(context.currentListQueries[context.currentTable]);
             })

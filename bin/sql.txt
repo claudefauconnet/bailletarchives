@@ -25,6 +25,11 @@ update versement v  JOIN  magasin m ON v.numVersement=m.numVersement set v.etatT
 
 
 
+UPDATE magasin
+        INNER JOIN
+    versement ON magasin.numversement = versement.numVersement
+SET
+    magasin.id_versement = versement.id
 
 UPDATE v SET v.Status = 'old' FROM versement v INNER JOIN magasin n ON v.numVersement = m.numVersement
 

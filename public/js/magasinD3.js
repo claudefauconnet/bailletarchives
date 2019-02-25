@@ -726,7 +726,7 @@ var magasinD3 = (function () {
         // .on("end", function(){ svg.call(zoom.transform, d3.zoomIdentity.translate((totalWidth/2 - xx),(totalHeight/2 - yy)).scale(1))});
     }
 
-    self.locate = function (property, array) {
+    self.locate = function (classe,property, array) {
 
 
         var found = 0;
@@ -734,34 +734,34 @@ var magasinD3 = (function () {
         var coordonnees = "";
 
         $("#popupD3Div").css("visibility", "hidden")
-        d3.selectAll(".boite").each(function (d, i) {
-            d3.select(this).style("opacity", 0.1)
+        d3.selectAll("."+classe+" rect").each(function (d, i) {
+    var ok=false;
             var x = d;
-            var d3Prop = d3.select(this).attr(property);
+            var firstbox = true;
+            var d3Prop = d3.select(this.parentNode).attr(property);
 
             if (d3Prop != null) {
-                var firstbox = true;
+
                 if (array.indexOf(d3Prop) > -1) {
+                    ok=true;
                     found += 1
                     if (firstbox) {
 
                         firstbox = false
-                        self.centerOnElt(this)
+                    // self.centerOnElt(this)
 
                     }
-                    d3.select(this).style("opacity", 1)
-                    d3.select(this).style("fill", "red")
-                    d3.select(this).style("stroke", "black")
-
-                    /*   $(this).css("opacity", 1)
-                       $(this).css("stroke", "red")*/
 
 
                 }
             }
+            if(!ok){
+                d3.select(this).style("opacity", 0.1)
+            }
 
         })
-
+        zoom.translateBy(svg, 100, 100)
+        zoom.scaleTo(svg, 1);
         return;
         if (found > 0) {
             var message = "versement " + numVersement + " , localisation : " + coordonnees + " nombre de boites +" + found + "+ première boite " + firstBoiteName;
@@ -775,116 +775,12 @@ var magasinD3 = (function () {
     }
 
 
-    self.locateVersements = function (sql) {
 
-        mainController.execSql(sql, function (err, json) {
-            if (json.length > config.maxVersementsToLocate) {
-                return mainController.setMessage("trop de résultats :" + json.length + " précisez la requête");
-            }
-
-            var numVersements = [];
-            json.forEach(function (line) {
-                numVersements.push(line.numVersement);
-            })
-            var found = 0;
-            var firstBoiteName = ""
-            var coordonnees = "";
-
-            $("#popupD3Div").css("visibility", "hidden")
-            d3.selectAll(".boite").each(function (d, i) {
-                d3.select(this).style("opacity", 0.1)
-                var x = d;
-                var numVersement = d3.select(this).attr("numVersement");
-                if (!numVersement)
-                    numVersement = d3.select(this).attr("numversement");
-
-                var firstbox = true;
-                if (numVersements.indexOf(numVersement) > -1) {
-                    found += 1
-                    if (firstbox) {
-                        firstBoiteName = d3.select(this).attr("name");
-                        coordonnees = d3.select(this).attr("coordonnees");
-
-
-                        $("#messageSpan").html(message)
-                        firstbox = false
-                        self.centerOnElt(this)
-
-                    }
-                    d3.select(this).style("opacity", 1)
-                    d3.select(this).style("fill", "red")
-                    d3.select(this).style("stroke", "black")
-
-                    /*   $(this).css("opacity", 1)
-                       $(this).css("stroke", "red")*/
-
-
-                }
-
-            })
-            if (found > 0) {
-                var message = "versement " + numVersement + " , localisation : " + coordonnees + " nombre de boites +" + found + "+ première boite " + firstBoiteName;
-                $("#messageSpan").html(message);
-                zoom.scaleTo(svg, avgZoom);
-            }
-            else
-                $("#messageSpan").html("aucune boite correspond au versement " + numVersement)
-
-        })
-
-    }
-    self.searchVersement = function (versement) {
-        versement = prompt("numero de versement")
-        var found = 0;
-        var firstBoiteName = ""
-        var coordonnees = "";
-        if (versement && versement != "") {
-            $("#popupD3Div").css("visibility", "hidden")
-            d3.selectAll(".boite").each(function (d, i) {
-                d3.select(this).style("opacity", 0.1)
-                var x = d;
-                var numVersement = d3.select(this).attr("numVersement");
-                if (!numVersement)
-                    numVersement = d3.select(this).attr("numversement");
-
-                var firstbox = true;
-                if (versement == numVersement) {
-                    found += 1
-                    if (firstbox) {
-                        firstBoiteName = d3.select(this).attr("name");
-                        coordonnees = d3.select(this).attr("coordonnees");
-
-
-                        $("#messageSpan").html(message)
-                        firstbox = false
-                        self.centerOnElt(this)
-
-                    }
-                    d3.select(this).style("opacity", 1)
-                    d3.select(this).style("fill", "red")
-                    d3.select(this).style("stroke", "black")
-
-                    /*   $(this).css("opacity", 1)
-                       $(this).css("stroke", "red")*/
-
-
-                }
-
-            })
-            if (found > 0) {
-                var message = "versement " + versement + " , localisation : " + coordonnees + " nombre de boites +" + found + "+ première boite " + firstBoiteName;
-                $("#messageSpan").html(message);
-                zoom.scaleTo(svg, minZoom);
-            }
-            else
-                $("#messageSpan").html("aucune boite correspond au versement " + versement)
-        }
-    }
 
     self.clearHighlights = function () {
         $("#popupD3Div").css("visibility", "hidden")
-        d3.selectAll(".boite").style("opacity", 1)
-        d3.selectAll(".tablette").style("fill", "none").style(" stroke", "blue");
+        d3.selectAll("rect").style("opacity", 1)
+      //  d3.selectAll(".tablette").style("fill", "none").style(" stroke", "blue");
     }
 
     self.showDialogChercherTablettesPourVersement = function () {

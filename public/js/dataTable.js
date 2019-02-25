@@ -9,22 +9,16 @@ var dataTable = function () {
     self.numberColumns = [];
     this.pageLength = 100;
     this.colHeight = 80;
-    this.loadJson = function (table, containerDiv, json, options) {
-        this.table = table
-        if (!options)
-            options = {};
 
-        this.dataSet = [];
-        this.columns = [];
+    this.dataTableSortArray=[]
 
-
-        this.dataSet = json
-        ;
+    this.getColumns=function(json,table){
+      var columns = [];
         var keys = [];
         var sortColumns = [];
         if (config.tableDefs[table] && config.tableDefs[table].sortFields)
             sortColumns = config.tableDefs[table].sortFields;
-        var dataTableSortArray = [];
+
         json.forEach(function (line, index) {
             for (var key in line) {
                 if (keys.indexOf(key) < 0 && config.listHiddenFields.indexOf(key) < 0)
@@ -55,17 +49,36 @@ var dataTable = function () {
                 else
                     order = "asc"
 
-                dataTableSortArray.push([index, order])
+             //   this.dataTableSortArray.push([index, order])
             }
         })
+        return columns;
 
-        this.columns = columns;
+    }
+    this.loadJson = function (table, containerDiv, json, options) {
+        this.table = table
+        if (!options)
+            options = {};
+
+        this.dataSet = json
+
+        this.columns = this.getColumns(json,table);
+        var widthStr = "";
+        var heightStr = ""
+        if (options.width)
+            widthStr = "width:" + options.width + "px;"
+        if (options.height)
+            heightStr = "height:" + options.height + "px;"
 
 
-        var htmlStr = "<table style=' z-index:100 ' id='table_" + containerDiv + "'  class='myDatatable cell-border display nowrap'></table>"
+        var htmlStr = "";
+        if (options.title)
+            htmlStr = "<div class='title'>" + options.title + "</div>"
+        htmlStr += "<table style='z-index:100;" + widthStr + heightStr + " ' id='table_" + containerDiv + "'  class='myDatatable cell-border display nowrap' ></table>"
 
         $("#" + containerDiv).html(htmlStr);
         $('#' + containerDiv).css("font-size", "10px");
+
         var height = $("#" + containerDiv).height() - 120
 
 
@@ -75,8 +88,10 @@ var dataTable = function () {
 
 
         var dom = '<"top"firptl><"bottom"B><"clear">'
-        if (options.dom)
+        if (typeof options.dom !== 'undefined' && options.dom !== null)
             dom = options.dom;
+
+        $("div.dataTables_wrapper").css("width","600px").css("height","200px")
 
         var table = $("#table_" + containerDiv).DataTable({
             //  responsive: true,
@@ -88,8 +103,8 @@ var dataTable = function () {
                 // 'copy', 'csv', 'excel', 'pdf', 'print'
             ],
             data: this.dataSet,
-            columns: columns,
-            "order": dataTableSortArray,
+            columns: this.columns,
+            "order": this.dataTableSortArray,
 
 
             scrollY: height,
@@ -109,7 +124,7 @@ var dataTable = function () {
                         if (data != null && data != "" && data.indexOf("0000") < 0) {
 
                             var date = new Date(data);
-                           str=util.dateToStringFR(date);
+                            str = util.dateToStringFR(date);
                         }
                         return str;
                     },
