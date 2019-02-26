@@ -28,7 +28,7 @@ var recordController = (function () {
                 targetObj[field.name].cols = 10;
             if ((field.maxLength && field.maxLength > 50) || field.dataType == "text") {
                 targetObj[field.name].cols = config.default.textArea.cols;
-                targetObj[field.name].rows =  config.default.textArea.rows
+                targetObj[field.name].rows = config.default.textArea.rows
             }
             else if (field.maxLength && field.maxLength <= 50)
                 targetObj[field.name].cols = field.maxLength;
@@ -50,44 +50,50 @@ var recordController = (function () {
 
         //$("#dialogDiv").load("./htmlSnippets/versement.html", function () {
 
-            $("#dialogDiv").html(  "<div id=\"recordDiv\">\n" +
-                "    <div id=\"recordDetailsDiv\" class=\"recordDetailsDiv\"></div>\n" +
-                "    <div id=\"recordLinkedDivs\"></div>\n" +
-                "</div>");
+        $("#dialogDiv").html("<div id=\"recordDiv\">\n" +
+            "    <div id=\"recordDetailsDiv\" class=\"recordDetailsDiv\"></div>\n" +
+            "    <div id=\"recordLinkedDivs\"></div>\n" +
+            "</div>");
+
+        {// record tools buttons
+            var recordToolsHtml = "";
+            var recordTools = config.tableDefs[context.currentTable].recordTools;
+            if (recordTools ) {
+                recordTools.forEach(function (recordTool) {
+                    recordToolsHtml += "&nbsp;&nbsp;<Button onclick='" + recordTool.toolFn + "()'>" + recordTool.title + "</Button>"
+                })
+            }
+        }
 
 
-            recordController.drawAttributes(targetObj, "recordDetailsDiv");
-                if (mode != "readOnly") {
-                    if (obj && obj.id && config.tableDefs[context.currentTable].tableConstraints && !config.tableDefs[context.currentTable].tableConstraints.cannotDelete==true)
-                        $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
-
-                    $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
-                    $("#recordDetailsDiv").prepend("<div id='recordMessageDiv' class='message'></div>")
-                }
-                $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
-
-
-           listController.loadLinkedDivs()
-
-
-
-                $("#saveRecordButton").attr("disabled", true);
-            $("#dialogDiv").dialog("open");
-
+        recordController.drawAttributes(targetObj, "recordDetailsDiv");
+        if (mode != "readOnly") {
+            if(recordToolsHtml!="")
+                $("#recordDetailsDiv").prepend(recordToolsHtml);
+            $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
 
 
 
+            if (obj && obj.id && config.tableDefs[context.currentTable].tableConstraints && !config.tableDefs[context.currentTable].tableConstraints.cannotDelete == true)
+                $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
 
 
+            $("#recordDetailsDiv").prepend("<div id='recordMessageDiv' class='message'></div>")
+        }
+        $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
 
-     //   mainController.setTabs();
 
+        listController.loadLinkedDivs()
+
+
+        $("#saveRecordButton").attr("disabled", true);
+        $("#dialogDiv").dialog("open");
+
+
+        //   mainController.setTabs();
 
 
     }
-
-
-
 
 
     self.saveRecord = function () {
@@ -100,9 +106,6 @@ var recordController = (function () {
             })
             return mainController.setRecordErrorMessage(message);
         }
-
-
-
 
 
         if (!context.currentRecordId)// new Record
@@ -137,23 +140,19 @@ var recordController = (function () {
 
         mainController.execSql(sql, function (err, json) {
             if (err)
-               return  mainController.setRecordErrorMessage(err)
+                return mainController.setRecordErrorMessage(err)
 
             mainController.setRecordMessage("enregistrement sauvé");
             dialog.dialog("close");
 
-            var fn=config.tableDefs[context.currentTable].onAfterSave
-            if(fn)
+            var fn = config.tableDefs[context.currentTable].onAfterSave
+            if (fn)
                 fn(context.currentRecordId)
-
 
 
             ///*******************************A finir*******************************************************************************
             if (context.dataTables[context.currentTable])
                 context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
-
-
-
 
 
         })
@@ -163,13 +162,13 @@ var recordController = (function () {
 
     self.saveNewRecord = function () {
 
-        self.execSqlCreateRecord(context.currentTable,self.currentRecordChanges, function (err, newId){
+        self.execSqlCreateRecord(context.currentTable, self.currentRecordChanges, function (err, newId) {
             if (err)
                 return mainController.setRecordErrorMessage(err);
             context.currentRecordId = newId;
 
-            var fn=config.tableDefs[context.currentTable].onAfterSave
-            if(fn)
+            var fn = config.tableDefs[context.currentTable].onAfterSave
+            if (fn)
                 fn(newId)
 
             mainController.setRecordMessage("enregistrement sauvé");
@@ -181,7 +180,7 @@ var recordController = (function () {
     }
 
 
-    self.execSqlCreateRecord=function(table,record, callback){
+    self.execSqlCreateRecord = function (table, record, callback) {
         var sql1 = "insert into " + table + " ( ";
         var sql2 = " values ( ";
         var i = 0;
@@ -191,16 +190,16 @@ var recordController = (function () {
                 sql2 += ","
             }
             sql1 += key;
-            if(!record[key])
-                sql2 +="null";
+            if (!record[key])
+                sql2 += "null";
             else {
                 var type = mainController.getFieldType(table, key)
                 if (type == "number")
-                    sql2 += (""+record[key]).replace(",", ".");
+                    sql2 += ("" + record[key]).replace(",", ".");
                 else if (type == "string")
                     sql2 += "'" + record[key] + "'";
                 else if (type == "date") {
-                    var str = (""+record[key]).replace(/\//g, "-");// date mysql  2018-09-21
+                    var str = ("" + record[key]).replace(/\//g, "-");// date mysql  2018-09-21
                     sql2 += "'" + str + "'";
                 }
             }
@@ -212,8 +211,8 @@ var recordController = (function () {
         mainController.execSql(sql, function (err, json) {
             if (err)
                 return callback(err);
-            var newId=json.insertId;
-            return callback(null,newId);
+            var newId = json.insertId;
+            return callback(null, newId);
 
         })
 
@@ -262,16 +261,12 @@ var recordController = (function () {
     }
 
 
-
-
-
-    self.execSQLDeleteRecord=function(table,recordId, callback){
+    self.execSQLDeleteRecord = function (table, recordId, callback) {
         var sql = "delete from " + table + " where id=" + recordId;
         mainController.execSql(sql, function (err, json) {
             if (err)
-               return callback(err)
-            return callback(null,"enregistrement supprimé");
-
+                return callback(err)
+            return callback(null, "enregistrement supprimé");
 
 
         })
@@ -350,7 +345,7 @@ var recordController = (function () {
 
                 if (type == 'date') {
                     var date = new Date(value);
-                  value=util.dateToStringFR(date);
+                    value = util.dateToStringFR(date);
 
                 }
                 else if (type == 'number') {

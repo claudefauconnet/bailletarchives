@@ -9,7 +9,7 @@ var config = (function () {
     self.tableDefs = {
         "magasin": {
             defaultSearchField: "coordonnees",
-            tabs: [ "versement"],
+            tabs: ["versement"],
             type: "n-1",
             sortFields: ["magasin"],
             relations: {
@@ -39,7 +39,16 @@ var config = (function () {
             defaultSearchField: "numVersement",
             tabs: ["versement_historique", "magasin", "sortie_boite"],
             sortFields: ["numVersement desc"],
+            recordTools: [
+                {
+                    title: "Integrer versement",
+                    toolFn: "versement.showDialogIntegrerVersement"
+                }
+
+            ],
             fieldTools: {
+
+
                 /*  "cotesExtremesBoites": {
                       title: "calculer",
                       toolFn: "SetVersementCotesExtremesFromMagasin"
@@ -84,18 +93,18 @@ var config = (function () {
 
 
                 }
-               /* "article": {
-                    type: "1-n",
-                    joinSql: "select article.* from article where 1=1 ",
-                    joinObj: {
-                        tables: "versement,article",
-                        where: " article.id_versement=versement.id "
-                    },
-                    createRelSql: "update article set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
-                    deleteRelSql: "update article set id_versement=null where id=<%data.id%>",
+                /* "article": {
+                     type: "1-n",
+                     joinSql: "select article.* from article where 1=1 ",
+                     joinObj: {
+                         tables: "versement,article",
+                         where: " article.id_versement=versement.id "
+                     },
+                     createRelSql: "update article set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
+                     deleteRelSql: "update article set id_versement=null where id=<%data.id%>",
 
-                    selectfields: []
-                }*/
+                     selectfields: []
+                 }*/
             },
             fieldConstraints: {
 
@@ -133,18 +142,18 @@ var config = (function () {
 
         },
         "sortie_boite": {
-            tableConstraints:{
-                cannotDelete :true
+            tableConstraints: {
+                cannotDelete: true
             },
             tabs: [],
             fieldConstraints: {
-                id_versement:"hidden"
+                id_versement: "hidden"
 
             },
-        fieldTools: {
-                numVersement:{
-                    title:"selectionner boites",
-                    toolFn:"sortiesShowBoitesCbx"
+            fieldTools: {
+                numVersement: {
+                    title: "selectionner boites",
+                    toolFn: "sortiesShowBoitesCbx"
                 }
 
 
@@ -181,10 +190,10 @@ var config = (function () {
         }
 
 
-}
+    }
 
 
-return self;
+    return self;
 
 
 })

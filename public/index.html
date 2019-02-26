@@ -24,7 +24,7 @@
     <script src="js/recordController.js"></script>
 
 
-    <script src="js/versement.js"></script>
+    <script src="js/_versement.js"></script>
 
 
     <script src="js/mainController.js"></script>
@@ -38,10 +38,10 @@
 
 
     <script src="js/magasinD3.js"></script>
-    <script src="js/sorties.js"></script>
+    <script src="js/_sortie.js"></script>
 
-    <script src="js/tabletteD3.js"></script>
-    <script src="js/boites.js"></script>
+    <script src="js/_tablette.js"></script>
+    <script src="js/_boite.js"></script>
     <script src="js/magasinD3dialog.js"></script>
 
     <script src="js/d3/d3.js"></script>
@@ -439,21 +439,19 @@
             <h1>Versements</h1>
             <div id="versementsDiv" class="accordionInnerDiv">
                 <div id="searchDiv-Versements"></div>
-                <button onclick="magasinD3.showDialogChercherTablettesPourVersement()">Integrer versement</button>
-
 
             </div>
 
 
             <h1>Sorties</h1>
             <div id="sortiesDiv" class="alignCenterFlex">
-                <button onclick="sorties.create()">Creer</button>
+                <button onclick="sortie.create()">Creer</button>
                 <br>
-                <button onclick="sorties.listActives()">Lister en cours</button>
+                <button onclick="sortie.listActives()">Lister en cours</button>
              <br>
-                <button onclick="sorties.listHistory()">Lister historique</button>
+                <button onclick="sortie.listHistory()">Lister historique</button>
                 <br>
-                <button onclick="sorties.highlightSorties()" class="locateButton">voir en cours</button>
+                <button onclick="sortie.highlightSorties()" class="locateButton">voir en cours</button>
                 <br>
 
 
@@ -517,8 +515,8 @@
                         </ul>
 
                         <div id="magasinsDivTabs_sorties" class="alignCenterFlex">
-                            <button onclick="sorties.highlightSorties()">voir les sorties</button>
-                            <button onclick="sorties.manageSorties()">gérer sorties</button>
+                            <button onclick="sortie.highlightSorties()">voir les sorties</button>
+                            <button onclick="sortie.manageSorties()">gérer sorties</button>
                         </div>
 
 

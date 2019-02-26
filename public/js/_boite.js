@@ -1,4 +1,4 @@
-var boites=(function(){
+var boite=(function(){
     var self={}
 
 

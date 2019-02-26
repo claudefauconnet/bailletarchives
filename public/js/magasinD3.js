@@ -98,48 +98,9 @@ var magasinD3 = (function () {
         zoom.scaleTo(svg, .4);
     }
 
-    self.drawFromCache = function () {
-
-
-        getDataFromEventThis = function (thisObj) {
-            var dataArray = thisObj.context.attributes;
-            var dataObj = {};
-            for (var i = 0; i < dataArray.length; i++) {
-                var line = dataArray[i];
-                dataObj[line.name] = line.value;
-            }
-            return dataObj;
-        }
-
-        $("#graphDiv").html(cachedHtml).promise().done(function () {
-
-
-            $(".boite").click(function (event, b) {
-                var coords = {x: event.pageX, y: event.pageY}
-                var boite = getDataFromEventThis($(this));
-                magasinD3.onBoiteClick(boite, coords.x, coords.y);
-
-            })
-            var panZoomTiger = svgPanZoom('svg');
-
-            /*  d3.selectAll(".boite")
-                  .on("click", function(){
-                      var coords = d3.event;
-
-                      magasinD3.onBoiteClick(boite, coords.x, coords.y);
-                      return false;
-                });  */
-        })
-
-
-    }
-
 
     self.drawMagasins = function (magasinsToDraw, callback) {
 
-        /*  if (cachedHtml) {
-              return self.drawFromCache();
-          }*/
 
         d3.select("svg").remove();
         $("#graphDiv").html("");
@@ -307,9 +268,6 @@ var magasinD3 = (function () {
 
     self.drawBoites = function (magasinsToDraw, callback) {
 
-        if (cachedHtml) {
-            return self.drawFromCache();
-        }
 
         d3.select("svg").remove();
         $("#graphDiv").html("");
@@ -571,7 +529,7 @@ var magasinD3 = (function () {
     }
 
     self.drawTablette = function (tablette, parentG) {
-        var gTablette = parentG.append("g").attr("class", "tablette").attr("id", tablette.name);
+        var gTablette = parentG.append("g").attr("class", "tablette").attr("id", tablette.name).attr("longueurM", tablette.longueurM);
 
         if (drawTabletteNumber) {
             gTablette.append("text")
@@ -597,7 +555,7 @@ var magasinD3 = (function () {
                 "stroke-width": "1"
             }).on("click", function (e) {
             var coords = d3.event;
-
+            self.currentTablette = tablette;
             onTabletteClick(tablette, coords.x, coords.y);
             return false;
 
@@ -605,15 +563,15 @@ var magasinD3 = (function () {
         }).on("mouseover", function () {
             magasinD3.onMouseOver(tablette)
 
-        });
+        })
 
 
-        function onTabletteClick(tablette, x, y) {
-            tabletteD3.currentTablette = tablette;
+        function onTabletteClick(obj, x, y) {
+            self.currentTablette = obj;
             var html = "tablette " + tablette.name + "<br>"
-            html += "operation tablette :<select onchange='tabletteD3.ontabletteOperationSelect(this)'>" +
+            html += "operation tablette :<select onchange='tablette.onTabletteOperationSelect(this)'>" +
                 " <option></option>" +
-                "<option value='applyVersement'> affecter versement</option>" +
+                "<option value='integrerVersement'> intégrer versement</option>" +
                 "<option value='decalerBoites'> décaler boites </option>" +
                 "<option value='createUnder'> creer nouvelle</option>" +
                 "<option value='split'> diviser </option>" +
@@ -655,56 +613,34 @@ var magasinD3 = (function () {
                 "stroke-width": 0.5
             })
             .on("click", function () {
-                // var position = d3.mouse(this);
-                // onBoiteClick(boite, position[0], position[1]);
                 var coords = d3.event;
-
-                magasinD3.onBoiteClick(boite, coords.x, coords.y);
+                self.currentBoite = boite;
+                onBoiteClick(boite, coords.x, coords.y);
                 return false;
 
 
             });
 
-        self.onBoiteClick = function (boite, x, y) {
-            self.currentBoite = boite;
-            var numVersement = boite.numVersement;
-            if (!numVersement)
-                numVersement = boite.numversement;
-            if (!numVersement)
-                return;
-            var sql = "select * from versement where numVersement='" + numVersement + "'"
-            var payload = {
-                exec: 1,
-                sql: sql
-            }
+        onBoiteClick = function (boite, x, y) {
 
-            $.ajax({
-                type: "POST",
-                url: mainController.urlPrefix + "/mysql",
-                data: payload,
-                dataType: "json",
-                success: function (data) {
-                    var obj = data[0];
-                    var html = "boite " + boite.name + "<br>"
-                    html += "<table>"
-                    var keys = ["numVersement", "cotesExtremeBoites", "nbBoites", "metrage", "theme"];
-                    for (var key in obj) {
-                        if (keys.indexOf(key) > -1)
-                            html += "<tr><td>" + key + "</td><td>" + obj[key] + "</td>"
-                    }
-                    html += "<button onclick='tabletteD3.decalerBoites()'> decaler boites</button>";
-                    html += "</table>"
-                    $("#popupD3Div").html(html);
-                    $("#popupD3Div").css("top", y - 20);
-                    $("#popupD3Div").css("left", x + 20)
-                    $("#popupD3Div").css("visibility", "visible")
-                    /*  $("#popupD3Div").dialog("open");
-                  $("#dialogContentDiv").html(html);*/
-                },
-                error: function (err) {
-                    console.log(err.responseText)
+            versement.getBoiteVersement(boite, function (err, obj) {
+                if (err)
+                    return console.log(err)
 
+                var html = "boite " + boite.name + "<br>"
+                html += "<table>"
+                var keys = ["numVersement", "cotesExtremeBoites", "nbBoites", "metrage", "theme"];
+                for (var key in obj) {
+                    if (keys.indexOf(key) > -1)
+                        html += "<tr><td>" + key + "</td><td>" + obj[key] + "</td>"
                 }
+                html += "<button onclick='tablette.decalerBoites()'> decaler boites</button>";
+                html += "</table>"
+                $("#popupD3Div").html(html);
+                $("#popupD3Div").css("top", y - 20);
+                $("#popupD3Div").css("left", x + 20)
+                $("#popupD3Div").css("visibility", "visible")
+
             })
 
         }
@@ -728,7 +664,7 @@ var magasinD3 = (function () {
         // .on("end", function(){ svg.call(zoom.transform, d3.zoomIdentity.translate((totalWidth/2 - xx),(totalHeight/2 - yy)).scale(1))});
     }
 
-    self.locate = function (classe, property, array,zoomLevel) {
+    self.locate = function (classe, property, array, zoomLevel) {
 
         self.clearHighlights();
         var found = 0;
@@ -784,115 +720,7 @@ var magasinD3 = (function () {
         d3.selectAll(".unselected").classed("unselected", false);
     }
 
-    self.showDialogChercherTablettesPourVersement = function () {
 
-        $("#dialogD3").attr("title", "chercher des tablettes");
-        dialogD3.dialog("open")
-        $("#dialogD3").load("./htmlSnippets/" + "findTablettesDialogD3.html"), function () {
-
-        }
-    }
-
-    self.chercherTablettesPourVersement = function (obj) {
-        $("#findTablettes_message").html("");
-
-        //  var metrage = prompt("longueur du versement")
-        if (!obj.metrage || obj.metrage == null)
-            return;
-        //obj.metrage = parseFloat(obj.metrage.replace(",", "."));
-        var longueurCumulee = 0;
-        var tablettesOK = [];
-        var done = false;
-
-        magasinData.children.forEach(function (magasin) {
-
-            if (obj.magasin && obj.magasin != "")
-                if (magasin.name != obj.magasin)
-                    return;
-
-            if (!done)
-                magasin.children.forEach(function (epi) {
-                    if (!done)
-                        epi.children.forEach(function (travee) {
-                            if (!done)
-                                travee.children.forEach(function (tablette) {
-                                    if (!done)
-                                        if ((!tablette.numVersement || tablette.numVersement == 0) && tablette.children.length == 0) {// tablette vide
-                                            if (tablettesOK.length > 0 && !self.areTablettesContigues(tablettesOK[tablettesOK.length - 1], tablette.name)) {
-                                                tablettesOK = []// on recommence si tablettes pas contigues
-                                                longueurCumulee = 0;
-                                            }
-                                            longueurCumulee += tablette.longueurM;
-                                            tablettesOK.push(tablette.name)
-                                            if (longueurCumulee >= obj.metrage)
-                                                done = true;
-                                        }
-                                        else {
-                                            tablettesOK = []// on recommence si uen tablette est occuppée
-                                            longueurCumulee = 0;
-                                        }
-
-
-                                })
-                        })
-                })
-
-        })
-
-        var xx = tablettesOK;
-        self.currentVersement = obj;
-        self.currentVersement.tablettes = tablettesOK
-        $("#findTablettes_message").html("Tablettes contigues libres pour " + obj.metrage + " m : de " + tablettesOK[0] + " à " + tablettesOK[tablettesOK.length - 1])
-
-        var first = true;
-        d3.selectAll(".boite").style("opacity", 0.3)
-        d3.selectAll(".tablette").style("fill", "none").style(" stroke", "blue");
-        d3.selectAll(".tablette").each(function (d, i) {
-
-
-            var name = d3.select(this).attr("name");
-            if (tablettesOK.indexOf(name) > -1) {
-
-                d3.select(this).style("opacity", 1).style("stroke", "black").style("fill", "green")
-                if (first == true) {
-                    self.centerOnElt(this)
-                    first = false;
-                }
-
-
-            }
-
-        })
-
-
-    }
-
-    self.areTablettesContigues = function (a, b) {
-
-        arrayA = a.split("-");
-        arrayB = b.split("-");
-        if (arrayA.length != 4 || arrayB.length != 4)
-            return null;
-        for (var i = 1; i < 4; i++) {
-            arrayA[i] = parseInt(arrayA[i])
-            arrayB[i] = parseInt(arrayB[i])
-        }
-
-        if (arrayB[3] - arrayA[3] == 1)//mema travee
-            return true;
-        else {// changement de travee
-            if (arrayB[2] - arrayA[2] == 1)
-                return true;
-            else {
-                if ((arrayB[1] - arrayA[1]) == 1 && (arrayB[2] - arrayA[2]) > 0)//changement d'épi
-                    return true;
-                else
-                    return false;
-            }
-        }
-
-
-    }
     self.refreshDrawingElement = function (subTree) {
         var d3Obj = d3.select("#" + subTree.name);
 
@@ -1002,6 +830,8 @@ var magasinD3 = (function () {
 
         $("#magasind3MouseInfo").html(str)
     }
+
+
 
 
 // var blob = new Blob([html], {type: "image/svg+xml"});
