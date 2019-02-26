@@ -58,7 +58,7 @@ var recordController = (function () {
 
             recordController.drawAttributes(targetObj, "recordDetailsDiv");
                 if (mode != "readOnly") {
-                    if (obj && obj.id && !config.tableDefs[context.currentTable].tableConstraints.cannotDelete==true)
+                    if (obj && obj.id && config.tableDefs[context.currentTable].tableConstraints && !config.tableDefs[context.currentTable].tableConstraints.cannotDelete==true)
                         $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
 
                     $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")

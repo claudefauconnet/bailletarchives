@@ -9,7 +9,7 @@ var config = (function () {
     self.tableDefs = {
         "magasin": {
             defaultSearchField: "coordonnees",
-            tabs: ["", "versement"],
+            tabs: [ "versement"],
             type: "n-1",
             sortFields: ["magasin"],
             relations: {
@@ -111,7 +111,7 @@ var config = (function () {
         },
         "article": {
 
-            tabs: ["", "versement"],
+            tabs: ["versement"],
             sortFields: ["numBoite desc"],
             relations: {
                 "versement": {
@@ -149,6 +149,12 @@ var config = (function () {
 
 
             }
+        },
+        "versement_historique": {
+            tableConstraints: {
+                cannotDelete: true
+            },
+            tabs: [],
         }
     }
     self.lists = {};

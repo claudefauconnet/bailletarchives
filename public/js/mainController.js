@@ -40,7 +40,7 @@ var mainController = (function () {
     self.bindActions = function () {
 
         $("#searchTableInput").bind("change", function () {
-
+context.currentTable=$(this).val();
             mainController.showSearchDiv("searchDiv-Autres");
 
 

@@ -72,7 +72,6 @@ var magasinD3 = (function () {
             "<div style=' z-index:100 ' id='graphDiv'  class='myDatatable cell-border display nowrap'></div>"
 
 
-
         $("#" + containerDiv).html(htmlStr);
         $('#' + containerDiv).css("font-size", "10px");
         var height = $("#" + containerDiv).height() - 120
@@ -501,10 +500,11 @@ var magasinD3 = (function () {
             })
             .on("click", function () {
                 $("#popupD3Div").css("visibility", "hidden")
-            }).on("mouseover", function(){
+            }).on("mouseover", function () {
             magasinD3.onMouseOver(magasin)
 
-        });;
+        });
+        ;
         return gMag;
     }
 
@@ -530,10 +530,11 @@ var magasinD3 = (function () {
                 fill: magasinD3.colors["epi"],
                 stroke: "black",
                 "stroke-width": "3"
-            }).on("mouseover", function(){
+            }).on("mouseover", function () {
             magasinD3.onMouseOver(epi)
 
-        });;
+        });
+        ;
         return gEpi;
 
     }
@@ -561,10 +562,11 @@ var magasinD3 = (function () {
                 stroke: "black",
                 "stroke-width": "1"
             })
-            .on("mouseover", function(){
+            .on("mouseover", function () {
                 magasinD3.onMouseOver(travee)
 
-            });;
+            });
+        ;
         return gTravee;
     }
 
@@ -600,7 +602,7 @@ var magasinD3 = (function () {
             return false;
 
 
-        }).on("mouseover", function(){
+        }).on("mouseover", function () {
             magasinD3.onMouseOver(tablette)
 
         });
@@ -726,61 +728,60 @@ var magasinD3 = (function () {
         // .on("end", function(){ svg.call(zoom.transform, d3.zoomIdentity.translate((totalWidth/2 - xx),(totalHeight/2 - yy)).scale(1))});
     }
 
-    self.locate = function (classe,property, array) {
+    self.locate = function (classe, property, array,zoomLevel) {
 
-
+        self.clearHighlights();
         var found = 0;
         var firstBoiteName = ""
         var coordonnees = "";
 
         $("#popupD3Div").css("visibility", "hidden")
-        d3.selectAll("."+classe+" rect").each(function (d, i) {
-    var ok=false;
-            var x = d;
+        d3.selectAll("." + classe + " rect").classed("unselected", true).each(function (d, i) {
+            var ok = false;
             var firstbox = true;
             var d3Prop = d3.select(this.parentNode).attr(property);
 
-            if (d3Prop != null) {
+            if (d3Prop != null && d3Prop != "") {
 
                 if (array.indexOf(d3Prop) > -1) {
-                    ok=true;
+                    d3.select(this).classed("unselected", false);
+
+
+                    ok = true;
                     found += 1
                     if (firstbox) {
-
                         firstbox = false
-                    // self.centerOnElt(this)
+                        zoom.scaleTo(svg, zoomLevel);
+                        self.centerOnElt(this)
 
                     }
-
-
                 }
             }
-            if(!ok){
-                d3.select(this).style("opacity", 0.1)
-            }
-
         })
-        zoom.translateBy(svg, 100, 100)
-        zoom.scaleTo(svg, 1);
+
+
+        var xxx = d3.selectAll(".unselected");
+        d3.selectAll(".unselected").style("opacity", 0.1)
         return;
-        if (found > 0) {
-            var message = "versement " + numVersement + " , localisation : " + coordonnees + " nombre de boites +" + found + "+ première boite " + firstBoiteName;
-            $("#messageSpan").html(message);
-            zoom.scaleTo(svg, avgZoom);
-        }
-        else
-            $("#messageSpan").html("aucune boite correspond au versement " + numVersement)
+
+
+        /*     if (found > 0) {
+                 var message = "versement " + numVersement + " , localisation : " + coordonnees + " nombre de boites +" + found + "+ première boite " + firstBoiteName;
+                 $("#messageSpan").html(message);
+                 zoom.scaleTo(svg, avgZoom);
+             }
+             else
+                 $("#messageSpan").html("aucune boite correspond au versement " + numVersement)*/
 
 
     }
 
 
-
-
     self.clearHighlights = function () {
         $("#popupD3Div").css("visibility", "hidden")
-        d3.selectAll("rect").style("opacity", 1)
-      //  d3.selectAll(".tablette").style("fill", "none").style(" stroke", "blue");
+
+        d3.selectAll(".unselected").style("opacity", 1)
+        d3.selectAll(".unselected").classed("unselected", false);
     }
 
     self.showDialogChercherTablettesPourVersement = function () {
@@ -985,25 +986,25 @@ var magasinD3 = (function () {
     }
 
     self.onMouseOver = function (obj) {
-       var array=obj.name.split("-");
-       var str=""
-       array.forEach(function(elt, index){
-           if(index==0)
-               str+=" magasin : "+elt;
-           if(index==1)
-               str+=" epi : "+elt;
-           if(index==2)
-               str+=" travee : "+elt;
-           if(index==3)
-               str+=" tablette : "+elt;
+        var array = obj.name.split("-");
+        var str = ""
+        array.forEach(function (elt, index) {
+            if (index == 0)
+                str += " magasin : " + elt;
+            if (index == 1)
+                str += " epi : " + elt;
+            if (index == 2)
+                str += " travee : " + elt;
+            if (index == 3)
+                str += " tablette : " + elt;
 
-       })
+        })
 
         $("#magasind3MouseInfo").html(str)
     }
 
 
-    // var blob = new Blob([html], {type: "image/svg+xml"});
+// var blob = new Blob([html], {type: "image/svg+xml"});
 
 
     return self;

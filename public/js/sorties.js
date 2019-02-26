@@ -17,7 +17,7 @@ var sorties=(function(){
                     boitesSorties = boitesSorties.concat(boites)
                 }
             })
-            magasinD3.locate ("boite","id",boitesSorties) ;
+            magasinD3.locate ("boite","id",boitesSorties,.2) ;
 
         })
 
