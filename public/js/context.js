@@ -1,12 +1,13 @@
 var context = {
     dataModel :{},
     currentTable: "",
+    currentRecord:{},
     currentLinkedTable: "",
     dataTables: {},
-    currentRecordId: "",
     currentTabIndex:0,
     currentCriteria:[],
     currentVersementInfos:{},
     currentListQueries:{},
+
     hiddenMainDivContent:{graph:"",table:""},
 }

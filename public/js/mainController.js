@@ -342,7 +342,7 @@ context.currentTable=$(this).val();
         if (!context.currentTable) {
             return mainController.setErrorMessage("selectionnez une table")
         }
-        context.currentRecordId = null;
+        context.currentRecord.id = null;
         recordController.displayRecordData({});
         $(dialog.dialog("open"))
         //  $("#tabs").tabs({disabled: [1, 2]});

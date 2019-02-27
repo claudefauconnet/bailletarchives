@@ -4,6 +4,8 @@ var recordController = (function () {
     self.canSave = 0;
 
 
+
+
     var setModifyMode = function () {
 
     }
@@ -13,7 +15,8 @@ var recordController = (function () {
         self.displayRecordData(obj, "readOnly")
     }
     self.displayRecordData = function (obj, mode) {
-        context.currentRecordId = obj.id;
+
+        context.currentRecord=obj;
         var table = context.currentTable;
         self.canSave = 0;
 
@@ -109,7 +112,7 @@ var recordController = (function () {
         }
 
 
-        if (!context.currentRecordId)// new Record
+        if (!context.currentRecord.id)// new Record
             return self.saveNewRecord();
 
         var sql = "Update " + context.currentTable + " set ";
@@ -135,7 +138,7 @@ var recordController = (function () {
                 sql += key + "='" + str + "'";
             }
         }
-        sql += " where id= " + context.currentRecordId;
+        sql += " where id= " + context.currentRecord.id;
         console.log(sql);
 
 
@@ -148,7 +151,7 @@ var recordController = (function () {
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
             if (fn)
-                fn(context.currentRecordId)
+                fn(context.currentRecord.id)
 
 
             ///*******************************A finir*******************************************************************************
@@ -166,7 +169,7 @@ var recordController = (function () {
         self.execSqlCreateRecord(context.currentTable, self.currentRecordChanges, function (err, newId) {
             if (err)
                 return mainController.setRecordErrorMessage(err);
-            context.currentRecordId = newId;
+            context.currentRecord.id = newId;
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
             if (fn)
@@ -245,7 +248,7 @@ var recordController = (function () {
         if (!canBeDeleted)
             return;
 
-        self.execSQLDeleteRecord(context.currentTable, context.currentRecordId, function (err, result) {
+        self.execSQLDeleteRecord(context.currentTable, context.currentRecord.id, function (err, result) {
             if (err) {
                 return mainController.setRecordErrorMessage(err)
             }
@@ -511,7 +514,7 @@ var recordController = (function () {
         for (var key in targetObj) {
             var fieldToolStr = ""
             if (fieldTools[key]) {
-                fieldToolStr = "&nbsp;&nbsp;<Button onclick='tools." + fieldTools[key].toolFn + "(" + context.currentRecordId + ")'>" + fieldTools[key].title + "</Button>"
+                fieldToolStr = "&nbsp;&nbsp;<Button onclick='tools." + fieldTools[key].toolFn + "(" + context.currentRecord.id + ")'>" + fieldTools[key].title + "</Button>"
             }
 
 

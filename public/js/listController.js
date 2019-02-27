@@ -220,7 +220,7 @@ var listController = (function () {
         //    mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
 
         var joinObj = relations[linkedTable].joinObj;
-        var sql = " select " + linkedTable + ".* from  " + joinObj.tables + " where " + joinObj.where + " and " + context.currentTable + ".id=" + context.currentRecordId;
+        var sql = " select " + linkedTable + ".* from  " + joinObj.tables + " where " + joinObj.where + " and " + context.currentTable + ".id=" + context.currentRecord.id;
         mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err)

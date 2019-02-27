@@ -164,15 +164,36 @@ var versement = (function () {
     }
 
 
-    self.showDialogIntegrerVersement = function () {
+    self.showDialogEntrerVersement = function () {
+
+        var metrage=$("#attr_metrage").val()
+        var nbBoites=$("#attr_nbBoites").val()
+
+
+
+        if( metrage=="" || nbBoites=="")
+            return  alert(" le métrage et le nombre de boites sont obligatoires")
 
         $("#dialogD3").attr("title", "chercher des tablettes");
         $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
 
         dialogD3.dialog("open")
-        $("#dialogD3").load("./htmlSnippets/" + "findTablettesDialogD3.html"), function () {
+        $("#dialogD3").load("./htmlSnippets/" + "findTablettesDialogD3.html", function () {
+            $("#findTablettesD3_versement").val(context.currentRecord.numVersement);
+            $("#findTablettesD3_nbBoites").val(metrage)
+            $("#findTablettesD3_metrage").val(nbBoites);
 
-        }
+            metrage=parseFloat(metrage.replace(",","."))*100
+            nbBoites=parseInt(nbBoites)
+
+          var ep=""+(Math.round(parseInt(metrage/nbBoites))/100);
+            ep=ep.replace(".",",");
+            $("#findTablettesD3_epaisseurMoyBoite").val(ep);
+
+
+
+
+        })
     }
 
     self.chercherTablettesPourVersement = function (obj) {

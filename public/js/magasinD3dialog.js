@@ -101,6 +101,8 @@ var magasinD3dialog = (function () {
 
             }
 
+            return alert("en construction")
+
             magasinD3.chercherTablettesPourVersement(obj);
             if (currentVersement && currentVersement.refoulement)
                 $("#findTablettesD3_versementRefoulementButton").removeAttr("disabled")
@@ -128,6 +130,9 @@ var magasinD3dialog = (function () {
 
 
         self.versementExecBoitesToTablettes = function (refoulement) {
+
+            return alert("en construction")
+
             if (refoulement)
                 magasinD3.currentVersement.refoulement = currentVersement.refoulement;
 

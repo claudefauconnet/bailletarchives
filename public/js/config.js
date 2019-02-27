@@ -18,8 +18,8 @@ var config = (function () {
                         tables: "versement,magasin",
                         where: "versement.id=magasin.id_versement"
                     },
-                    createRelSql: "update magasin set id_versement=<%data.id%> where  id=<%context.currentRecordId%>\"",
-                    deleteRelSql: "update magasin set id_versement=null where  id=<%context.currentRecordId%>\"",
+                    createRelSql: "update magasin set id_versement=<%data.id%> where  id=<%context.currentRecord.id%>\"",
+                    deleteRelSql: "update magasin set id_versement=null where  id=<%context.currentRecord.id%>\"",
 
 
                     selectfields: ["numVersement", "theme", "deposant"]
@@ -41,8 +41,8 @@ var config = (function () {
             sortFields: ["numVersement desc"],
             recordTools: [
                 {
-                    title: "Entrer en magasin",
-                    toolFn: "versement.showDialogIntegrerVersement"
+                    title: "Entrer en magasin...",
+                    toolFn: "versement.showDialogEntrerVersement"
                 }
 
             ],
@@ -65,7 +65,7 @@ var config = (function () {
                         tables: "versement,versement_historique",
                         where: " versement_historique.id_versement=versement.id "
                     },
-                    createRelSql: "update versement_historique set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
+                    createRelSql: "update versement_historique set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update versement_historique set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"]
 
@@ -76,7 +76,7 @@ var config = (function () {
                         tables: "versement,magasin",
                         where: " magasin.id_versement=versement.id "
                     },
-                    createRelSql: "update magasin set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
+                    createRelSql: "update magasin set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update magasin set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"]
 
@@ -88,7 +88,7 @@ var config = (function () {
                         tables: "versement,sortie_boite",
                         where: " sortie_boite.id_versement=versement.id "
                     },
-                    createRelSql: "update sortie_boite set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
+                    createRelSql: "update sortie_boite set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update sortie_boite set id_versement=null where id=<%data.id%>",
 
 
@@ -100,7 +100,7 @@ var config = (function () {
                          tables: "versement,article",
                          where: " article.id_versement=versement.id "
                      },
-                     createRelSql: "update article set id_versement=<%context.currentRecordId%> where id=<%data.id%>",
+                     createRelSql: "update article set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                      deleteRelSql: "update article set id_versement=null where id=<%data.id%>",
 
                      selectfields: []
@@ -129,8 +129,8 @@ var config = (function () {
                         tables: "versement,article",
                         where: " article.id_versement=versement.id "
                     },
-                    createRelSql: "update article set id_versement=<%data.id%> where id=<%context.currentRecordId%>",
-                    deleteRelSql: "update article set id_versement=null where id=<%context.currentRecordId%>",
+                    createRelSql: "update article set id_versement=<%data.id%> where id=<%context.currentRecord.id%>",
+                    deleteRelSql: "update article set id_versement=null where id=<%context.currentRecord.id%>",
                     selectfields: ["numVersement"]
                 }
 
@@ -188,8 +188,8 @@ var config = (function () {
 
     self.default = {
         textArea: {
-            cols: 30,
-            rows: 2
+            cols: 50,
+            rows: 4
         }
 
 
