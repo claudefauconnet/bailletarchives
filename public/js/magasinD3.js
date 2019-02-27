@@ -569,10 +569,9 @@ var magasinD3 = (function () {
         function onTabletteClick(obj, x, y) {
             self.currentTablette = obj;
             var html = "tablette " + tablette.name + "<br>"
-            html += "operation tablette :<select onchange='tablette.onTabletteOperationSelect(this)'>" +
+            html += "operations tablette :<select onchange='tablette.onTabletteOperationSelect(this)'>" +
                 " <option></option>" +
                 "<option value='integrerVersement'> intégrer versement</option>" +
-                "<option value='decalerBoites'> décaler boites </option>" +
                 "<option value='createUnder'> creer nouvelle</option>" +
                 "<option value='split'> diviser </option>" +
                 "<option value='delete'> supprimer </option>"
@@ -634,7 +633,12 @@ var magasinD3 = (function () {
                     if (keys.indexOf(key) > -1)
                         html += "<tr><td>" + key + "</td><td>" + obj[key] + "</td>"
                 }
-                html += "<button onclick='tablette.decalerBoites()'> decaler boites</button>";
+                html += "operations boite:<select onchange='boite.onBoiteOperationSelect(this)'>"
+                +" <option></option>" +
+                "<option value='decalerBoite'> décaler</option>" +
+                "<option value='supprimerBoite'> supprimer  </option>" +
+                "</select>";
+                html += "<div id='popupD3DivOperationDiv'></div>"
                 html += "</table>"
                 $("#popupD3Div").html(html);
                 $("#popupD3Div").css("top", y - 20);

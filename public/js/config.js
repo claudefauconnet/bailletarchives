@@ -41,7 +41,7 @@ var config = (function () {
             sortFields: ["numVersement desc"],
             recordTools: [
                 {
-                    title: "Integrer versement",
+                    title: "Entrer en magasin",
                     toolFn: "versement.showDialogIntegrerVersement"
                 }
 
@@ -147,7 +147,10 @@ var config = (function () {
             },
             tabs: [],
             fieldConstraints: {
-                id_versement: "hidden"
+                id_versement: "hidden",
+                sortieDate:"mandatory",
+                sortieArchiviste:"mandatory"
+
 
             },
             fieldTools: {

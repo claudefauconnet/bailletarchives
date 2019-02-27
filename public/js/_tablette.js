@@ -7,17 +7,20 @@ var tablette = (function () {
         var operation = $(select).val();
 
         if (operation == "createUnder") {
+            return alert("en construction");
             html = "<button onclick='tablette.create();'>OK</button>";
             $("#popupD3DivOperationDiv").html(html);
 
         }
         else if (operation == "split") {
+            return alert("en construction");
             var html = "<br>Pourcentage restant sur l'ancienne tablette : <input size='3' id=tablette_percentageRemainingOnTopTablette value='50'> %";
             html += "<button onclick='tablette.split();'>OK</button>";
             $("#popupD3DivOperationDiv").html(html);
 
         }
         else if (operation == "delete") {
+            return alert("en construction");
             html = "<button onclick='tablette.delete();'>OK</button>";
             $("#popupD3DivOperationDiv").html(html);
 
@@ -142,6 +145,18 @@ var tablette = (function () {
         }
 
 
+    }
+
+    self.updateCotesParTablette=function(cotes, idMagasin,callback){
+
+
+            var sql ="update  magasin set cotesParTablette='"+cotes+"' where id="+idMagasin;
+            mainController.execSql(sql,callback);
+
+    }
+
+    self.locate=function(){
+        return alert("en construction");
     }
 
 

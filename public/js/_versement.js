@@ -83,9 +83,9 @@ var versement = (function () {
 
 
             var tablettesProposees = $("#popupD3DivOperationDivTablettesProposees li")
-            $("#popupD3DivOperationDiv").css("visibility","hidden")
-            if (tablettesProposees && tablettesProposees.length > 0) {// selection done do integration
 
+            if (tablettesProposees && tablettesProposees.length > 0) {// selection done do integration
+                $("#popupD3DivOperationDiv").css("visibility", "hidden")
                 var tablettes = []
                 $(tablettesProposees).each(function (index, value) {
                     tablettes.push(value.innerHTML)
@@ -95,7 +95,8 @@ var versement = (function () {
 
                 async.eachSeries(tablettes, function (tablette, callback) {
 
-                    var sql = "update magasin set numVersement='" + versement.numVersement + '",id_versement="+versement.id where magasin.coordonnees=' + tablette + "'";
+                    var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + " where magasin.coordonnees='" + tablette + "'";
+                    console.log(sql)
                     mainController.execSql(sql, function (err, result) {
                         if (err)
                             return callback(err);
@@ -103,12 +104,16 @@ var versement = (function () {
 
                     })
 
-                }, function(err){
-                    if(err)
-                   return  console. log(err);
-
-                        self.listRecords("select * from versement where id="+versement.id)
-
+                }, function (err) {
+                    if (err)
+                        return console.log(err);
+                    context.currentTable = "versement";
+                    var sql="update versement set metrage="+versement.metrage+" where id="+ versement.id;
+                    mainController.execSql(sql, function (err, result) {
+                        if (err)
+                                return callback(err);
+                    listController.listRecords("select * from versement where id=" + versement.id)
+                    })
 
                 })
 

@@ -288,7 +288,8 @@ context.currentTable=$(this).val();
 
     self.onChangeMainAccordionTab = function (tabName) {
         if (tabName == "Accueil") {
-            magasinD3.init("graphDiv")
+           // magasinD3.init("graphDiv")
+            mainController.showInMainDiv("graph");
 
         }
 

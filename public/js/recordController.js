@@ -58,7 +58,7 @@ var recordController = (function () {
         {// record tools buttons
             var recordToolsHtml = "";
             var recordTools = config.tableDefs[context.currentTable].recordTools;
-            if (recordTools ) {
+            if (recordTools) {
                 recordTools.forEach(function (recordTool) {
                     recordToolsHtml += "&nbsp;&nbsp;<Button onclick='" + recordTool.toolFn + "()'>" + recordTool.title + "</Button>"
                 })
@@ -68,14 +68,15 @@ var recordController = (function () {
 
         recordController.drawAttributes(targetObj, "recordDetailsDiv");
         if (mode != "readOnly") {
-            if(recordToolsHtml!="")
+            if (recordToolsHtml != "")
                 $("#recordDetailsDiv").prepend(recordToolsHtml);
+
+            if (obj && obj.id && (!config.tableDefs[context.currentTable].tableConstraints || config.tableDefs[context.currentTable].tableConstraints.cannotDelete !== true))
+                $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
             $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
 
 
 
-            if (obj && obj.id && config.tableDefs[context.currentTable].tableConstraints && !config.tableDefs[context.currentTable].tableConstraints.cannotDelete == true)
-                $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
 
 
             $("#recordDetailsDiv").prepend("<div id='recordMessageDiv' class='message'></div>")
@@ -223,41 +224,36 @@ var recordController = (function () {
         var ok = true;
         var linkedTables = [];
         if (config.tableDefs[context.currentTable].relations)
-            linkedTables = Object.keys(config.tableDefs[context.currentTable].relations);
-        async.eachSeries(linkedTables, function (linkedTable, callbackEach) {
-            listController.loadLinkedRecords(linkedTable, null, function (err, result) {
-                if (err) {
-                    ok = false
-                    return callbackEach(err);
-                }
-                var nlinks = result.length;
+            relations = Object.keys(config.tableDefs[context.currentTable].relations);
 
-                if (nlinks > 0) {
-                    ok = false;
-                    alert("vous devez au préalable supprimer les  " + nlinks + " liens avec " + context.currentLinkedTable);
+        var canBeDeleted = 0
+        relations.forEach(function (relation) {
 
-                }
-                return callbackEach(null);
-            })
+            var dataTableDivName = "linkedRecordsDiv_" + relation;
 
-        }, function (err) {
+            if ($("#" + dataTableDivName).html().indexOf("dataTables_wrapper") > -1) {// si des lignes de datatable
+                canBeDeleted += 1;
 
-            if (!ok)
-                return;
-            ok = confirm("supprimer l'enregsitrement ?");
 
-            if (!ok)
-                return;
-
-            self.execSQLDeleteRecord(context.currentTable, context.currentRecordId, function (err, result) {
-                if (err) {
-                    return mainController.setRecordErrorMessage(err)
-                }
-                mainController.setRecordMessage(result);
-                dialog.dialog("close");
-                listController.listRecords(context.currentListQueries[context.currentTable]);
-            })
+            }
         })
+        if (canBeDeleted > 0)
+            return alert("vous devez au préalable supprimer les  liens");
+
+        canBeDeleted = confirm("supprimer l'enregsitrement ?");
+
+        if (!canBeDeleted)
+            return;
+
+        self.execSQLDeleteRecord(context.currentTable, context.currentRecordId, function (err, result) {
+            if (err) {
+                return mainController.setRecordErrorMessage(err)
+            }
+            mainController.setRecordMessage(result);
+            dialog.dialog("close");
+            listController.listRecords(context.currentListQueries[context.currentTable]);
+        })
+
     }
 
 
@@ -329,8 +325,9 @@ var recordController = (function () {
                 str += "</select>";
                 value = str;
             }
-
-            else if (type == 'password') {
+            else if (type == 'hidden') {
+                value = "<input type='hidden'  id='attr_" + key + "'value='" + value + "'>";
+            } else if (type == 'password') {
                 value = "<input type='password' onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
                     + key + "'value='" + value + "'>";
             }

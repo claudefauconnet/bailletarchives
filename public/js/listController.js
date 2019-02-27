@@ -1,5 +1,6 @@
 var listController = (function () {
     var self = {};
+   self.table;
 
 
     // replace variables identified by $xx% by their current value in the context and eval it
@@ -197,7 +198,7 @@ var listController = (function () {
         $("#recordLinkedDivs").html("")
         var index = 0;
         async.eachSeries(relations, function (relation, callbackEach) {
-            var dataTableDivName = "linkedRecordsDiv_" + Math.round(Math.random() * 10000);
+            var dataTableDivName = "linkedRecordsDiv_" + relation ;//Math.round(Math.random() * 10000);
 
 
             $.when($('#' + dataTableDivName).remove()).then(function () {
@@ -215,8 +216,8 @@ var listController = (function () {
         var foreignKey = ""
         var relations = config.tableDefs[context.currentTable].relations;
         context.currentLinkedTable = linkedTable;
-     //   var selectfields = relations[linkedTable].selectfields;
-    //    mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
+        //   var selectfields = relations[linkedTable].selectfields;
+        //    mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
 
         var joinObj = relations[linkedTable].joinObj;
         var sql = " select " + linkedTable + ".* from  " + joinObj.tables + " where " + joinObj.where + " and " + context.currentTable + ".id=" + context.currentRecordId;
@@ -224,18 +225,21 @@ var listController = (function () {
             if (err)
                 mainController.setErrorMessage(err)
 
+
+
             if (json.length == 0) {
                 $("#" + dataTableDivName).css("border-style", "none")
                 $("#" + dataTableDivName).html(linkedTable + " 0 ");
-                $("#" + dataTableDivName).height(50).css("padding", "20px");
-                return callback();
+                $("#" + dataTableDivName).height(20).css("padding", "10px");
+                if(callback)
+                    return callback(null,json);
             }
 
             var width = mainController.totalDims.w - $("#recordDetailsDiv").width() - 150
             var height = Math.min((json.length * 20) + 100, 300);
 
 
-          $("#recordLinkedDivs").removeAttr( "overflow" )
+            $("#recordLinkedDivs").removeAttr("overflow")
             $("#" + dataTableDivName).width(width).height(height).css("padding", "20px");
             if (!context.dataTables["linked_" + linkedTable])
                 context.dataTables["linked_" + linkedTable] = new dataTable();
@@ -246,46 +250,47 @@ var listController = (function () {
             htmlStr += "<table  id='table_" + dataTableDivName + "'  class='dataTables_wrapper  display nowrap' ></table>"
             $('#' + dataTableDivName).css("font-size", "10px");
             $("#" + dataTableDivName).html(htmlStr);
-            console.log(dataTableDivName)
-            var table = $("#table_" + dataTableDivName).DataTable({
+            console.log(dataTableDivName);
 
-                fixedHeader: true,
-                "dom": "",
+
+            self.table = $("#table_" + dataTableDivName).DataTable({
                 data: json,
                 columns: columns,
-                fixedColumns: true,
-                scrollY: height,
-                scrollX: true,
-                scrollCollapse: true,
+                fixedHeader: true,
+                "dom": "",
 
+                fixedColumns: true,
+
+                select: true,
 
 
                 drawCallback: function (settings, json) {
-
                     callback(json)
                 }
 
 
-            }).on('click', 'tr', function (event) {
-                this.selectedRow = table.row(this);
-                var line = table.row(this).data();
-                recordController.displayDataReadOnly()
+            });
 
+            $("#table_" + dataTableDivName).on('click', 'tr', function (event) {
+                this.selectedRow = listController.table.row(this);
+                var line = listController.table.row(this).data();
+                var rowIndex = listController.table.row(this).index();
+
+                if (line.coordonnees) {
+                    var cotes = prompt("cotes par tablettes", line.cotesParTablette);
+                    if (cotes != line.cotesParTablette) {
+                        tablette.updateCotesParTablette(cotes, line.id, function (err, result) {
+                            if (err)
+                                return console.log(err);
+                            mainController.setRecordMessage(" tablette sauvegardee");
+                            var columnIndex = listController.table.column(':contains(cotesParTablette)')[0];
+
+                            listController.table.cell(rowIndex, columnIndex).data(cotes).draw();
+                        })
+                    }
+                }
             })
-            table.ajax.reload();
-
-            /*
-                        context.dataTables["linked_" + linkedTable].loadJson(linkedTable, dataTableDivName, json, {
-                            dom: "",
-                            title: linkedTable,
-                            width: width,
-                            //   height: height,
-                            // onClick: mainController.enableUnlinkButton
-                            //   onClick: recordController.displayDataReadOnly
-                        })*/
         })
-
-
     }
 
 
