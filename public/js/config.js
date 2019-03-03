@@ -149,7 +149,9 @@ var config = (function () {
             fieldConstraints: {
                 id_versement: "hidden",
                 sortieDate:"mandatory",
-                sortieArchiviste:"mandatory"
+                sortieArchiviste:"mandatory",
+
+
 
 
             },
@@ -174,13 +176,13 @@ var config = (function () {
     self.tools = {
 
 
-        "ChercherTablettesDisponibles ": {htmlPage: "magasinD3dialog.html"},
+      //  "ChercherTablettesDisponibles ": {htmlPage: "magasinD3dialog.html"},
 
-        "DéplacerBoitesVersement ": {htmlPage: "deplacerBoitesDialog.html"},
+    //    "DéplacerBoitesVersement ": {htmlPage: "deplacerBoitesDialog.html"},
 
         "GererLesListes ": {htmlPage: "gererListes.html"},
 
-        "carte de magasin ": {loadMagasinD3: true}
+     //   "carte de magasin ": {loadMagasinD3: true}
 
 
     }

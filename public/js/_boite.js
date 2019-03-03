@@ -4,6 +4,11 @@ var boite=(function(){
     self.onBoiteOperationSelect = function (select) {
         var operation = $(select).val();
 
+        if (operation == "refoulerVersement") {
+            alert("en construction")
+
+        }
+
         if (operation == "decalerBoite") {
          alert("en construction")
 

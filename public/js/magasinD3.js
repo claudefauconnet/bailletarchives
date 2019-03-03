@@ -571,7 +571,7 @@ var magasinD3 = (function () {
             var html = "tablette " + tablette.name + "<br>"
             html += "operations tablette :<select onchange='tablette.onTabletteOperationSelect(this)'>" +
                 " <option></option>" +
-                "<option value='integrerVersement'> intégrer versement</option>" +
+                "<option value='integrerVersement'> entrer versement</option>" +
                 "<option value='createUnder'> creer nouvelle</option>" +
                 "<option value='split'> diviser </option>" +
                 "<option value='delete'> supprimer </option>"
@@ -635,6 +635,7 @@ var magasinD3 = (function () {
                 }
                 html += "operations boite:<select onchange='boite.onBoiteOperationSelect(this)'>"
                 +" <option></option>" +
+                    "<option value='refoulerVersement'> refoulerVersement</option>" +
                 "<option value='decalerBoite'> décaler</option>" +
                 "<option value='supprimerBoite'> supprimer  </option>" +
                 "</select>";

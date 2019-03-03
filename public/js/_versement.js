@@ -57,6 +57,10 @@ var versement = (function () {
 
     }
 
+    self.integrerVersementFromD3TabletteNew = function (tablette) {
+        alert("en construction");
+    }
+
     self.integrerVersementFromD3Tablette = function () {
 
 

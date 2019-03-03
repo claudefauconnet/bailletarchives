@@ -29,7 +29,7 @@ var recordController = (function () {
 
             if (targetObj.type == "number")
                 targetObj[field.name].cols = 10;
-            if ((field.maxLength && field.maxLength > 50) || field.dataType == "text") {
+            if ((field.maxLength && field.maxLength > 100) || field.dataType == "text") {
                 targetObj[field.name].cols = config.default.textArea.cols;
                 targetObj[field.name].rows = config.default.textArea.rows
             }
@@ -147,7 +147,7 @@ var recordController = (function () {
                 return mainController.setRecordErrorMessage(err)
 
             mainController.setRecordMessage("enregistrement sauvé");
-            dialog.dialog("close");
+          //  dialog.dialog("close");
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
             if (fn)

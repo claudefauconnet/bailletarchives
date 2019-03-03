@@ -1,6 +1,6 @@
 var listController = (function () {
     var self = {};
-   self.table;
+    self.table;
 
 
     // replace variables identified by $xx% by their current value in the context and eval it
@@ -30,10 +30,10 @@ var listController = (function () {
         var whereStr = "";
         var table = context.currentTable;
         if (!table || table == "")
-           return mainController.setErrorMessage("selectionnez une table");
+            return mainController.setErrorMessage("selectionnez une table");
 
 
-        context.currentJoinTable=null;
+        context.currentJoinTable = null;
 
         // gestion des requetes sur plusieurs tables
         var joinTable = context.currentJoinTable;// see mainController lines 21 to 25
@@ -156,13 +156,14 @@ var listController = (function () {
         if (indice > -1) {
             context.currentCriteria.splice(indice, 1);
             $("#searchCriteria_" + indice).remove();
+            $("#searchColumnInput").val("");
+            $("#searchOperatorInput").val("");
+            $("#searchValueInput").val("");
         } else {
             context.currentCriteria = [];
             $(".searchCriteria ").remove();
         }
-        $("#searchColumnInput").val("");
-        $("#searchOperatorInput").val("");
-        $("#searchValueInput").val("");
+
     }
 
     self.listRecords = function (sql) {
@@ -198,7 +199,7 @@ var listController = (function () {
         $("#recordLinkedDivs").html("")
         var index = 0;
         async.eachSeries(relations, function (relation, callbackEach) {
-            var dataTableDivName = "linkedRecordsDiv_" + relation ;//Math.round(Math.random() * 10000);
+            var dataTableDivName = "linkedRecordsDiv_" + relation;//Math.round(Math.random() * 10000);
 
 
             $.when($('#' + dataTableDivName).remove()).then(function () {
@@ -226,13 +227,12 @@ var listController = (function () {
                 mainController.setErrorMessage(err)
 
 
-
             if (json.length == 0) {
                 $("#" + dataTableDivName).css("border-style", "none")
                 $("#" + dataTableDivName).html(linkedTable + " 0 ");
                 $("#" + dataTableDivName).height(20).css("padding", "10px");
-                if(callback)
-                    return callback(null,json);
+                if (callback)
+                    return callback(null, json);
             }
 
             var width = mainController.totalDims.w - $("#recordDetailsDiv").width() - 150
@@ -245,7 +245,7 @@ var listController = (function () {
                 context.dataTables["linked_" + linkedTable] = new dataTable();
 
 
-            var columns = context.dataTables["linked_" + linkedTable].getColumns(json);
+            var columns = context.dataTables["linked_" + linkedTable].getColumns(json,linkedTable);
             var htmlStr = "<div class='title'>" + linkedTable + "</div>"
             htmlStr += "<table  id='table_" + dataTableDivName + "'  class='dataTables_wrapper  display nowrap' ></table>"
             $('#' + dataTableDivName).css("font-size", "10px");
@@ -262,7 +262,33 @@ var listController = (function () {
                 fixedColumns: true,
 
                 select: true,
+                columnDefs: [
+                   // {width: 100, targets: 0},
+                    {//dates
+                        "render": function (data, type, row, meta) {
+                            var str = "";
+                            if (data != null && data != "" && data.indexOf("0000") < 0) {
 
+                                var date = new Date(data);
+                                str = util.dateToStringFR(date);
+                            }
+                            return str;
+                        },
+                        "targets": columns.dateColumns
+                    },
+                    {//number
+                        "render": function (data, type, row, meta) {
+                            var str = "";
+                            if (data != null && config.locale == "FR") {
+                                str = ("" + data).replace(".", ",")
+                            }
+                            return str;
+
+                        },
+                        "targets": columns.numberColumns
+                    }
+
+                ],
 
                 drawCallback: function (settings, json) {
                     callback(json)
@@ -273,19 +299,19 @@ var listController = (function () {
 
             $("#table_" + dataTableDivName).on('click', 'tr', function (event) {
                 this.selectedRow = listController.table.row(this);
-                var line = listController.table.row(this).data();
-                var rowIndex = listController.table.row(this).index();
+                var table = $("#table_" + dataTableDivName).DataTable();
+                var line = table.row(this).data();
+                var rowIndex = table.row(this).index();
 
                 if (line.coordonnees) {
                     var cotes = prompt("cotes par tablettes", line.cotesParTablette);
-                    if (cotes != line.cotesParTablette) {
+                    if (cotes != null   && cotes != line.cotesParTablette && confirm("modifer les cotes :"+cotes)) {
                         tablette.updateCotesParTablette(cotes, line.id, function (err, result) {
                             if (err)
                                 return console.log(err);
                             mainController.setRecordMessage(" tablette sauvegardee");
-                            var columnIndex = listController.table.column(':contains(cotesParTablette)')[0];
-
-                            listController.table.cell(rowIndex, columnIndex).data(cotes).draw();
+                            var columnIndex = table.column(':contains(cotesParTablette)')[0];
+                            table.cell(rowIndex, columnIndex).data(cotes).draw();
                         })
                     }
                 }

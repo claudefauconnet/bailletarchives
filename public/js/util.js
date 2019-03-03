@@ -18,7 +18,7 @@ var util = (function () {
     self.dateToMariaDBString = function (date) {
         var str = ""
         if (date instanceof Date && isFinite(date)) {
-            var month = "" + date.getMonth()+1;
+            var month = "" + (date.getMonth()+1);
             var day = "" + date.getDate();
             str = date.getFullYear() + "-" + month + "-" + day;
         }

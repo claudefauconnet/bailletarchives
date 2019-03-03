@@ -15,7 +15,7 @@ var dataTable = function () {
     this.getColumns=function(json,table){
       var columns = [];
         var keys = [];
-        var sortColumns = [];
+
         if (config.tableDefs[table] && config.tableDefs[table].sortFields)
             sortColumns = config.tableDefs[table].sortFields;
 
@@ -28,6 +28,7 @@ var dataTable = function () {
         var columns = [];
         self.dateColumns = [];
         self.numberColumns = [];
+        var sortColumns = [];
         keys.forEach(function (key, index) {
             var type = mainController.getFieldType(table, key);
 
@@ -52,6 +53,10 @@ var dataTable = function () {
              //   this.dataTableSortArray.push([index, order])
             }
         })
+
+        columns.sortColumns=sortColumns;
+        columns.dateColumns=self.dateColumns;
+        columns.numberColumns=self.numberColumns;
         return columns;
 
     }
@@ -69,6 +74,10 @@ var dataTable = function () {
             widthStr = "width:" + options.width + "px;"
         if (options.height)
             heightStr = "height:" + options.height + "px;"
+
+
+
+
 
 
         var htmlStr = "";

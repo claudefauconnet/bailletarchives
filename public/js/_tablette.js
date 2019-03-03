@@ -26,8 +26,9 @@ var tablette = (function () {
 
         }
         if (operation == "integrerVersement") {
-
+            html += "<br><button onclick='versement.integrerVersementFromD3TabletteNew();'>OK</button>";
             var html = "<br>Numero du versement : <input size='3' id=tablette_numeroVersementIntegrer value=''> ";
+
             html += "<button onclick='versement.integrerVersementFromD3Tablette();'>OK</button>";
             $("#popupD3DivOperationDiv").html(html);
             $("#tablette_numeroVersementIntegrer").focus();
