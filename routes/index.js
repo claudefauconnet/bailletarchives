@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mysql = require('../bin/mySQLproxy..js')
+var authentication = require('../bin/authentication..js')
 var processData = require("../bin/processData..js")
 
 /* GET home page. */
@@ -41,6 +42,14 @@ router.post('/modifytravee', function (req, res, next) {
     processData.modifytravee (req.body.operation,JSON.parse( req.body.tablette), JSON.parse(req.body.options),  function (err, result) {
         processResponse(res, err, result)
     })
+
+});
+
+router.post( '/authentication', function (req, response) {
+    if (req.body.authentify)
+        authentication.authentify(req.body.login, req.body.password, function (error, result) {
+            processResponse(response, error, result)
+        });
 
 });
 

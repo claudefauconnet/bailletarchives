@@ -43,6 +43,7 @@
     <script src="js/_tablette.js"></script>
     <script src="js/_boite.js"></script>
     <script src="js/magasinD3dialog.js"></script>
+    <script src="js/authentication.js"></script>
 
     <script src="js/d3/d3.js"></script>
     <script src="js/d3/svg-pan-zoom.min.js"></script>
@@ -68,7 +69,8 @@
             padding: 3px;
             font-size: 12px;
         }
-        .locateButton{
+
+        .locateButton {
             background-color: #efec9f;
         }
 
@@ -295,10 +297,7 @@
     <script>
         var dialog, dialog2, dialog3;
         $(function () {
-            if (true)
-                setTimeout(function () {
-                    magasinD3.init("mainDiv");
-                }, 100)
+
             mainController.setDivsSize();
             $("#leftAccordion").accordion({
 
@@ -384,7 +383,7 @@
             });
 
 
-            $("#loginDialogDiv").dialog({
+            /*$("#loginDialogDiv").dialog({
                 autoOpen: false,
                 modal: true,
                 buttons: {
@@ -395,23 +394,21 @@
                         $(this).dialog("close");
                     }
                 }
-            });
-            if (false) {
-                $("#searchTableInput").attr("disabled", true)
-                $("#leftAccordion").css("opacity", 0.2);
-                $("#loginDialogDiv").dialog("open");
+            });*/
+
+
+            if (true) {
+
+                authentication.init(true, function (err, result) {
+
+                })
+                /* $("#searchTableInput").attr("disabled", true)
+                 $("#leftAccordion").css("opacity", 0.2);
+                 $("#loginDialogDiv").dialog("open");*/
             }
-            mainController.bindActions();
-
-
-            mainController.loadDataModel(function (err, result) {
-                if (err)
-                    return;
-                mainController.initTablesSelects();
-                mainController.loadLists();
-
-
-            });
+            else {
+                mainController.init0();
+            }
 
 
         })
@@ -426,8 +423,12 @@
 
         <div id="leftAccordion">
             <h1>Accueil</h1>
-            <div id="acceuilDiv" class="accordionInnerDiv">
-                Bienvenue !!
+            <div id="acceuilDiv" class="accordionInnerDiv"
+                 style="display: flex;flex-direction:column;align-content: center;align-items: center">
+                <B>Bienvenue aux archives de Baillet</B>
+                <img src="images/logoATD.png" width="100px">
+                <br>
+                <div id="magasinD3MessageDiv"></div>
             </div>
 
             <!--   <h1>Magasins</h1>
@@ -448,7 +449,7 @@
                 <button onclick="sortie.create()">Creer</button>
                 <br>
                 <button onclick="sortie.listActives()">Lister en cours</button>
-             <br>
+                <br>
                 <button onclick="sortie.listHistory()">Lister historique</button>
                 <br>
                 <button onclick="sortie.highlightSorties()" class="locateButton">voir en cours</button>
@@ -587,28 +588,6 @@
     </div>
 
 
-    <div id="loginDialogDiv" title="Connexion">
-        <table>
-            <tr>
-                <td>
-                    Utilisateur
-                </td>
-                <td>
-                    <input id="login">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    mot de passe
-                </td>
-                <td>
-                    <input type="password" id="password">
-                </td>
-            </tr>
-        </table>
-        <span id="logonMessageDiv"></span>
-
-    </div>
     <div id="popupD3Div">
         <div id="dialogContentDiv"></div>
     </div>
@@ -663,6 +642,14 @@
             </tr>
         </table>
     </div>
-
+    <div id="loginDiv"
+         style="position: absolute;visibility: hidden;display: flex;justify-content:center;align-items: center">
+        <div> login<input id="loginInput">
+            password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
+                        document.getElementById('loginButton').click()">
+            <button id="loginButton" onclick="authentication.doLogin()">OK</button>
+            <div id="loginMessage"></div>
+        </div>
+    </div>
 </body>
 </html>

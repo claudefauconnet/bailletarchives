@@ -66,14 +66,6 @@ var magasinD3 = (function () {
     self.init = function (_containerDiv) {
         containerDiv = _containerDiv;
 
-        var htmlStr = "<div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
-            "<button onclick='magasinD3.initialZoom()'>zoom out</button><span id='magasind3MouseInfo'></span></div> " +
-
-            "<div style=' z-index:100 ' id='graphDiv'  class='myDatatable cell-border display nowrap'></div>"
-
-
-        $("#" + containerDiv).html(htmlStr);
-        $('#' + containerDiv).css("font-size", "10px");
         var height = $("#" + containerDiv).height() - 120
 
         var startTime = new Date();
@@ -81,7 +73,9 @@ var magasinD3 = (function () {
         console.log("duration " + Math.floor((endTime - startTime) / 1000));
         // magasinD3.drawBoites(["A"], function () {
         // magasinD3.drawBoites(null, function () {
+        $("#magasinD3MessageDiv").html("Chargement du graphe en cours...")
         magasinD3.drawMagasins(null, function () {
+             $("#magasinD3MessageDiv").html("")
             cachedHtml = $("#graphDiv").html();
 
             var zzz = d3.select("svg")
@@ -101,6 +95,15 @@ var magasinD3 = (function () {
 
     self.drawMagasins = function (magasinsToDraw, callback) {
 
+
+        var htmlStr = "<div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
+            "<button onclick='magasinD3.initialZoom()'>zoom out</button><span id='magasind3MouseInfo'></span></div> " +
+
+            "<div style=' z-index:100 ' id='graphDiv'  class='myDatatable cell-border display nowrap'></div>"
+
+
+        $("#" + containerDiv).html(htmlStr);
+        $('#' + containerDiv).css("font-size", "10px");
 
         d3.select("svg").remove();
         $("#graphDiv").html("");

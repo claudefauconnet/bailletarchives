@@ -36,6 +36,20 @@ var mainController = (function () {
         })
     }
 
+    self.init0=function () {
+        mainController.bindActions();
+        mainController.loadDataModel(function (err, result) {
+            if (err)
+                return;
+            mainController.initTablesSelects();
+            mainController.loadLists();
+            if (true)
+                magasinD3.init("mainDiv");
+
+
+        });
+    }
+
 
     self.bindActions = function () {
 
