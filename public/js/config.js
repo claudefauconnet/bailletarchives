@@ -42,6 +42,7 @@ var config = (function () {
             recordTools: [
                 {
                     title: "Entrer en magasin...",
+                    id:"versementEntrerEnMagasinButton",
                     toolFn: "versement.showDialogEntrerVersement"
                 }
 
@@ -78,7 +79,9 @@ var config = (function () {
                     },
                     createRelSql: "update magasin set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update magasin set id_versement=null where id=<%data.id%>",
-                    selectfields: ["coordonnees"]
+                    selectfields: ["coordonnees"],
+                    onListLoadedFn:versement.onMagasinsLoaded,
+                    onRowClickedFn:versement.onDataTableRowClicked,
 
                 }
                 ,

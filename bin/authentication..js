@@ -6,7 +6,9 @@ var authentication={
 
 
     authentify:function(login,password,callback){
-        jsonFileStorage.retrieve(path.resolve("config/users/users.json"), function(err,users){
+        var usersLocation="../souslesens/config/users/users.json";
+        //var usersLocation="config/users/users.json";
+        jsonFileStorage.retrieve(path.resolve(usersLocation), function(err,users){
             if(err)
                 return callback(err)
             if(users[login] && users[login].password==password)

@@ -112,11 +112,11 @@ var versement = (function () {
                     if (err)
                         return console.log(err);
                     context.currentTable = "versement";
-                    var sql="update versement set metrage="+versement.metrage+" where id="+ versement.id;
+                    var sql = "update versement set metrage=" + versement.metrage + " where id=" + versement.id;
                     mainController.execSql(sql, function (err, result) {
                         if (err)
-                                return callback(err);
-                    listController.listRecords("select * from versement where id=" + versement.id)
+                            return callback(err);
+                        listController.listRecords("select * from versement where id=" + versement.id)
                     })
 
                 })
@@ -170,13 +170,12 @@ var versement = (function () {
 
     self.showDialogEntrerVersement = function () {
 
-        var metrage=$("#attr_metrage").val()
-        var nbBoites=$("#attr_nbBoites").val()
+        var metrage = $("#attr_metrage").val()
+        var nbBoites = $("#attr_nbBoites").val()
 
 
-
-        if( metrage=="" || nbBoites=="")
-            return  alert(" le métrage et le nombre de boites sont obligatoires")
+        if (metrage == "" || nbBoites == "")
+            return alert(" le métrage et le nombre de boites sont obligatoires")
 
         $("#dialogD3").attr("title", "chercher des tablettes");
         $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
@@ -187,14 +186,12 @@ var versement = (function () {
             $("#findTablettesD3_nbBoites").val(metrage)
             $("#findTablettesD3_metrage").val(nbBoites);
 
-            metrage=parseFloat(metrage.replace(",","."))*100
-            nbBoites=parseInt(nbBoites)
+            metrage = parseFloat(metrage.replace(",", ".")) * 100
+            nbBoites = parseInt(nbBoites)
 
-          var ep=""+(Math.round(parseInt(metrage/nbBoites))/100);
-            ep=ep.replace(".",",");
+            var ep = "" + (Math.round(parseInt(metrage / nbBoites)) / 100);
+            ep = ep.replace(".", ",");
             $("#findTablettesD3_epaisseurMoyBoite").val(ep);
-
-
 
 
         })
@@ -285,6 +282,31 @@ var versement = (function () {
                 return callback(err);
             return callback(null, result[0])
         })
+    }
+
+    self.onMagasinsLoaded = function (magasins) {
+        if (magasins.length > 0) {
+            $("#versementEntrerEnMagasinButton").css("visibility", "hidden")
+        }
+
+
+    }
+    self.onDataTableRowClicked = function (table, line, rowIndex) {
+
+
+        if (line.coordonnees) {
+            var cotes = prompt("cotes par tablettes", line.cotesParTablette);
+            if (cotes != null && cotes != line.cotesParTablette && confirm("modifer les cotes :" + cotes)) {
+                tablette.updateCotesParTablette(cotes, line.id, function (err, result) {
+                    if (err)
+                        return console.log(err);
+                    mainController.setRecordMessage(" tablette sauvegardee");
+                    var columnIndex = table.column(':contains(cotesParTablette)')[0];
+                    table.cell(rowIndex, columnIndex).data(cotes).draw();
+                })
+            }
+        }
+
     }
 
 

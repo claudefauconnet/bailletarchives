@@ -217,6 +217,9 @@ var listController = (function () {
         var foreignKey = ""
         var relations = config.tableDefs[context.currentTable].relations;
         context.currentLinkedTable = linkedTable;
+        var onListLoadedFn=relations[linkedTable].onListLoadedFn;
+        var onRowClickedFn=relations[linkedTable].onRowClickedFn;
+
         //   var selectfields = relations[linkedTable].selectfields;
         //    mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
 
@@ -250,7 +253,7 @@ var listController = (function () {
             htmlStr += "<table  id='table_" + dataTableDivName + "'  class='dataTables_wrapper  display nowrap' ></table>"
             $('#' + dataTableDivName).css("font-size", "10px");
             $("#" + dataTableDivName).html(htmlStr);
-            console.log(dataTableDivName);
+        //    console.log(dataTableDivName);
 
 
             self.table = $("#table_" + dataTableDivName).DataTable({
@@ -303,19 +306,13 @@ var listController = (function () {
                 var line = table.row(this).data();
                 var rowIndex = table.row(this).index();
 
-                if (line.coordonnees) {
-                    var cotes = prompt("cotes par tablettes", line.cotesParTablette);
-                    if (cotes != null   && cotes != line.cotesParTablette && confirm("modifer les cotes :"+cotes)) {
-                        tablette.updateCotesParTablette(cotes, line.id, function (err, result) {
-                            if (err)
-                                return console.log(err);
-                            mainController.setRecordMessage(" tablette sauvegardee");
-                            var columnIndex = table.column(':contains(cotesParTablette)')[0];
-                            table.cell(rowIndex, columnIndex).data(cotes).draw();
-                        })
-                    }
-                }
+                if(onRowClickedFn)
+                    onRowClickedFn(table,line,rowIndex)
+
             })
+            if(onListLoadedFn){
+                onListLoadedFn(json);
+            }
         })
     }
 

@@ -61,9 +61,13 @@ var recordController = (function () {
         {// record tools buttons
             var recordToolsHtml = "";
             var recordTools = config.tableDefs[context.currentTable].recordTools;
+
             if (recordTools) {
                 recordTools.forEach(function (recordTool) {
-                    recordToolsHtml += "&nbsp;&nbsp;<Button onclick='" + recordTool.toolFn + "()'>" + recordTool.title + "</Button>"
+                    var id=recordTool.id;
+                    if( !id)
+                        id=""+Math.random();
+                    recordToolsHtml += "&nbsp;&nbsp;<Button id='"+id+"' onclick='" + recordTool.toolFn + "()'>" + recordTool.title + "</Button>"
                 })
             }
         }

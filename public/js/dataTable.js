@@ -88,7 +88,7 @@ var dataTable = function () {
         $("#" + containerDiv).html(htmlStr);
         $('#' + containerDiv).css("font-size", "10px");
 
-        var height = $("#" + containerDiv).height() - 120
+        var height = $("#" + containerDiv).height() - 150
 
 
         /*   $('#' + containerDiv).width(500);
