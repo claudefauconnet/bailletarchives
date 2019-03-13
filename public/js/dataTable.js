@@ -125,7 +125,7 @@ var dataTable = function () {
 
             scrollY: height,
             scrollX: true,
-            scrollCollapse: true,
+          //  scrollCollapse: true,
             paging: true,
             pageResize: true,
             pageLength: this.pageLength,
@@ -164,11 +164,18 @@ var dataTable = function () {
                 style: 'os',
                 selector: 'td:first-child'
             },
+            drawCallback: function (settings, json) {
+                $(".dataTables_scrollHeadInner").css({"width":"100%"});
+
+                $(".table ").css({"width":"100%"});
+            }
 
 
         })
 
         table.columns.adjust().draw();
+
+
 
         this.table = table;
 

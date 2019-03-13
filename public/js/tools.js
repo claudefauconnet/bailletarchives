@@ -178,7 +178,7 @@ var tools = (function () {
                     boites=boitesStr.split(" ");
                     allBoites=allBoites.concat(boites)
                 })
-                html="Boites<br><div>"
+                html="<input type='checkbox' onchange=util.checkUncheckAllBoxes($(this),'.boite_cbx')>Boites<br><br><div>"
                 allBoites.sort();
                 allBoites.forEach(function(boite){
                     html+="<input type='checkbox' id='"+boite+"'class='boite_cbx'>"+boite+"<br>"

@@ -18,7 +18,7 @@ var util = (function () {
     self.dateToMariaDBString = function (date) {
         var str = ""
         if (date instanceof Date && isFinite(date)) {
-            var month = "" + (date.getMonth()+1);
+            var month = "" + (date.getMonth() + 1);
             var day = "" + date.getDate();
             str = date.getFullYear() + "-" + month + "-" + day;
         }
@@ -35,6 +35,16 @@ var util = (function () {
         var day = parseInt(array[2])
         str = array[0] + "-" + month + "-" + day;
         return str;
+
+    }
+
+    self.checkUncheckAllBoxes = function (cbxAllInput, className) {
+        var checked = $(cbxAllInput).prop("checked");
+        $(className).each(function (index, val) {
+
+                $(this).prop("checked", checked)
+
+        })
 
     }
 
