@@ -18,6 +18,7 @@ var versement = (function () {
             mainController.execSql(sql2, function (err, result) {
                 if (err)
                     return console.log(err);
+                listController.loadLinkedDivs()
             })
         })
     }

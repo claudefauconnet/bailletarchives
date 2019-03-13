@@ -102,6 +102,13 @@ var dataTable = function () {
 
         $("div.dataTables_wrapper").css("width","600px").css("height","200px")
 
+        var fixedColumns=true;
+        if(options.noFixedColumns)
+            fixedColumns=false;
+
+
+
+
         var table = $("#table_" + containerDiv).DataTable({
             //  responsive: true,
             fixedHeader: true,
@@ -152,7 +159,7 @@ var dataTable = function () {
                 }
 
             ],
-            fixedColumns: true,
+         fixedColumns: fixedColumns,
             select: {
                 style: 'os',
                 selector: 'td:first-child'

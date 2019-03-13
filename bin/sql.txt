@@ -71,3 +71,14 @@ select etatTraitement,sum(volumeGO),sum(nbreElements) from versement group by et
 
  suppimer commentaires  dans magasin
  select versement.numVersement,magasin.coordonnees,versement.commentaires, magasin.commentaires  from versement, magasin where versement.commentaires= magasin.commentaires and versement.commentaires is not null and versement.commentaires!=''
+
+
+**********************************changement modele historique versement*************************
+
+insert into versement_historique (id_versement,etat,etatDate,etatAuteur)
+SELECT v.id,"décrit" , v.dateArrivee,v.deposePar FROM versment_old v
+
+insert into versement_historique (id_versement,etat,etatDate,etatAuteur)
+SELECT v.id,"entré" , v.dateArrivee,v.deposePar FROM versment_old v
+
+

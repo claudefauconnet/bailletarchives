@@ -4,8 +4,6 @@ var recordController = (function () {
     self.canSave = 0;
 
 
-
-
     var setModifyMode = function () {
 
     }
@@ -14,9 +12,12 @@ var recordController = (function () {
     self.displayDataReadOnly = function (obj) {
         self.displayRecordData(obj, "readOnly")
     }
+
+
+
     self.displayRecordData = function (obj, mode) {
 
-        context.currentRecord=obj;
+        context.currentRecord = obj;
         var table = context.currentTable;
         self.canSave = 0;
 
@@ -64,10 +65,10 @@ var recordController = (function () {
 
             if (recordTools) {
                 recordTools.forEach(function (recordTool) {
-                    var id=recordTool.id;
-                    if( !id)
-                        id=""+Math.random();
-                    recordToolsHtml += "&nbsp;&nbsp;<Button id='"+id+"' onclick='" + recordTool.toolFn + "()'>" + recordTool.title + "</Button>"
+                    var id = recordTool.id;
+                    if (!id)
+                        id = "" + Math.random();
+                    recordToolsHtml += "&nbsp;&nbsp;<Button id='" + id + "' onclick='" + recordTool.toolFn + "()'>" + recordTool.title + "</Button>"
                 })
             }
         }
@@ -83,15 +84,12 @@ var recordController = (function () {
             $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
 
 
-
-
-
             $("#recordDetailsDiv").prepend("<div id='recordMessageDiv' class='message'></div>")
         }
         $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
 
-
-        listController.loadLinkedDivs()
+        if (obj && obj.id)
+            listController.loadLinkedDivs()
 
 
         $("#saveRecordButton").attr("disabled", true);
@@ -151,7 +149,8 @@ var recordController = (function () {
                 return mainController.setRecordErrorMessage(err)
 
             mainController.setRecordMessage("enregistrement sauvé");
-          //  dialog.dialog("close");
+            //  dialog.dialog("close");
+
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
             if (fn)

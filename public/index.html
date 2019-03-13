@@ -309,7 +309,9 @@
                 activate: function (event, ui) {
                     var content = ui;
                     var tabName = ui.newHeader.text()
-                    mainController.onChangeMainAccordionTab(tabName)
+                    mainController.onChangeMainAccordionTab(tabName);
+                    $("#popupD3Div").css("visibility","hidden")
+                    $("#dialogD3").dialog("close");
 
                 }
 
@@ -343,9 +345,13 @@
                 buttons: {
                     Fermer: function () {
                         dialog.dialog("close");
+                        $("#dialogD3").dialog("close");
+
                     }
                 },
                 close: function () {
+                    $("#dialogD3").dialog("close");
+
                     // allFields.removeClass("ui-state-error");
                 }
             });
@@ -357,9 +363,11 @@
                 buttons: {
                     Fermer: function () {
                         dialog2.dialog("close");
+
                     }
                 },
                 close: function () {
+
                     // allFields.removeClass("ui-state-error");
                 }
             });

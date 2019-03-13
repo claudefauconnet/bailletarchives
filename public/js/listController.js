@@ -214,11 +214,23 @@ var listController = (function () {
     }
 
     self.loadLinkedRecords = function (linkedTable, dataTableDivName, callback) {
-        var foreignKey = ""
-        var relations = config.tableDefs[context.currentTable].relations;
+        var foreignKey = "";
+        var relations = {};
+        var onListLoadedFn = null;
+        var onRowClickedFn = null;
+
         context.currentLinkedTable = linkedTable;
-        var onListLoadedFn=relations[linkedTable].onListLoadedFn;
-        var onRowClickedFn=relations[linkedTable].onRowClickedFn;
+
+            if (config.tableDefs[context.currentTable]) {
+                if (config.tableDefs[context.currentTable].relations)
+                    relations = config.tableDefs[context.currentTable].relations;
+                onListLoadedFn = relations[linkedTable].onListLoadedFn;
+                onRowClickedFn = relations[linkedTable].onRowClickedFn;
+            }
+            else {
+                context.currentLinkedTable = {};
+            }
+
 
         //   var selectfields = relations[linkedTable].selectfields;
         //    mainController.fillSelectOptions("linkedRecordsFieldSelect", selectfields, true);
@@ -248,12 +260,12 @@ var listController = (function () {
                 context.dataTables["linked_" + linkedTable] = new dataTable();
 
 
-            var columns = context.dataTables["linked_" + linkedTable].getColumns(json,linkedTable);
+            var columns = context.dataTables["linked_" + linkedTable].getColumns(json, linkedTable);
             var htmlStr = "<div class='title'>" + linkedTable + "</div>"
             htmlStr += "<table  id='table_" + dataTableDivName + "'  class='dataTables_wrapper  display nowrap' ></table>"
             $('#' + dataTableDivName).css("font-size", "10px");
             $("#" + dataTableDivName).html(htmlStr);
-        //    console.log(dataTableDivName);
+            //    console.log(dataTableDivName);
 
 
             self.table = $("#table_" + dataTableDivName).DataTable({
@@ -266,7 +278,7 @@ var listController = (function () {
 
                 select: true,
                 columnDefs: [
-                   // {width: 100, targets: 0},
+                    // {width: 100, targets: 0},
                     {//dates
                         "render": function (data, type, row, meta) {
                             var str = "";
@@ -306,11 +318,11 @@ var listController = (function () {
                 var line = table.row(this).data();
                 var rowIndex = table.row(this).index();
 
-                if(onRowClickedFn)
-                    onRowClickedFn(table,line,rowIndex)
+                if (onRowClickedFn)
+                    onRowClickedFn(table, line, rowIndex)
 
             })
-            if(onListLoadedFn){
+            if (onListLoadedFn) {
                 onListLoadedFn(json);
             }
         })
