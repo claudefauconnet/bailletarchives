@@ -23,7 +23,7 @@ var magasinD3 = (function () {
     var zoom;
     var minZoom = .2
     var maxZoom = 3
-    var avgZoom = 0.8
+    var avgZoom = 0.3
     var nMagByLine = 10;
     var drawEpis = true;
     var drawTravees = true;
@@ -88,8 +88,18 @@ var magasinD3 = (function () {
 
     }
     self.initialZoom = function () {
-        zoom.translateBy(svg, -1300, -600)
-        zoom.scaleTo(svg, .4);
+     //  zoom.translateBy(svg, -1300, -600)
+      //  avgZoom=1
+
+      //  zoom.translateTo(svg,(svgWidth/2)*1, -(svgHeight/2)*1)
+
+     //  zoom.scaleTo(svg, avgZoom);
+      //  zoom.translateTo(d3.select(".viewport"),0, 0);
+        zoom.scaleTo(svg, 1);
+        zoom.translateTo(svg, svgWidth,svgHeight)
+        zoom.scaleTo(svg, avgZoom);
+
+    //  zoom.translateTo(svg,-(svgWidth/2)/avgZoom, -(svgHeight/2)/avgZoom)
     }
 
 
@@ -98,7 +108,6 @@ var magasinD3 = (function () {
 
         var htmlStr = "<div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
             "<button onclick='magasinD3.initialZoom()'>zoom out</button><span id='magasind3MouseInfo'></span></div> " +
-
             "<div style=' z-index:100 ' id='graphDiv'  class='myDatatable cell-border display nowrap'></div>"
 
 
@@ -113,10 +122,10 @@ var magasinD3 = (function () {
             var nMag = data.children.length;
             magasinData = data;
 
-            totalWidth = $("#mainDiv").width() - 10;
-            totalHeight = $("#mainDiv").height() - 10;
+            totalWidth = $("#mainDiv").width() - 50;
+            totalHeight = $("#mainDiv").height() - 50;
             svgWidth = totalWidth
-            svgHeight = totalHeight
+            svgHeight = totalHeight*.8
             $("#graphDiv").width(svgWidth)
             $("#graphDiv").height(svgHeight)
 
@@ -129,8 +138,13 @@ var magasinD3 = (function () {
             svg = d3.select('#graphDiv')
                 .append('svg')
                 .attrs({width: svgWidth, height: svgHeight})
+                .on("click", function () {
+                    $("#popupD3Div").css("visibility", "hidden")
+                })
                 .call(zoom)
-                .append("g").attr("class", "viewport");
+                .append("g").attr("class", "viewport")
+
+            ;
             var magW = totalWidth / 2;
             var magH = totalHeight * 2;
 
@@ -428,11 +442,8 @@ var magasinD3 = (function () {
                 }
             )
 
-
             if (callback)
                 callback();
-
-
         })
     }
 
@@ -557,6 +568,7 @@ var magasinD3 = (function () {
                 stroke: "blue",
                 "stroke-width": "1"
             }).on("click", function (e) {
+            d3.event.stopPropagation();
             var coords = d3.event;
             self.currentTablette = tablette;
             onTabletteClick(tablette, coords.x, coords.y);
@@ -571,6 +583,7 @@ var magasinD3 = (function () {
 
         function onTabletteClick(obj, x, y) {
             self.currentTablette = obj;
+
             var html = "tablette " + tablette.name + "<br>"
             html += "operations tablette :<select onchange='tablette.onTabletteOperationSelect(this)'>" +
                 " <option></option>" +
@@ -615,6 +628,7 @@ var magasinD3 = (function () {
                 "stroke-width": 0.5
             })
             .on("click", function () {
+                d3.event.stopPropagation();
                 var coords = d3.event;
                 self.currentBoite = boite;
                 onBoiteClick(boite, coords.x, coords.y);
@@ -709,13 +723,6 @@ var magasinD3 = (function () {
         return;
 
 
-        /*     if (found > 0) {
-                 var message = "versement " + numVersement + " , localisation : " + coordonnees + " nombre de boites +" + found + "+ première boite " + firstBoiteName;
-                 $("#messageSpan").html(message);
-                 zoom.scaleTo(svg, avgZoom);
-             }
-             else
-                 $("#messageSpan").html("aucune boite correspond au versement " + numVersement)*/
 
 
     }

@@ -27,12 +27,11 @@ var config = (function () {
             },
 
             fieldConstraints: {
-                numVersement: "readOnly;mandatory",
-                coordonnees: "mandatory",
-                magasin: "readOnly",
-                epi: "readOnly",
-                travee: "readOnly",
-                tablette: "readOnly",
+                coordonnees: {mandatory:true},
+                magasin: {readOnly:true},
+                epi: {readOnly:true},
+                travee: {readOnly:true},
+                tablette: {readOnly:true},
             }
         },
         "versement": {
@@ -44,6 +43,11 @@ var config = (function () {
                     title: "Entrer en magasin...",
                     id:"versementEntrerEnMagasinButton",
                     toolFn: "versement.showDialogEntrerVersement"
+                },
+                {
+                    title: "Localiser...",
+                    id:"versementLocaliserButton",
+                    toolFn: "versement.locateCurrentVersement"
                 }
 
             ],
@@ -68,7 +72,10 @@ var config = (function () {
                     },
                     createRelSql: "update versement_historique set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update versement_historique set id_versement=null where id=<%data.id%>",
-                    selectfields: ["coordonnees"]
+                    selectfields: ["coordonnees"],
+                  //  onRowClickedFn:versement.onDataTableRowClicked,
+                    editableColumns: ["commentaire"],
+                    columns:["etat","etatAuteur","etatDate","commentaire","dateModification"]
 
                 },
                 "magasin": {
@@ -81,7 +88,9 @@ var config = (function () {
                     deleteRelSql: "update magasin set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"],
                     onListLoadedFn:versement.onMagasinsLoaded,
-                    onRowClickedFn:versement.onDataTableRowClicked,
+                   // onRowClickedFn:versement.onDataTableRowClicked,
+                    editableColumns: ["cotesParTablette","commentaires"],
+                   columns : ["coordonnees","cotesParTablette","commentaires","DimTabletteMLineaire"]
 
                 }
                 ,
@@ -93,6 +102,8 @@ var config = (function () {
                     },
                     createRelSql: "update sortie_boite set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update sortie_boite set id_versement=null where id=<%data.id%>",
+                    columns : ["numVersement","sortieDate","sortieArchiviste","retourDate","retourArchiviste","cotesBoite","commentaire"],
+                    editableColumns: ["commentaire"],
 
 
                 }
@@ -111,11 +122,12 @@ var config = (function () {
             },
             fieldConstraints: {
 
-                numVersement: "mandatory",
-                nature: "mandatory",
-                etatTraitement: "mandatory",
-                etatTraitementAuteur: "mandatory",
-                etatTraitementDate: "mandatory",
+                numVersement: {mandatory:true,format:{regex:/^1\d{3}$/,message:"4 chiffres commençant par 1"}},
+                nature: {mandatory:true},
+                etatTraitement: {mandatory:true},
+                etatTraitementAuteur: {mandatory:true},
+                etatTraitementDate: {mandatory:true},
+                DimTabletteMLineaire: {mandatory:true},
             },
             onAfterSave: versement.updateRecordHistory
 
@@ -150,9 +162,9 @@ var config = (function () {
             },
             tabs: [],
             fieldConstraints: {
-                id_versement: "hidden",
-                sortieDate:"mandatory",
-                sortieArchiviste:"mandatory",
+                id_versement: {hidden:true},
+                sortieDate:{mandatory:true},
+                sortieArchiviste:{mandatory:true},
 
 
 

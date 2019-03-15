@@ -23,7 +23,31 @@ var versement = (function () {
         })
     }
 
-    self.locate = function (sql) {
+
+    self.locateCurrentVersement=function(){
+        $("#dialogDiv").dialog("close");
+        mainController.showInMainDiv("graph")
+        self.locateByNumVersement(context.currentRecord.numVersement);
+    }
+
+    self.locateByNumVersement = function (_numVersement) {
+        $("#popupD3Div").css("visibility", "hidden")
+        var boites = [];
+        d3.selectAll(".boite").each(function (d, i) {
+            var boiteD3 = d3.select(this)
+            var numVersement = boiteD3.attr("numVersement");
+            if (!numVersement)
+                numVersement = boiteD3.attr("numversement");
+            if (_numVersement == numVersement) {
+                boites.push(boiteD3.attr("name"))
+            }
+
+        })
+
+        magasinD3.locate("boite", "id", boites, 1);
+    }
+
+    self.locateBySql = function (sql) {
 
         mainController.execSql(sql, function (err, json) {
             if (json.length > config.maxVersementsToLocate) {
@@ -149,6 +173,7 @@ var versement = (function () {
                 })
             } else
                 tablettesContigues.push(tablette.name)
+
 
 
             //magasinD3.locate("tablette", "id", tablettesContigues, "1")
@@ -287,28 +312,18 @@ var versement = (function () {
 
     self.onMagasinsLoaded = function (magasins) {
         if (magasins.length > 0) {
-            $("#versementEntrerEnMagasinButton").css("visibility", "hidden")
+            $("#versementEntrerEnMagasinButton").css("visibility","hidden");
+            $("#versementLocaliserButton").css("visibility","visible");
+
+        }
+        else {
+            $("#versementEntrerEnMagasinButton").css("visibility","visible");
+            $("#versementLocaliserButton").css("visibility","hidden");
         }
 
 
     }
-    self.onDataTableRowClicked = function (table, line, rowIndex) {
 
-
-        if (line.coordonnees) {
-            var cotes = prompt("cotes par tablettes", line.cotesParTablette);
-            if (cotes != null && cotes != line.cotesParTablette && confirm("modifer les cotes :" + cotes)) {
-                tablette.updateCotesParTablette(cotes, line.id, function (err, result) {
-                    if (err)
-                        return console.log(err);
-                    mainController.setRecordMessage(" tablette sauvegardee");
-                    var columnIndex = table.column(':contains(cotesParTablette)')[0];
-                    table.cell(rowIndex, columnIndex).data(cotes).draw();
-                })
-            }
-        }
-
-    }
 
 
     return self;

@@ -4,7 +4,8 @@ var statistics = (function () {
     self.stats = {
 
         "prochain numero de versement": {
-            sql: "select concat('0',MAX( CONVERT(numVersement, SIGNED INTEGER)+1)) as prochainNumeroVersement from versement"
+           // sql: "select concat('0',MAX( CONVERT(numVersement, SIGNED INTEGER)+1)) as prochainNumeroVersement from versement"
+            sql: "select concat('',MAX( CONVERT(numVersement, SIGNED INTEGER)+1)) as prochainNumeroVersement from versement"
         },
         "versements par année et etatTraitement": {
             sql:"select YEAR(vh.etatDate) as annee, count(*) as  nombre,vh.etat,sum(v.nbBoites) as nbreBoites,sum(v.metrage) as totalMetrage, sum(v.volumeGO) as volumeTotalGO,sum(v.nbreElements) as nbreTotalElements from versement as v,versement_historique as vh where v.id=vh.id  group by annee,etat",

@@ -218,18 +218,22 @@ var listController = (function () {
         var relations = {};
         var onListLoadedFn = null;
         var onRowClickedFn = null;
+        var editableColumns = null;
+        var definedColumns = null;
 
         context.currentLinkedTable = linkedTable;
 
-            if (config.tableDefs[context.currentTable]) {
-                if (config.tableDefs[context.currentTable].relations)
-                    relations = config.tableDefs[context.currentTable].relations;
-                onListLoadedFn = relations[linkedTable].onListLoadedFn;
-                onRowClickedFn = relations[linkedTable].onRowClickedFn;
-            }
-            else {
-                context.currentLinkedTable = {};
-            }
+        if (config.tableDefs[context.currentTable]) {
+            if (config.tableDefs[context.currentTable].relations)
+                relations = config.tableDefs[context.currentTable].relations;
+            onListLoadedFn = relations[linkedTable].onListLoadedFn;
+            onRowClickedFn = relations[linkedTable].onRowClickedFn;
+            editableColumns = relations[linkedTable].editableColumns;
+            definedColumns = relations[linkedTable].columns;
+        }
+        else {
+            context.currentLinkedTable = {};
+        }
 
 
         //   var selectfields = relations[linkedTable].selectfields;
@@ -259,8 +263,17 @@ var listController = (function () {
             if (!context.dataTables["linked_" + linkedTable])
                 context.dataTables["linked_" + linkedTable] = new dataTable();
 
+            var columns = context.dataTables["linked_" + linkedTable].getColumns(json, linkedTable,null);
 
-            var columns = context.dataTables["linked_" + linkedTable].getColumns(json, linkedTable);
+          var nonVisibleColumns=[];
+          if(definedColumns) {
+              columns.forEach(function (column, index) {
+                  if (definedColumns.indexOf(column.data) < 0)
+                      nonVisibleColumns.push(index);
+              })
+          }
+
+
             var htmlStr = "<div class='title'>" + linkedTable + "</div>"
             htmlStr += "<table  id='table_" + dataTableDivName + "'  class='dataTables_wrapper  display nowrap' ></table>"
             $('#' + dataTableDivName).css("font-size", "10px");
@@ -272,13 +285,17 @@ var listController = (function () {
                 data: json,
                 columns: columns,
                 fixedHeader: true,
+             //   "autoWidth": false,
                 "dom": "",
 
-                fixedColumns: true,
+                //  fixedColumns: true,
 
                 select: true,
                 columnDefs: [
-                    // {width: 100, targets: 0},
+
+                    {  "visible": false,targets:nonVisibleColumns},
+
+                  {'width': 400, 'targets': columns.textColumns},
                     {//dates
                         "render": function (data, type, row, meta) {
                             var str = "";
@@ -312,20 +329,50 @@ var listController = (function () {
 
             });
 
-            $("#table_" + dataTableDivName).on('click', 'tr', function (event) {
-                this.selectedRow = listController.table.row(this);
-                var table = $("#table_" + dataTableDivName).DataTable();
-                var line = table.row(this).data();
-                var rowIndex = table.row(this).index();
 
+            $("#table_" + dataTableDivName).on('click', 'td', function (event) {
+                this.selectedRow = listController.table.row(this);
+                var dataTable = $("#table_" + dataTableDivName).DataTable();
+
+                var rowIndex = dataTable.cell(this).index().row;
+                var colIndex = dataTable.cell(this).index().column;
+                var line = dataTable.row(rowIndex).data();
+
+                if (editableColumns) {
+                    var tableName = dataTableDivName.replace("linkedRecordsDiv_", "")
+                    listController.editCellContent(tableName, editableColumns, dataTable, line, rowIndex, colIndex);
+                }
                 if (onRowClickedFn)
-                    onRowClickedFn(table, line, rowIndex)
+
+                    onRowClickedFn(dataTable, line, rowIndex, colIndex)
 
             })
             if (onListLoadedFn) {
                 onListLoadedFn(json);
             }
         })
+        //    $("#table_" + dataTableDivName).DataTable().columns.adjust().draw();
+    }
+
+    self.editCellContent = function (linkedTable, editableColumns, datatable, line, rowIndex, colIndex) {
+        var colName = context.dataTables["linked_" + linkedTable].columns[colIndex].title;
+        if (editableColumns.indexOf(colName) > -1) {
+
+            var data = prompt(colName, line[colName]);
+            if (data != null && data != line[colName] && confirm("modifier " + colName + " : " + colName)) {
+                var sql = "update  " + linkedTable + " set " + colName + "='" + data + "' where id=" + line.id;
+                mainController.execSql(sql, function (err, result) {
+                    if (err)
+                        return console.log(err);
+
+                    mainController.setRecordMessage(colName + "  sauvegarde");
+                    datatable.cell(rowIndex, colIndex).data(data).draw();
+
+                })
+            }
+
+        }
+
     }
 
 

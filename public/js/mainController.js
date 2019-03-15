@@ -73,7 +73,7 @@ context.currentTable=$(this).val();
         $("#locateButton").bind("click", function () {
             self.showInMainDiv("graph")
             context.currentCriteria = [];
-            listController.addSearchCriteria(versement.locate);
+            listController.addSearchCriteria(versement.locateBySql);
             context.currentCriteria = [];
 
         })
@@ -198,6 +198,8 @@ context.currentTable=$(this).val();
 
         if (numberTypes.indexOf(type) > -1)
             return "number";
+
+
         if (stringTypes.indexOf(type) > -1)
             return "string";
 
@@ -205,6 +207,20 @@ context.currentTable=$(this).val();
 
 
     }
+
+    self.isTextField=function(table, _field){
+        if (!table || !context.dataModel[table] )
+            return  false;
+        var ok=false
+        context.dataModel[table].forEach(function (field) {
+            if (field.name == _field && (field.dataType == "text" || field.maxLength > 60)) {
+                   ok= true;
+                }
+        })
+        return ok;
+
+    }
+
     self.setOperators = function (field) {
         var type = self.getFieldType(context.currentTable, field);
         var operatorsArray = operators[type];
@@ -466,6 +482,8 @@ context.currentTable=$(this).val();
 
         if (type == "graph" && context.hiddenMainDivContent["graph"]) {
             context.hiddenMainDivContent["graph"].appendTo($("#mainDiv"))
+            magasinD3.clearHighlights() ;
+            magasinD3.initialZoom  ();
         }
         if (type == "list" && context.hiddenMainDivContent["list"]) {
             context.hiddenMainDivContent["list"].appendTo($("#mainDiv"))

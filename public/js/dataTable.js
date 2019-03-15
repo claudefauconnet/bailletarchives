@@ -10,25 +10,37 @@ var dataTable = function () {
     this.pageLength = 100;
     this.colHeight = 80;
 
-    this.dataTableSortArray=[]
+    this.dataTableSortArray=[];
 
-    this.getColumns=function(json,table){
+
+
+    this.getColumns=function(json,table, definedColumns){
+        this.table = table
       var columns = [];
         var keys = [];
 
         if (config.tableDefs[table] && config.tableDefs[table].sortFields)
             sortColumns = config.tableDefs[table].sortFields;
 
-        json.forEach(function (line, index) {
-            for (var key in line) {
-                if (keys.indexOf(key) < 0 && config.listHiddenFields.indexOf(key) < 0)
-                    keys.push(key);
-            }
-        })
+
+        if(definedColumns){
+
+            definedColumns.forEach(function(column){
+                keys.push(column)
+            })
+        }else {
+            json.forEach(function (line, index) {
+                for (var key in line) {
+                    if (keys.indexOf(key) < 0 && config.listHiddenFields.indexOf(key) < 0)
+                        keys.push(key);
+                }
+            })
+        }
         var columns = [];
         self.dateColumns = [];
         self.numberColumns = [];
         var sortColumns = [];
+        var textColumns=[];
         keys.forEach(function (key, index) {
             var type = mainController.getFieldType(table, key);
 
@@ -40,7 +52,14 @@ var dataTable = function () {
                 self.numberColumns.push(index);
             }
 
+            if(mainController.isTextField(table, key)) {
+                obj.width=400;
+
+                textColumns.push(index)
+            }
+
             columns.push(obj);
+
 
             //sort datatable
             if (sortColumns.length > 0 && sortColumns[0].indexOf(key) > -1) {
@@ -57,6 +76,8 @@ var dataTable = function () {
         columns.sortColumns=sortColumns;
         columns.dateColumns=self.dateColumns;
         columns.numberColumns=self.numberColumns;
+        columns.textColumns=textColumns;
+        this.columns = columns
         return columns;
 
     }
@@ -113,7 +134,7 @@ var dataTable = function () {
             //  responsive: true,
             fixedHeader: true,
             "dom": dom,
-
+            "autoWidth": false,
             buttons: [
                 'copy', 'csv', 'print'
                 // 'copy', 'csv', 'excel', 'pdf', 'print'
@@ -174,6 +195,7 @@ var dataTable = function () {
         })
 
         table.columns.adjust().draw();
+        table.sqlTable=table;
 
 
 

@@ -14,7 +14,6 @@ var recordController = (function () {
     }
 
 
-
     self.displayRecordData = function (obj, mode) {
 
         context.currentRecord = obj;
@@ -44,7 +43,7 @@ var recordController = (function () {
             }
             var constaints = null;
             if (config.tableDefs[context.currentTable] && config.tableDefs[context.currentTable].fieldConstraints != null && config.tableDefs[context.currentTable].fieldConstraints[field.name])
-                if (config.tableDefs[context.currentTable].fieldConstraints[field.name].indexOf("readOnly") > -1)
+                if (config.tableDefs[context.currentTable].fieldConstraints[field.name].readOnly)
                     targetObj[field.name].type = "readOnly"
         })
         recordController.setAttributesValue(table, targetObj, obj);
@@ -383,11 +382,24 @@ var recordController = (function () {
         var errors = [];
         $(".objAttrInput").each(function () {
             var value = $(this).val();
-            var key = $(this).attr("id").substring(5);
-            var constraints = config.tableDefs[context.currentTable].fieldConstraints[key];
-            if (constraints && constraints.indexOf("mandatory") > -1)
-                if (value == null || value == "")
-                    errors.push(key + " est obligatoire")
+            var fieldName = $(this).attr("id").substring(5);
+            var constraints = config.tableDefs[context.currentTable].fieldConstraints[fieldName];
+            if (constraints) {
+
+                for (var key in constraints) {
+                    if (key == "mandatory") {
+                        if (value == null || value == "")
+                            errors.push(fieldName + " est obligatoire")
+                    }
+                    else if (key == "format") {
+                        if (constraints[key].regex) {
+                            if (value == null || !value.match(constraints[key].regex))
+                                errors.push(fieldName + " doit avoir le format " + constraints[key].message);
+                        }
+                    }
+                }
+            }
+
         })
         return errors;
 

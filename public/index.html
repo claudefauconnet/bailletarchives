@@ -77,6 +77,9 @@
         input {
             width: 150px;
         }
+        input[type='checkbox']{
+            width: 30px;
+        }
 
         #main {
             width: 100%;
@@ -128,10 +131,11 @@
             border-left-style: solid;
             border-left-width: 1px;
             border-left-color: #93aeca;
-            width: 100px !important;
+           width: 100px ;
 
             height: 20px !important;
         }
+
 
 
         div.dataTables_wrapper {
@@ -296,6 +300,12 @@
 
         }
 
+        .dialogButton
+        {
+            margin-right: 400px !important;
+        }
+
+
 
     </style>
 
@@ -312,6 +322,7 @@
                     mainController.onChangeMainAccordionTab(tabName);
                     $("#popupD3Div").css("visibility","hidden")
                     $("#dialogD3").dialog("close");
+
 
                 }
 
@@ -343,14 +354,27 @@
                 width: "100%",
                 modal: true,
                 buttons: {
-                    Fermer: function () {
-                        dialog.dialog("close");
-                        $("#dialogD3").dialog("close");
+                    Fermer: {
+                      //  class: 'dialogButton',
+                        text:" Fermer",
+                       click: function () {
 
+                            dialog.dialog("close");
+                            $("#dialogD3").dialog("close");
+                            if (context.redrawMagasinD3) {
+                                context.redrawMagasinD3 = null;
+                                magasinD3.drawMagasins()
+                            }
+
+                        }
                     }
                 },
                 close: function () {
                     $("#dialogD3").dialog("close");
+                    if( context.redrawMagasinD3 ){
+                        context.redrawMagasinD3=null;
+                        magasinD3.drawMagasins()
+                    }
 
                     // allFields.removeClass("ui-state-error");
                 }

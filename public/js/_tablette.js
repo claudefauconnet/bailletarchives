@@ -149,10 +149,12 @@ var tablette = (function () {
     }
 
     self.updateCotesParTablette=function(cotes, idMagasin,callback){
-
-
             var sql ="update  magasin set cotesParTablette='"+cotes+"' where id="+idMagasin;
             mainController.execSql(sql,callback);
+    }
+    self.updateCommentaireParTablette=function(commentaires, idMagasin,callback){
+        var sql ="update  magasin set commentaires='"+commentaires+"' where id="+idMagasin;
+        mainController.execSql(sql,callback);
 
     }
 
