@@ -1,5 +1,5 @@
 <script>
-    var listController=(function() {
+    var listsManager=(function() {
         var self={};
         self.loadValues = function (listName) {
             var sql = "select valeur  from listes  where liste='" + listName + "' order by ordreNum";
@@ -50,7 +50,7 @@
             liste
         </td>
         <td>
-            <select id="gererLists_listSelect" onchange="listController.loadValues($(this).val())"></select>
+            <select id="gererLists_listSelect" onchange="listsManager.loadValues($(this).val())"></select>
         </td>
     </tr>
     <tr>
@@ -59,22 +59,22 @@
             <table>
                 <tr>
                     <td>
-                        <button onclick="listController.addValue()">+</button>
+                        <button onclick="listsManager.addValue()">+</button>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <button onclick="listController.removeValue()">-</button>
+                        <button onclick="listsManager.removeValue()">-</button>
                     </td>
                 </tr>
             <!--    <tr>
                     <td>
-                        <button onclick="listController.moveUp()">^</button>
+                        <button onclick="listsManager.moveUp()">^</button>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <button onclick="listController.moveDown()">v</button>
+                        <button onclick="listsManager.moveDown()">v</button>
                     </td>
                 </tr>-->
             </table>
@@ -88,7 +88,7 @@
 
 
 </table>
-Rafraichir les listes sur le client<button onclick="mainController.loadLists()">ok  </button>
+Rafraichir les listes localement<button onclick="mainController.loadLists()">ok  </button>
 
 <script>
 

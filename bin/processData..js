@@ -8,7 +8,7 @@ var processData = {
     getMagasinTree: function (callback) {
         var tailleMoyenneBoite = 0.09
 
-        var sql = "select id,numVersement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette from magasin"
+        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette from magasin"
         mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
             var tree = {
                 name: "Baillet",
@@ -51,7 +51,10 @@ var processData = {
                         countBoites: 0,
                         longueurTotale: 0, longueurOccupee: 0
                     }
-
+var isEmpty=true;
+                if(line.cotesParTablette!=null && line.cotesParTablette.trim()!=""){
+                    isEmpty=false;
+                }
                 if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette])
                     tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette] = {
                         type: "tablette",
@@ -61,7 +64,9 @@ var processData = {
                         countBoites: 0,
                         longueurM: line.longueurTablette,
                         numVersement: line.numVersement,
-                        longueurTotale: 0, longueurOccupee: 0
+                        longueurTotale: 0,
+                        longueurOccupee: 0,
+                        isEmpty:isEmpty
                     }
 
 
@@ -74,6 +79,8 @@ var processData = {
                 }
 
                 if (line.cotesParTablette) {
+
+
                     var boites = line.cotesParTablette.split(" ");
 
 
@@ -94,7 +101,8 @@ var processData = {
                                     name: boite,
                                     count: 1,
                                     children: [],
-                                    numVersement: line.numVersement
+                                    numVersement: line.numVersement,
+                                    id_versement: line.id_versement
                                 };
                                 tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].countBoites += 1
                                 tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].countBoites += 1;

@@ -17,7 +17,9 @@ var sortie=(function(){
                     boitesSorties = boitesSorties.concat(boites)
                 }
             })
-            magasinD3.locate ("boite","id",boitesSorties,.2) ;
+            magasinD3.initialZoom();
+            magasinD3.locate ("boite","id",boitesSorties,.3) ;
+
 
         })
 

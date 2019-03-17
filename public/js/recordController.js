@@ -94,6 +94,10 @@ var recordController = (function () {
         $("#saveRecordButton").attr("disabled", true);
         $("#dialogDiv").dialog("open");
 
+        var afterDisplayFn = config.tableDefs[context.currentTable].onAfterDisplay
+        if (afterDisplayFn)
+            afterDisplayFn(obj);
+
 
         //   mainController.setTabs();
 
@@ -169,13 +173,16 @@ var recordController = (function () {
     self.saveNewRecord = function () {
 
         self.execSqlCreateRecord(context.currentTable, self.currentRecordChanges, function (err, newId) {
-            if (err)
+            if (err) {
+
                 return mainController.setRecordErrorMessage(err);
+            }
             context.currentRecord.id = newId;
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
             if (fn)
                 fn(newId)
+
 
             mainController.setRecordMessage("enregistrement sauvé");
 
@@ -529,7 +536,13 @@ var recordController = (function () {
         for (var key in targetObj) {
             var fieldToolStr = ""
             if (fieldTools[key]) {
-                fieldToolStr = "&nbsp;&nbsp;<Button onclick='tools." + fieldTools[key].toolFn + "(" + context.currentRecord.id + ")'>" + fieldTools[key].title + "</Button>"
+                if (!Array.isArray(fieldTools[key]))
+                    fieldTools[key] = [fieldTools[key]];
+                fieldTools[key].forEach(function (tool) {
+
+
+                    fieldToolStr = "&nbsp;&nbsp;<Button onclick='" + tools.toolFn + "(" + context.currentRecord.id + ")'>" + tool.title + "</Button>"
+                })
             }
 
 

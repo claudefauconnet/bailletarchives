@@ -245,6 +245,9 @@ var listController = (function () {
             if (err)
                 mainController.setErrorMessage(err)
 
+            if (onListLoadedFn) {
+                onListLoadedFn(json);
+            }
 
             if (json.length == 0) {
                 $("#" + dataTableDivName).css("border-style", "none")
@@ -347,9 +350,7 @@ var listController = (function () {
                     onRowClickedFn(dataTable, line, rowIndex, colIndex)
 
             })
-            if (onListLoadedFn) {
-                onListLoadedFn(json);
-            }
+
         })
         //    $("#table_" + dataTableDivName).DataTable().columns.adjust().draw();
     }
@@ -444,6 +445,7 @@ var listController = (function () {
         }
 
     }
+
     self.deleteLinkedRecord = function () {
         var linksTable = context.dataTables["linked_" + context.currentLinkedTable].table;
         var idx = linksTable.rows('.selected', 0).indexes();

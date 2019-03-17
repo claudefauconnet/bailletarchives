@@ -21,9 +21,9 @@ var magasinD3 = (function () {
     var boiteColor = "";
     var containerDiv = null;
     var zoom;
-    var minZoom = .2
-    var maxZoom = 3
-    var avgZoom = 0.3
+    self.minZoom = .2
+    self.maxZoom = 3
+    self.avgZoom = 0.3
     var nMagByLine = 10;
     var drawEpis = true;
     var drawTravees = true;
@@ -75,7 +75,7 @@ var magasinD3 = (function () {
         // magasinD3.drawBoites(null, function () {
         $("#magasinD3MessageDiv").html("Chargement du graphe en cours...")
         magasinD3.drawMagasins(null, function () {
-             $("#magasinD3MessageDiv").html("")
+            $("#magasinD3MessageDiv").html("")
             cachedHtml = $("#graphDiv").html();
 
             var zzz = d3.select("svg")
@@ -88,18 +88,18 @@ var magasinD3 = (function () {
 
     }
     self.initialZoom = function () {
-     //  zoom.translateBy(svg, -1300, -600)
-      //  avgZoom=1
+        //  zoom.translateBy(svg, -1300, -600)
+        //  self.avgZoom=1
 
-      //  zoom.translateTo(svg,(svgWidth/2)*1, -(svgHeight/2)*1)
+        //  zoom.translateTo(svg,(svgWidth/2)*1, -(svgHeight/2)*1)
 
-     //  zoom.scaleTo(svg, avgZoom);
-      //  zoom.translateTo(d3.select(".viewport"),0, 0);
+        //  zoom.scaleTo(svg, self.avgZoom);
+        //  zoom.translateTo(d3.select(".viewport"),0, 0);
         zoom.scaleTo(svg, 1);
-        zoom.translateTo(svg, svgWidth,svgHeight)
-        zoom.scaleTo(svg, avgZoom);
+        zoom.translateTo(svg, svgWidth, svgHeight)
+        zoom.scaleTo(svg, self.minZoom);
 
-    //  zoom.translateTo(svg,-(svgWidth/2)/avgZoom, -(svgHeight/2)/avgZoom)
+        //  zoom.translateTo(svg,-(svgWidth/2)/self.avgZoom, -(svgHeight/2)/self.avgZoom)
     }
 
 
@@ -125,7 +125,7 @@ var magasinD3 = (function () {
             totalWidth = $("#mainDiv").width() - 50;
             totalHeight = $("#mainDiv").height() - 50;
             svgWidth = totalWidth
-            svgHeight = totalHeight*.8
+            svgHeight = totalHeight * .8
             $("#graphDiv").width(svgWidth)
             $("#graphDiv").height(svgHeight)
 
@@ -133,7 +133,7 @@ var magasinD3 = (function () {
             zoom = d3.zoom().on("zoom", function () {
                 svg.attr("transform", d3.event.transform)
 
-            }).scaleExtent([minZoom, maxZoom])
+            }).scaleExtent([self.minZoom, self.maxZoom])
 
             svg = d3.select('#graphDiv')
                 .append('svg')
@@ -182,6 +182,7 @@ var magasinD3 = (function () {
                                 epi.h = epiH;
                                 var gEpi = self.drawEpi(epi, gMag);
 
+
                                 if (drawTravees) {
                                     // draw travee
                                     var traveeW = epiW / epi.children.length;
@@ -214,7 +215,6 @@ var magasinD3 = (function () {
                                                 tab.w = tabW;
                                                 tab.index = indexTab
                                                 var gTablette = self.drawTablette(tab, gTravee)
-
 
                                                 // draw boites
                                                 var bteW = (tabW - tabletteTextSpacing) / nBoitesTablette
@@ -283,169 +283,6 @@ var magasinD3 = (function () {
         })
     }
 
-    self.drawBoites = function (magasinsToDraw, callback) {
-
-
-        d3.select("svg").remove();
-        $("#graphDiv").html("");
-
-
-        d3.json(mainController.urlPrefix + "/magasinD3Tree", function (data) {
-            var nMag = data.children.length;
-            magasinData = data;
-
-            totalWidth = $("#mainDiv").width() - 10;
-            totalHeight = $("#mainDiv").height() - 10;
-            svgWidth = totalWidth
-            svgHeight = totalHeight
-            $("#graphDiv").width(svgWidth)
-            $("#graphDiv").height(svgHeight)
-
-
-            zoom = d3.zoom().on("zoom", function () {
-                svg.attr("transform", d3.event.transform)
-
-            }).scaleExtent([minZoom, maxZoom])
-
-            svg = d3.select('#graphDiv')
-                .append('svg')
-                .attrs({width: svgWidth, height: svgHeight})
-                .call(zoom)
-                .append("g").attr("class", "viewport");
-            var magW = totalWidth / 2;
-            var magH = totalHeight * 2;
-
-            var magX = 50;
-            var magY = 50;
-
-
-            data.children.forEach(function (magasin, indexMagasin) {
-                    if (magasinsToDraw != null && magasinsToDraw.indexOf(magasin.name) < 0)
-                        return;
-
-                    if (magasin.name == "" || !magasin.name)
-                        return;
-                    magasin.x = magX;
-                    magasin.y = magY;
-                    magasin.h = magH;
-                    magasin.w = magW;
-                    //      var gMag = self.drawMagasin(magasin, svg);
-
-
-                    // draw epi
-                    if (drawEpis) {
-                        var epiYOffset = 20
-                        var epiW = magW;
-                        var epiH = (magH) / magasin.children.length;
-                        epiH = epiH - epiYOffset - 1
-                        var epiX = magX;
-                        var epiY = magY;
-
-
-                        magasin.children.forEach(function (epi, indexEpi) {
-                                epi.x = epiX;
-                                epi.y = epiY;
-                                epi.w = epiW;
-                                epi.h = epiH;
-                                //  var gEpi = self.drawEpi(epi, gMag);
-
-                                if (drawTravees) {
-                                    // draw travee
-                                    var traveeW = epiW / epi.children.length;
-                                    var traveeH = epiH;
-                                    var traveeX = epiX + 10;
-                                    var traveeY = epiY;
-                                    epi.children.forEach(function (travee, indexTravee) {
-                                        travee.x = traveeX;
-                                        travee.y = traveeY;
-                                        travee.w = traveeW;
-                                        travee.h = traveeH;
-                                        travee.indexEpi = indexEpi;
-                                        travee.indexTravee = indexTravee;
-                                        if (indexTravee == epi.children.length - 1)
-                                            travee.w -= 30;
-
-                                        //   var gTravee = self.drawTravee(travee, gEpi);
-
-
-                                        // draw tablettes
-                                        var tabW = traveeW
-                                        var tabH = traveeH / travee.children.length;
-                                        var tabX = traveeX;
-                                        var tabY = traveeY;
-                                        if (drawTablettes) {
-                                            travee.children.forEach(function (tab, indexTab) {
-                                                tab.x = tabX;
-                                                tab.y = tabY;
-                                                tab.h = tabH;
-                                                tab.w = tabW;
-                                                tab.index = indexTab
-                                                var gTablette = self.drawTablette(tab, gTravee)
-
-
-                                                // draw boites
-                                                var bteW = (tabW - tabletteTextSpacing) / nBoitesTablette
-                                                var bteH = tabH - 1;
-                                                var bteX = tabX;
-                                                var bteY = tabY + 1;
-
-                                                if (drawBoites) {
-                                                    function getRandomColor() {
-                                                        var letters = '0123456789ABCDEF';
-                                                        var color = '#';
-                                                        for (var i = 0; i < 6; i++) {
-                                                            color += letters[Math.floor(Math.random() * 16)];
-                                                        }
-                                                        return color;
-                                                    }
-
-                                                    tab.children.forEach(function (boite, boiteIndex) {
-                                                        boite.tablette = tab;
-                                                        boite.x = bteX;
-                                                        boite.y = bteY;
-                                                        boite.w = bteW;
-                                                        boite.h = bteH;
-
-                                                        if (oldNumVersement != boite.numVersement) {
-                                                            oldNumVersement = boite.numVersement
-                                                            // boiteColor = getRandomColor();
-                                                            currentBoiteColor = palette[Math.floor(Math.random() * palette.length)]
-                                                        }
-                                                        boite.color = currentBoiteColor;
-                                                        var gBoite = self.drawBoite(boite, svg);
-
-                                                        bteX += bteW;
-                                                    })
-                                                }
-                                                tabY += tabH;
-                                            })
-                                        }
-                                        traveeX += traveeW;
-                                    })
-                                }
-                                epiY += epiH + epiYOffset;
-                            }
-                        )
-                    }
-
-                    //  magY += magH + 20;
-                    if (indexMagasin > 0 && indexMagasin % nMagByLine == 0) {
-                        magX = 50;
-                        magY += magH + 50;
-
-                    }
-                    else {
-                        magX += magW + 50;
-                    }
-
-
-                }
-            )
-
-            if (callback)
-                callback();
-        })
-    }
 
     self.drawMagasin = function (magasin, parentG) {
         var gMag = parentG.append("g").attr("class", "magasin").attr("id", magasin.name);
@@ -563,6 +400,7 @@ var magasinD3 = (function () {
                 width: tablette.w - tabletteTextSpacing,
                 height: tablette.h,
                 name: tablette.name,
+                isEmpty:tablette.isEmpty,
                 class: "tablette",
                 fill: magasinD3.colors["tablette"],
                 stroke: "blue",
@@ -587,7 +425,8 @@ var magasinD3 = (function () {
             var html = "tablette " + tablette.name + "<br>"
             html += "operations tablette :<select onchange='tablette.onTabletteOperationSelect(this)'>" +
                 " <option></option>" +
-                "<option value='integrerVersement'> entrer versement</option>" +
+                "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
+                "<option value='entrerVersementExistant'> entrer versement existant</option>" +
                 "<option value='createUnder'> creer nouvelle</option>" +
                 "<option value='split'> diviser </option>" +
                 "<option value='delete'> supprimer </option>"
@@ -620,6 +459,7 @@ var magasinD3 = (function () {
                     return boite.color
                 },
                 numVersement: boite.numVersement,
+                id_versement: boite.id_versement,
                 name: boite.name,
                 coordonnees: boite.tablette.coordonnees,
                 nBoites: boite.tablette.nBoites,
@@ -651,11 +491,12 @@ var magasinD3 = (function () {
                         html += "<tr><td>" + key + "</td><td>" + obj[key] + "</td>"
                 }
                 html += "operations boite:<select onchange='boite.onBoiteOperationSelect(this)'>"
-                +" <option></option>" +
-                    "<option value='refoulerVersement'> refoulerVersement</option>" +
-                "<option value='decalerBoite'> décaler</option>" +
-                "<option value='supprimerBoite'> supprimer  </option>" +
-                "</select>";
+                    + " <option></option>" +
+
+                    "<option value='voirVersement'> voir versement</option>" +
+                    "<option value='decalerBoite'> décaler</option>" +
+                    "<option value='supprimerBoite'> supprimer  </option>" +
+                    "</select>";
                 html += "<div id='popupD3DivOperationDiv'></div>"
                 html += "</table>"
                 $("#popupD3Div").html(html);
@@ -671,14 +512,26 @@ var magasinD3 = (function () {
     }
 
 
-    self.centerOnElt = function (elt) {
-        var currentZoom = d3.zoomTransform(elt).k;
-        var w = $(window).width() / 2;
-        var h = $(window).height() / 2;
-        var xx = w - d3.select(elt).attr("x") * currentZoom
+    self.centerOnElt = function (elt, zoomLevel) {
+        if (!zoomLevel)
+            var zoomLevel = d3.zoomTransform(elt).k;
+        /*  var w = $(window).width() / 2;
+          var h = $(window).height() / 2;
+          var xx = w - d3.select(elt).attr("x") * zoomLevel
 
-        var yy = h - d3.select(elt).attr("y") * currentZoom
-        d3.select(".viewport").attr("transform", "translate(" + (xx) + "," + (yy) + ") scale(" + 1 + ")")
+
+          var yy = h - d3.select(elt).attr("y") * zoomLevel*/
+
+
+        zoom.scaleTo(svg, zoomLevel);
+        var x = d3.select(elt).attr("x");
+        var y = d3.select(elt).attr("y");
+        zoom.translateTo(svg, x, y)
+
+
+        //   d3.select(".viewport").attr("transform", "translate(" + (xx) + "," + (yy) + ") scale(" + zoomLevel + ")")
+
+
         /*    d3.select(".viewport").transition()
                 .duration(10)
 
@@ -709,8 +562,8 @@ var magasinD3 = (function () {
                     found += 1
                     if (firstbox) {
                         firstbox = false
-                        zoom.scaleTo(svg, zoomLevel);
-                        self.centerOnElt(this)
+                        //  zoom.scaleTo(svg, zoomLevel);
+                        self.centerOnElt(this, zoomLevel)
 
                     }
                 }
@@ -721,8 +574,6 @@ var magasinD3 = (function () {
         var xxx = d3.selectAll(".unselected");
         d3.selectAll(".unselected").style("opacity", 0.1)
         return;
-
-
 
 
     }
@@ -846,7 +697,45 @@ var magasinD3 = (function () {
         $("#magasind3MouseInfo").html(str)
     }
 
+    self.getTablettesContigues=function(tabletteDepart, metrage, callback){
+        var tablettesContigues=[];
+        if (tabletteDepart.longueurM < metrage) {
 
+            var sumLength = 0;
+            var started = false;
+            var stop=false;
+            d3.selectAll("g .tablette").each(function (d, i) {
+                if(stop==false) {
+                    var name = d3.select(this).attr("id");
+                    var longueurM = parseInt(d3.select(this).attr("longueurM"));
+                    if (name == tabletteDepart.name) {
+                        started = true;
+                        sumLength += longueurM;
+                        tablettesContigues.push(name)
+
+                    }
+                    else if (started && longueurM && sumLength < metrage) {
+                        var isEmpty = d3.select(this).attr("isEmpty");
+                        if (isEmpty == false) {
+                            stop = true;
+                            return alert("la tablette n'est pas vide");
+
+                        }
+                        sumLength += longueurM;
+                        tablettesContigues.push(name)
+                    }
+                }
+
+            })
+        } else
+            tablettesContigues.push(tabletteDepart.name);
+
+        if( stop)
+            return callback("pas de tablettes contigues  vides a partir de la tablette "+tabletteDepart.name+" et la longueur "+metrage);
+        return callback(null,tablettesContigues);
+
+        return
+    }
 
 
 // var blob = new Blob([html], {type: "image/svg+xml"});

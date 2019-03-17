@@ -25,14 +25,25 @@ var tablette = (function () {
             $("#popupD3DivOperationDiv").html(html);
 
         }
-        if (operation == "integrerVersement") {
-            html += "<br><button onclick='versement.integrerVersementFromD3TabletteNew();'>OK</button>";
+        if (operation == "entrerVersementExistant") {
+
             var html = "<br>Numero du versement : <input size='3' id=tablette_numeroVersementIntegrer value=''> ";
 
-            html += "<button onclick='versement.integrerVersementFromD3Tablette();'>OK</button>";
+            html += "<br><button onclick='versement.entrerVersementExistantFromD3Tablette();'>OK</button>";
+
             $("#popupD3DivOperationDiv").html(html);
             $("#tablette_numeroVersementIntegrer").focus();
 
+
+        }
+
+        if (operation == "entrerNouveauVersement") {
+            var html = "metrage du versement <input id='popupD3DivOperationDiv_metrage'><br>";
+            html+= "nombre de boites<input id='popupD3DivOperationDiv_nbBoites'>";
+            html += "<br><button onclick='versement.entrerNouveauVersementFromD3Tablette();'>OK</button>";
+
+            $("#popupD3DivOperationDiv").html(html);
+            $("#popupD3DivOperationDiv_metrage").focus();
 
         }
 
@@ -159,7 +170,12 @@ var tablette = (function () {
     }
 
     self.locate=function(){
-        return alert("en construction");
+
+        var coordonnees =prompt("coordonnees :")
+        if(coordonnees && coordonnees!=""){
+            magasinD3.locate("tablette", "id", [coordonnees], 1);
+        }
+       // return alert("en construction");
     }
 
 

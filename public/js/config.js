@@ -48,20 +48,25 @@ var config = (function () {
                     title: "Localiser...",
                     id:"versementLocaliserButton",
                     toolFn: "versement.locateCurrentVersement"
+                },
+                {
+                    title: "Refouler...",
+                    id:"versementRefoulerButton",
+                    toolFn: "versement.refoulerVersement"
                 }
 
             ],
             fieldTools: {
 
 
-                /*  "cotesExtremesBoites": {
-                      title: "calculer",
-                      toolFn: "SetVersementCotesExtremesFromMagasin"
+                 "cotesExtremesBoites": {
+                      title: "mettre à jour",
+                      toolFn: "versement.SetVersementCotesExtremesFromMagasin"
                   },
                   "nbBoites": {
                       title: "calculer",
-                      toolFn: "SetVersementnbBoitesFromMagasin"
-                  }*/
+                      toolFn: "versement.SetVersementnbBoitesFromMagasin"
+                  }
             },
             relations: {
                 "versement_historique": {
@@ -129,6 +134,7 @@ var config = (function () {
                 etatTraitementDate: {mandatory:true},
                 DimTabletteMLineaire: {mandatory:true},
             },
+            onAfterDisplay: versement.setNewRecordDisplayNumVersement,
             onAfterSave: versement.updateRecordHistory
 
 
@@ -211,6 +217,8 @@ var config = (function () {
 
 
     }
+
+
 
 
     return self;
