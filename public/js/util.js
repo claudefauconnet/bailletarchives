@@ -47,6 +47,14 @@ var util = (function () {
         })
 
     }
+    self.integerToStringWithFixedLength=function(number,nDigits){
+        var str=""+number;
+        while(str.length<nDigits) {
+            str = "0" + str;
+        }
+        return str;
+
+    }
 
 
     return self;

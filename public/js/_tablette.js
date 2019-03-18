@@ -38,8 +38,9 @@ var tablette = (function () {
         }
 
         if (operation == "entrerNouveauVersement") {
-            var html = "metrage du versement <input id='popupD3DivOperationDiv_metrage'><br>";
-            html+= "nombre de boites<input id='popupD3DivOperationDiv_nbBoites'>";
+            var html = "metrage du versement (m) <input style='width:30px' id='popupD3DivOperationDiv_metrage'><br>";
+            html+= "nombre de boites<input style='width:30px' id='popupD3DivOperationDiv_nbBoites'><br>";
+            html+= "index cote de début<input style='width:30px' id='popupD3DivOperationDiv_coteDebut' value='1'> ";
             html += "<br><button onclick='versement.entrerNouveauVersementFromD3Tablette();'>OK</button>";
 
             $("#popupD3DivOperationDiv").html(html);

@@ -161,11 +161,9 @@ var versement = (function () {
                 }
 
 
-
-
                 if (tablettesProposees && tablettesProposees.length > 0) {// selection done do integration
                     $("#popupD3DivOperationDiv").css("visibility", "hidden");
-                    var tablettes=[];
+                    var tablettes = [];
                     var tablettesProposees = $("#popupD3DivOperationDivTablettesProposees li")
                     $(tablettesProposees).each(function (index, value) {
                         tablettes.push(value.innerHTML)
@@ -205,16 +203,29 @@ var versement = (function () {
         self.creerVersementAndAttachTablettes = function () {
             var metrageFromDialog = $("#popupD3DivOperationDiv_metrage").val();
             var nbBoitesFromDialog = $("#popupD3DivOperationDiv_nbBoites").val();
+            var coteDebutFromDialog = $("#popupD3DivOperationDiv_coteDebut").val();
+
+            var coordonneesTablettes = self.currentCandidateTablettes;
+            var tablettes = [];
+            var coteDebutIndex = 1
             if (isNaN(metrageFromDialog))
                 return (alert("Le format du  métrage n'est pas correct"))
             var metrage = parseFloat(metrageFromDialog.replace(",", "."));
             if (isNaN(nbBoitesFromDialog))
                 return (alert("Le format du  nombre de boites n'est pas correct"))
-            var nbBoites = parseInt(nbBoitesFromDialog.replace(",", "."));
+            var nbBoites = parseInt(nbBoitesFromDialog);
+            if (isNaN(coteDebutFromDialog))
+                return (alert("Le format de  la cote de début n'est pas correct"))
+            coteDebutIndex = parseInt(coteDebutFromDialog);
 
 
-            var tailleMoyBoite=metrage/nbBoites;
-            var versementObj = {etatTraitement: "en attente",metrage:metrage};
+            var tailleMoyBoite = metrage / nbBoites;
+            var versementObj = {
+                etatTraitement: "en attente",
+                metrage: metrage,
+                nbBoites: nbBoites,
+                cotesExtremesBoites: ""
+            };
             async.series([
 
                     function (callback) {// set new numero de versement
@@ -240,23 +251,39 @@ var versement = (function () {
 
                     },
 
-                    function (callback) {// get taille tablettes
-                        var sql="select * from magasin where coordonnees in "
-                        recordController.execSqlCreateRecord("versement", versementObj, function (err, newId) {
-                            if (err)
-                                callback(err);
-                            versementObj.id = newId;
-                            callback();
-                        })
+                    function (callback) {// get taille tablettes and set cotesParTablette
+                        if (coordonneesTablettes) {
+                            var tablettesStr = ""
+                            coordonneesTablettes.forEach(function (coordonnee, index) {
+                                if (index > 0)
+                                    tablettesStr += ",";
+                                tablettesStr += '"' + coordonnee + '"';
 
+                            })
+                            var sql = "select id, coordonnees,DimTabletteMLineaire from magasin where coordonnees in (" + tablettesStr + ") order by coordonnees";
+                            mainController.execSql(sql, function (err, result) {
+                                if (err)
+                                    callback(err);
+
+                                tablettes = result;
+                                tablettes=self.setCotesParTablette(versementObj, tablettes, nbBoites, tailleMoyBoite, coteDebutIndex);
+                                var coteDebut=tablettes[0].cotesParTablette.substring(0,tablettes[0].cotesParTablette.indexOf(" "));
+                                var coteFin=tablettes[tablettes.length-1].cotesParTablette.substring(tablettes[tablettes.length-1].cotesParTablette.lastIndexOf(" "));
+                                versementObj.cotesExtremesBoites=coteDebut+coteFin;
+                                callback();
+
+                            })
+                        }
+                        else
+                            callback();
 
                     },
 
                     function (callback) {//create tablettes
-                        if (self.currentCandidateTablettes) {
-                            var tablettes = self.currentCandidateTablettes;
+                        if (coordonneesTablettes) {
 
-                            self.AttachTablettesToVersement(versementObj, tablettes,nbBoites,tailleMoyBoite, function (err, result) {
+
+                            self.AttachTablettesToVersement(versementObj, tablettes, nbBoites, tailleMoyBoite, function (err, result) {
                                 if (err)
                                     callback(err);
 
@@ -266,30 +293,97 @@ var versement = (function () {
                         } else {
                             callback();
                         }
-                    }
+                    },
+                function (callback) {//update cotesExtremes
+                    var sql = "update versement set cotesExtremesBoites='" + versementObj.cotesExtremesBoites + "' where id=" + versementObj.id;
+                    mainController.execSql(sql, function (err, result) {
+                        if (err)
+                            callback(err);
+                        callback();
+                    })
+                }
 
                 ]
 
                 ,
                 function (err) {// at the end dispalay  versement and tablettes
                     $("#popupD3DivOperationDiv").css("visibility", "hidden");
-                if(err){
-                    console.log(err);
-                    return mainController.setErrorMessage(err);
-                }
-
-                    listController.listRecords("select * from versement where id=" + versementObj.id)
+                    if (err) {
+                        console.log(err);
+                        return mainController.setErrorMessage(err);
+                    }
+                    context.currentTable = "versement";
+                    listController.listRecords("select * from versement where id=" + versementObj.id);
+                    magasinD3.drawMagasins()
                 }
             )
         }
 
-        self.AttachTablettesToVersement = function (versement, tablettes,nbBoites,tailleMoyBoite, callback) {
+        /**
+         *
+         *  // le taux d'occupation d'une tablette ne doit pas dépasser  config.coefRemplissageTablette si c'est le cas on enlève une boite qu'on met sur la tablette suivante
+         *
+         * @param versement
+         * @param tablettes
+         * @param nbBoites
+         * @param tailleMoyBoite
+         * @param callback
+         * @constructor
+         */
 
+
+        self.setCotesParTablette = function (versement, tablettes, nbBoites, tailleMoyBoite, coteDebut) {
+
+
+
+            function getTabletteNbBoites(dimTablette) {
+                // le taux d'occupation d'une tablette ne doit pas dépasser  config.coefRemplissageTablette si c'est le cas on enlève une boite qu'on met sur la tablette suivante
+
+                var tabletteNbBoites = dimTablette / tailleMoyBoite;
+                var decimalPart = tabletteNbBoites - Math.floor(tabletteNbBoites);
+                tabletteNbBoites = Math.floor(tabletteNbBoites);
+                if (decimalPart > (1 - config.coefRemplissageTablette))
+                    tabletteNbBoites -= 1;
+                return tabletteNbBoites;
+            }
+
+
+            var boiteIndex = coteDebut;
+
+
+            tablettes.forEach(function (tablette) {
+                var cotesParTablette = "";
+                var tabletteNbBoites = getTabletteNbBoites(tablette.DimTabletteMLineaire);
+                for (var i = 0; i < tabletteNbBoites; i++) {
+                    var cote = versement.numVersement + "/" + util.integerToStringWithFixedLength(boiteIndex, config.coteBoiteNbDigits);
+                    if (i > 0)
+                        cotesParTablette += " ";
+                    cotesParTablette += cote;
+                    boiteIndex += 1;
+                }
+                tablette.cotesParTablette = cotesParTablette;
+            })
+            return tablettes;
+        }
+
+
+        /**
+         *
+         *  // le taux d'occupation d'une tablette ne doit pas dépasser  config.coefRemplissageTablette si c'est le cas on enlève une boite qu'on met sur la tablette suivante
+         *
+         * @param versement
+         * @param tablettes
+         * @param nbBoites
+         * @param tailleMoyBoite
+         * @param callback
+         * @constructor
+         */
+        self.AttachTablettesToVersement = function (versement, tablettes, nbBoites, tailleMoyBoite, callback) {
 
 
             async.eachSeries(tablettes, function (tablette, callbackSeries) {
 
-                var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + " where magasin.coordonnees='" + tablette + "'";
+                var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + ",cotesParTablette='" + tablette.cotesParTablette + "' where magasin.coordonnees='" + tablette.coordonnees + "'";
                 console.log(sql)
                 mainController.execSql(sql, function (err, result) {
                     if (err)
@@ -441,11 +535,13 @@ var versement = (function () {
         }
 
         self.setNewRecordDisplayNumVersement = function (versementObj) {
-            self.getNewNumVersement(function (err, numVersement) {
-                if (err)
-                    return console.log(err);
-                $("#attr_numVersement").val(numVersement)
-            })
+            if (!versementObj.id) {
+                self.getNewNumVersement(function (err, numVersement) {
+                    if (err)
+                        return console.log(err);
+                    $("#attr_numVersement").val(numVersement)
+                })
+            }
 
         }
 

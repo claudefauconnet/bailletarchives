@@ -5,6 +5,8 @@ var config = (function () {
     self.hiddenTables = ["article", "listes"]
     self.LoadAllrecordsTables = false;
     self.maxVersementsToLocate = 5;
+    self.coefRemplissageTablette=.7
+    self.coteBoiteNbDigits=3
 
     self.tableDefs = {
         "magasin": {
