@@ -1,4 +1,4 @@
-var tablette = (function () {
+var Tablette = (function () {
     var self = {};
     self.currentTablette = null;
 
@@ -8,20 +8,20 @@ var tablette = (function () {
 
         if (operation == "createUnder") {
             return alert("en construction");
-            html = "<button onclick='tablette.create();'>OK</button>";
+            html = "<button onclick='Tablette.create();'>OK</button>";
             $("#popupD3DivOperationDiv").html(html);
 
         }
         else if (operation == "split") {
             return alert("en construction");
             var html = "<br>Pourcentage restant sur l'ancienne tablette : <input size='3' id=tablette_percentageRemainingOnTopTablette value='50'> %";
-            html += "<button onclick='tablette.split();'>OK</button>";
+            html += "<button onclick='Tablette.split();'>OK</button>";
             $("#popupD3DivOperationDiv").html(html);
 
         }
         else if (operation == "delete") {
             return alert("en construction");
-            html = "<button onclick='tablette.delete();'>OK</button>";
+            html = "<button onclick='Tablette.delete();'>OK</button>";
             $("#popupD3DivOperationDiv").html(html);
 
         }
@@ -29,7 +29,7 @@ var tablette = (function () {
 
             var html = "<br>Numero du versement : <input size='3' id=tablette_numeroVersementIntegrer value=''> ";
 
-            html += "<br><button onclick='versement.entrerVersementExistantFromD3Tablette();'>OK</button>";
+            html += "<br><button onclick='Versement.entrerVersementExistantFromD3Tablette();'>OK</button>";
 
             $("#popupD3DivOperationDiv").html(html);
             $("#tablette_numeroVersementIntegrer").focus();
@@ -38,16 +38,35 @@ var tablette = (function () {
         }
 
         if (operation == "entrerNouveauVersement") {
-            var html = "metrage du versement (m) <input style='width:30px' id='popupD3DivOperationDiv_metrage'><br>";
+            var html = "metrage <input style='width:30px' id='popupD3DivOperationDiv_metrage'><br>";
             html+= "nombre de boites<input style='width:30px' id='popupD3DivOperationDiv_nbBoites'><br>";
             html+= "index cote de début<input style='width:30px' id='popupD3DivOperationDiv_coteDebut' value='1'> ";
-            html += "<br><button onclick='versement.entrerNouveauVersementFromD3Tablette();'>OK</button>";
+            html += "<br><button onclick='Versement.entrerNouveauVersementFromD3Tablette();'>OK</button>";
 
             $("#popupD3DivOperationDiv").html(html);
             $("#popupD3DivOperationDiv_metrage").focus();
 
         }
 
+
+    }
+
+    self.getIntegrerVersementDialogParams=function(){
+        var metrageFromDialog = $("#popupD3DivOperationDiv_metrage").val();
+        var nbBoitesFromDialog = $("#popupD3DivOperationDiv_nbBoites").val();
+        var coteDebutFromDialog = $("#popupD3DivOperationDiv_coteDebut").val();
+        var error=""
+        if (isNaN(metrageFromDialog))
+            error+="Le format du  métrage n'est pas correct.";
+        var metrage = parseFloat(metrageFromDialog.replace(",", "."));
+        if (isNaN(nbBoitesFromDialog))
+            error+="Le format du  nombre de boites n'est pas correct.";
+        var nbBoites = parseInt(nbBoitesFromDialog);
+        if (isNaN(coteDebutFromDialog))
+            error+="Le format de  la cote de début n'est pas correct.";
+        coteDebutIndex = parseInt(coteDebutFromDialog);
+
+        return {error:error,metrage:metrage,nbBoites:nbBoites,coteDebutIndex:coteDebutIndex};
 
     }
 

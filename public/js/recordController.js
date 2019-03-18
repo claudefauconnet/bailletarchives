@@ -540,8 +540,7 @@ var recordController = (function () {
                     fieldTools[key] = [fieldTools[key]];
                 fieldTools[key].forEach(function (tool) {
 
-
-                    fieldToolStr = "&nbsp;&nbsp;<Button onclick='" + tools.toolFn + "(" + context.currentRecord.id + ")'>" + tool.title + "</Button>"
+                    fieldToolStr = "&nbsp;&nbsp;<Button onclick='" + tool.toolFn + "(" + context.currentRecord.id + ")'>" + tool.title + "</Button>"
                 })
             }
 

@@ -43,18 +43,18 @@ var config = (function () {
             recordTools: [
                 {
                     title: "Entrer en magasin...",
-                    id:"versementEntrerEnMagasinButton",
-                    toolFn: "versement.showDialogEntrerVersement"
+                    id:"VersementEntrerEnMagasinButton",
+                    toolFn: "Versement.showDialogEntrerVersement"
                 },
                 {
                     title: "Localiser...",
-                    id:"versementLocaliserButton",
-                    toolFn: "versement.locateCurrentVersement"
+                    id:"VersementLocaliserButton",
+                    toolFn: "Versement.locateCurrentVersement"
                 },
                 {
                     title: "Refouler...",
-                    id:"versementRefoulerButton",
-                    toolFn: "versement.refoulerVersement"
+                    id:"VersementRefoulerButton",
+                    toolFn: "Versement.refoulerVersement"
                 }
 
             ],
@@ -136,8 +136,8 @@ var config = (function () {
                 etatTraitementDate: {mandatory:true},
                 DimTabletteMLineaire: {mandatory:true},
             },
-            onAfterDisplay: versement.setNewRecordDisplayNumVersement,
-            onAfterSave: versement.updateRecordHistory
+            onAfterDisplay: Versement.setNewRecordDisplayNumVersement,
+            onAfterSave: Versement.updateRecordHistory
 
 
         },

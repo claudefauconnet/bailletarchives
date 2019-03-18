@@ -423,7 +423,7 @@ var magasinD3 = (function () {
             self.currentTablette = obj;
 
             var html = "tablette " + tablette.name + "<br>"
-            html += "operations tablette :<select onchange='tablette.onTabletteOperationSelect(this)'>" +
+            html += "operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
                 " <option></option>" +
                 "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
                 "<option value='entrerVersementExistant'> entrer versement existant</option>" +
@@ -697,7 +697,7 @@ var magasinD3 = (function () {
         $("#magasind3MouseInfo").html(str)
     }
 
-    self.getTablettesContigues=function(tabletteDepart, metrage, callback){
+    self.getTablettesContigues=function(tabletteDepart, metrage,tailleMoyBoite,callback){
         var tablettesContigues=[];
         if (tabletteDepart.longueurM < metrage) {
 
@@ -708,6 +708,7 @@ var magasinD3 = (function () {
                 if(stop==false) {
                     var name = d3.select(this).attr("id");
                     var longueurM = parseInt(d3.select(this).attr("longueurM"));
+                    longueurM=longueurM-(config.coefRemplissageTablette*tailleMoyBoite)
                     if (name == tabletteDepart.name) {
                         started = true;
                         sumLength += longueurM;

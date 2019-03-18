@@ -73,7 +73,7 @@ context.currentTable=$(this).val();
         $("#locateButton").bind("click", function () {
             self.showInMainDiv("graph")
             context.currentCriteria = [];
-            listController.addSearchCriteria(versement.locateBySql);
+            listController.addSearchCriteria(Versement.locateBySql);
             context.currentCriteria = [];
 
         })
