@@ -63,11 +63,11 @@ var config = (function () {
 
                  "cotesExtremesBoites": {
                       title: "mettre à jour",
-                      toolFn: "versement.SetVersementCotesExtremesFromMagasin"
+                      toolFn: "Versement.SetVersementCotesExtremesFromMagasin"
                   },
                   "nbBoites": {
                       title: "calculer",
-                      toolFn: "versement.SetVersementnbBoitesFromMagasin"
+                      toolFn: "Versement.SetVersementnbBoitesFromMagasin"
                   }
             },
             relations: {
@@ -80,7 +80,7 @@ var config = (function () {
                     createRelSql: "update versement_historique set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update versement_historique set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"],
-                  //  onRowClickedFn:versement.onDataTableRowClicked,
+                  //  onRowClickedFn:Versement.onDataTableRowClicked,
                     editableColumns: ["commentaire"],
                     columns:["etat","etatAuteur","etatDate","commentaire","dateModification"]
 
@@ -94,8 +94,8 @@ var config = (function () {
                     createRelSql: "update magasin set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update magasin set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"],
-                    onListLoadedFn:versement.onMagasinsLoaded,
-                   // onRowClickedFn:versement.onDataTableRowClicked,
+                    onListLoadedFn:Versement.onMagasinsLoaded,
+                   // onRowClickedFn:Versement.onDataTableRowClicked,
                     editableColumns: ["cotesParTablette","commentaires"],
                    columns : ["coordonnees","cotesParTablette","commentaires","DimTabletteMLineaire"]
 

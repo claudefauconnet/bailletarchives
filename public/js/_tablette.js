@@ -27,21 +27,23 @@ var Tablette = (function () {
         }
         if (operation == "entrerVersementExistant") {
 
-            var html = "<br>Numero du versement : <input size='3' id=tablette_numeroVersementIntegrer value=''> ";
 
-            html += "<br><button onclick='Versement.entrerVersementExistantFromD3Tablette();'>OK</button>";
+            var html = self.getEnterVersementExistantDialogHtml();
+            html += "<br><button id='popupD3DivOperationDiv_okButtonExistant' onclick='Versement.entrerVersementExistantDialog();'>OK</button>";
+            html += "<br><button style='visibility: hidden' id='popupD3DivOperationDiv_okButtonAll' onclick='Versement.entrerVersementDialog();'>OK</button>";
 
             $("#popupD3DivOperationDiv").html(html);
-            $("#tablette_numeroVersementIntegrer").focus();
+            $(".popupD3DivOperationDiv_hiddenInput").css("visibility", "hidden");
+            $("#popupD3DivOperationDiv_numVersement").focus();
 
 
         }
 
         if (operation == "entrerNouveauVersement") {
             var html = "metrage <input style='width:30px' id='popupD3DivOperationDiv_metrage'><br>";
-            html+= "nombre de boites<input style='width:30px' id='popupD3DivOperationDiv_nbBoites'><br>";
-            html+= "index cote de début<input style='width:30px' id='popupD3DivOperationDiv_coteDebut' value='1'> ";
-            html += "<br><button onclick='Versement.entrerNouveauVersementFromD3Tablette();'>OK</button>";
+            html += "nombre de boites<input style='width:30px' id='popupD3DivOperationDiv_nbBoites'><br>";
+            html += "index cote de début<input style='width:30px' id='popupD3DivOperationDiv_coteDebut' value='1'> ";
+            html += "<br><button onclick='Versement.entrerVersementDialog();'>OK</button>";
 
             $("#popupD3DivOperationDiv").html(html);
             $("#popupD3DivOperationDiv_metrage").focus();
@@ -51,22 +53,34 @@ var Tablette = (function () {
 
     }
 
-    self.getIntegrerVersementDialogParams=function(){
+    self.getEnterVersementExistantDialogHtml = function () {
+        var html = "<br>Numero du versement : <input size='4' id=popupD3DivOperationDiv_numVersement value=''> ";
+
+        html += "<br>metrage <input  class='popupD3DivOperationDiv_hiddenInput' style='width:30px' id='popupD3DivOperationDiv_metrage'><br>";
+        html += "nombre de boites<input class='popupD3DivOperationDiv_hiddenInput' style='width:30px' id='popupD3DivOperationDiv_nbBoites'><br>";
+        html += "index cote de début<input class='popupD3DivOperationDiv_hiddenInput' style='width:30px' id='popupD3DivOperationDiv_coteDebut' value='1'> ";
+
+
+        return html;
+
+    }
+
+    self.getIntegrerVersementDialogParams = function () {
         var metrageFromDialog = $("#popupD3DivOperationDiv_metrage").val();
         var nbBoitesFromDialog = $("#popupD3DivOperationDiv_nbBoites").val();
         var coteDebutFromDialog = $("#popupD3DivOperationDiv_coteDebut").val();
-        var error=""
-        if (isNaN(metrageFromDialog))
-            error+="Le format du  métrage n'est pas correct.";
+        var error = ""
+        if (metrageFromDialog == "" || isNaN(metrageFromDialog))
+            error += "Le format du  métrage n'est pas correct.";
         var metrage = parseFloat(metrageFromDialog.replace(",", "."));
-        if (isNaN(nbBoitesFromDialog))
-            error+="Le format du  nombre de boites n'est pas correct.";
+        if (nbBoitesFromDialog == "" || isNaN(nbBoitesFromDialog))
+            error += "Le format du  nombre de boites n'est pas correct.";
         var nbBoites = parseInt(nbBoitesFromDialog);
-        if (isNaN(coteDebutFromDialog))
-            error+="Le format de  la cote de début n'est pas correct.";
+        if (coteDebutFromDialog == "" || isNaN(coteDebutFromDialog))
+            error += "Le format de  la cote de début n'est pas correct.";
         coteDebutIndex = parseInt(coteDebutFromDialog);
 
-        return {error:error,metrage:metrage,nbBoites:nbBoites,coteDebutIndex:coteDebutIndex};
+        return {error: error, metrage: metrage, nbBoites: nbBoites, coteDebutIndex: coteDebutIndex};
 
     }
 
@@ -74,18 +88,18 @@ var Tablette = (function () {
     self.split = function () {
         if (!self.currentTablette)
             return;
-       var percentage=parseInt($("#tablette_percentageRemainingOnTopTablette").val())
-        var payload={
+        var percentage = parseInt($("#tablette_percentageRemainingOnTopTablette").val())
+        var payload = {
             operation: "split",
-            tablette:JSON.stringify(self.currentTablette),
-            options:JSON.stringify({splitPercentage:percentage})
+            tablette: JSON.stringify(self.currentTablette),
+            options: JSON.stringify({splitPercentage: percentage})
 
         }
-        self.executeOnServer("modifytravee",payload, function(err,result){
-            if(err){
-                return  mainController.setErrorMessage(err);
+        self.executeOnServer("modifytravee", payload, function (err, result) {
+            if (err) {
+                return mainController.setErrorMessage(err);
             }
-            $("#popupD3Div").css("visibility","hidden");
+            $("#popupD3Div").css("visibility", "hidden");
             magasinD3.drawMagasins();
         })
 
@@ -96,17 +110,17 @@ var Tablette = (function () {
     self.delete = function () {
         if (!self.currentTablette)
             return;
-        var payload={
+        var payload = {
             operation: "delete",
-            tablette:JSON.stringify(self.currentTablette),
-            options:JSON.stringify({})
+            tablette: JSON.stringify(self.currentTablette),
+            options: JSON.stringify({})
 
         }
-        self.executeOnServer("modifytravee",payload, function(err,result){
-            if(err){
-                return  mainController.setErrorMessage(err);
+        self.executeOnServer("modifytravee", payload, function (err, result) {
+            if (err) {
+                return mainController.setErrorMessage(err);
             }
-            $("#popupD3Div").css("visibility","hidden");
+            $("#popupD3Div").css("visibility", "hidden");
             magasinD3.drawMagasins()
         })
 
@@ -114,33 +128,30 @@ var Tablette = (function () {
     self.create = function (callback) {
         if (!self.currentTablette)
             return;
-        var payload={
+        var payload = {
             operation: "create",
-            tablette:JSON.stringify(self.currentTablette),
-            options:JSON.stringify({})
+            tablette: JSON.stringify(self.currentTablette),
+            options: JSON.stringify({})
 
         }
-        self.executeOnServer("modifytravee",payload, function(err,result){
-            if(err){
-               return  mainController.setErrorMessage(err);
+        self.executeOnServer("modifytravee", payload, function (err, result) {
+            if (err) {
+                return mainController.setErrorMessage(err);
             }
-            $("#popupD3Div").css("visibility","hidden");
+            $("#popupD3Div").css("visibility", "hidden");
             magasinD3.drawMagasins()
         })
     }
 
 
-
-
-
-    self.executeOnServer=function(urlSuffix,payload,callback){
+    self.executeOnServer = function (urlSuffix, payload, callback) {
         $.ajax({
             type: "POST",
-            url: mainController.urlPrefix+"/"+urlSuffix,
+            url: mainController.urlPrefix + "/" + urlSuffix,
             data: payload,
             dataType: "json",
             success: function (json) {
-                return callback(null,json);
+                return callback(null, json);
             },
             error: function (err) {
                 console.log(err.responseText)
@@ -148,8 +159,6 @@ var Tablette = (function () {
             }
         })
     }
-
-
 
 
     self.areTablettesContigues = function (a, b) {
@@ -179,23 +188,23 @@ var Tablette = (function () {
 
     }
 
-    self.updateCotesParTablette=function(cotes, idMagasin,callback){
-            var sql ="update  magasin set cotesParTablette='"+cotes+"' where id="+idMagasin;
-            mainController.execSql(sql,callback);
+    self.updateCotesParTablette = function (cotes, idMagasin, callback) {
+        var sql = "update  magasin set cotesParTablette='" + cotes + "' where id=" + idMagasin;
+        mainController.execSql(sql, callback);
     }
-    self.updateCommentaireParTablette=function(commentaires, idMagasin,callback){
-        var sql ="update  magasin set commentaires='"+commentaires+"' where id="+idMagasin;
-        mainController.execSql(sql,callback);
+    self.updateCommentaireParTablette = function (commentaires, idMagasin, callback) {
+        var sql = "update  magasin set commentaires='" + commentaires + "' where id=" + idMagasin;
+        mainController.execSql(sql, callback);
 
     }
 
-    self.locate=function(){
+    self.locate = function () {
 
-        var coordonnees =prompt("coordonnees :")
-        if(coordonnees && coordonnees!=""){
+        var coordonnees = prompt("coordonnees :")
+        if (coordonnees && coordonnees != "") {
             magasinD3.locate("tablette", "id", [coordonnees], 1);
         }
-       // return alert("en construction");
+        // return alert("en construction");
     }
 
 

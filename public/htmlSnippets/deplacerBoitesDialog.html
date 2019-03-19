@@ -25,7 +25,7 @@
 
     getInfos = function () {
         var numVersement = $("#deplacerBoites_numVersement").val();
-        versement.getVersementMagasinInfos({numVersement:numVersement}, function (err, infos) {
+        Versement.getVersementMagasinInfos({numVersement:numVersement}, function (err, infos) {
             if (err)
                console.log(err);
         //  $("#deplacerBoites_message").html(JSON.stringify(infos,null,2));

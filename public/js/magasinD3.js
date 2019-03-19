@@ -479,7 +479,7 @@ var magasinD3 = (function () {
 
         onBoiteClick = function (boite, x, y) {
 
-            versement.getBoiteVersement(boite, function (err, obj) {
+            Versement.getBoiteVersement(boite, function (err, obj) {
                 if (err)
                     return console.log(err)
 
@@ -736,6 +736,57 @@ var magasinD3 = (function () {
         return callback(null,tablettesContigues);
 
         return
+    }
+
+    self.chercherTablettesPourVersement = function (obj) {
+
+        if (!obj.metrage || obj.metrage == null)
+            return alert("metrage non spécifié");
+        //obj.metrage = parseFloat(obj.metrage.replace(",", "."));
+        var longueurCumulee = 0;
+        var tablettesOK = [];
+        var done = false;
+
+        magasinData.children.forEach(function (magasin) {
+
+            if (obj.magasin && obj.magasin != "")
+                if (magasin.name != obj.magasin)
+                    return;
+
+            if (!done)
+                magasin.children.forEach(function (epi) {
+                    if (!done)
+                        epi.children.forEach(function (travee) {
+                            if (!done)
+                                travee.children.forEach(function (tablette) {
+                                    if (!done)
+                                        if ((!tablette.numVersement || tablette.numVersement == 0) && tablette.children.length == 0) {// tablette vide
+                                            if (tablettesOK.length > 0 && !Tablette.areTablettesContigues(tablettesOK[tablettesOK.length - 1], tablette.name)) {
+                                                tablettesOK = []// on recommence si tablettes pas contigues
+                                                longueurCumulee = 0;
+                                            }
+                                            longueurCumulee += tablette.longueurM;
+                                            tablettesOK.push(tablette.name)
+                                            if (longueurCumulee >= obj.metrage)
+                                                done = true;
+                                        }
+                                        else {
+                                            tablettesOK = []// on recommence si uen tablette est occuppée
+                                            longueurCumulee = 0;
+                                        }
+
+
+                                })
+                        })
+                })
+
+        })
+
+        return tablettesOK;
+
+
+
+
     }
 
 
