@@ -2,12 +2,15 @@ var Versement = (function () {
 
         var self = {};
         self.currentCandidateTablettes = []
-        self.updateRecordHistory = function (id) {
+        self.updateRecordHistory = function (id, etat) {
             var sql = "select * from versement where id=" + id;
             mainController.execSql(sql, function (err, result) {
                 if (err)
                     return console.log(err);
                 var versement = result[0];
+
+                if (etat)
+                    versement.etatTraitement = etat;
 
 
                 var sql2 = " insert into versement_historique (etat,etatAuteur, etatDate,dateModification,id_versement) values (" +
@@ -84,14 +87,7 @@ var Versement = (function () {
         }
 
 
-        self.refoulerVersement = function (tablette) {
-
-
-            alert("en construction");
-        }
-
-
-        self.entrerVersementExistantDialog = function (refouler) {
+        self.doAfterEntrerVersementExistantDialogValidate = function (refouler) {
             var numVersement = $("#popupD3DivOperationDiv_numVersement").val();
             if (!numVersement || numVersement == "") {
                 return alert("entrez un numero de versement");
@@ -118,28 +114,6 @@ var Versement = (function () {
                         callback();
                     })
 
-                }, function (callback) {
-                    var sql = "select * from magasin where id_versement=" + versement.id;
-                    mainController.execSql(sql, function (err, result) {
-                        if (err)
-                            callback(err);
-                        if (result.length > 0) {
-                            if (!refouler)
-                                callback("ce versement est déjà entré.")
-                            else {//refoulement total
-                                if (prompt("confirmez le refoulement de ce versement ")) {
-                                    self.currentRefoulement = result;
-                                    callback();
-                                }
-                                else{
-                                    callback("refoulement abandonné");
-                                }
-
-                            }
-
-                        }
-                    })
-
                 }
 
             ], function (err) {
@@ -164,7 +138,7 @@ var Versement = (function () {
         }
 
 
-        self.entrerVersementDialog = function (numVersement) {
+        self.doAfterEntrerVersementDialogValidate = function (numVersement) {
             var params = Tablette.getIntegrerVersementDialogParams();
             if (params.error != "")
                 return alert(params.error)
@@ -206,10 +180,11 @@ var Versement = (function () {
                 numVersement = null;
 
             var coordonneesTablettes = self.currentCandidateTablettes;
+
             var tablettes = [];
             var coteDebutIndex = 1;
             var err = "";
-            var tablettesRefoulees=null;
+            var tablettesRefoulees = null;
 
             var params = Tablette.getIntegrerVersementDialogParams();
             if (params.error != "")
@@ -217,7 +192,8 @@ var Versement = (function () {
 
 
             var tailleMoyBoite = params.metrage / params.nbBoites;
-            var versementObj = {
+            var currentRefoulement = null;
+            var versement = {
                 etatTraitement: "en attente",
                 metrage: params.metrage,
                 nbBoites: params.nbBoites,
@@ -226,20 +202,18 @@ var Versement = (function () {
             async.series([
                     function (callback) {// set new numero de versement
                         if (numVersement) {
-                            versementObj.numVersement = numVersement;
+                            versement.numVersement = numVersement;
                             callback()
                         }
                         else {
                             self.getNewNumVersement(function (err, numVersement) {
                                 if (err)
-                                    callback(err);
-                                versementObj.numVersement = numVersement;
+                                    return callback(err);
+                                versement.numVersement = numVersement;
                                 callback();
                             })
                         }
                     },
-
-
 
 
                     function (callback) {// create  or select versement
@@ -247,40 +221,69 @@ var Versement = (function () {
                             var sql = "select id from versement where numVersement='" + numVersement + "'"
                             mainController.execSql(sql, function (err, result) {
                                 if (err)
-                                    callback(err);
-                                versementObj.id = result[0].id;
+                                    return callback(err);
+                                versement.id = result[0].id;
                                 callback()
                             })
                         }
                         else {
-                            recordController.execSqlCreateRecord("versement", versementObj, function (err, newId) {
+                            recordController.execSqlCreateRecord("versement", versement, function (err, newId) {
                                 if (err)
-                                    callback(err);
-                                versementObj.id = newId;
+                                    return callback(err);
+                                versement.id = newId;
                                 callback();
                             })
                         }
                     },
 
-                    function(callback){// process refoulement : libere les tablettes du versement : numVersement et cotesParTablette vides
-                        if( !self.currentRefoulement )
+
+                    function (callback) {// check if tablettes have this versement id
+                        var sql = "select * from magasin where id_versement=" + versement.id;
+                        mainController.execSql(sql, function (err, result) {
+                            if (err)
+                                return callback(err);
+                            if (result.length > 0) {//refoulement total
+
+                                if (confirm("Ce versement est déjà entré.confirmez le refoulement de tout ce versement sur les nouvelles tablettes")) {
+                                    currentRefoulement = result;
+                                    callback();
+                                }
+                                else {
+                                    callback("refoulement abandonné");
+                                }
+
+                            }
+                            else {
+                                callback();
+                            }
+
+
+                        })
+
+                    },
+
+                    function (callback) {// process refoulement : libere les tablettes du versement : numVersement et cotesParTablette vides
+                        if (!currentRefoulement)
                             callback();
-                        else{
-                            var sql="update magasin set id_versement='', cotesParTablette='' where id_versement="+versementObj.id
-                            mainController.execSql(sql, function (err, result) {
+                        else {
+                            var etatTraitementAuteur = prompt("auteur du refoulement");
+                            if (!etatTraitementAuteur || etatTraitementAuteur == "")
+                                callback("refoulement abandonné  faute d'auteur")
+                            versement.etatTraitementAuteur = etatTraitementAuteur;
+                            self.refoulerVersement(versement, null, function (err, result) {
                                 if (err)
-                                    callback(err);
-                                tablettesRefoulees=self.currentRefoulement;
-                                self.currentRefoulement=null;
+                                    return callback(err)
 
-
-
-                                callback()
+                                tablettesRefoulees = currentRefoulement;
+                                currentRefoulement = null;
+                                callback();
                             })
+
 
                         }
 
                     },
+
 
                     function (callback) {// get taille tablettes and set cotesParTablette
                         if (coordonneesTablettes) {
@@ -294,12 +297,12 @@ var Versement = (function () {
                             var sql = "select id, coordonnees,DimTabletteMLineaire from magasin where coordonnees in (" + tablettesStr + ") order by coordonnees";
                             mainController.execSql(sql, function (err, result) {
                                 if (err)
-                                    callback(err);
+                                    return callback(err);
 
                                 tablettes = result;
-                                tablettes = self.setCotesParTablette(versementObj, tablettes, params.nbBoites, tailleMoyBoite, params.coteDebutIndex);
+                                tablettes = self.setCotesParTablette(versement, tablettes, params.nbBoites, tailleMoyBoite, params.coteDebutIndex);
 
-                                versementObj.cotesExtremesBoites = self.getTablettesCotesExtremes(tablettes);
+                                versement.cotesExtremesBoites = self.getTablettesCotesExtremes(tablettes);
                                 callback();
 
                             })
@@ -309,9 +312,9 @@ var Versement = (function () {
                     },
                     function (callback) {//create tablettes
                         if (coordonneesTablettes) {
-                            self.AttachTablettesToVersement(versementObj, tablettes, params.nbBoites, tailleMoyBoite, function (err, result) {
+                            self.AttachTablettesToVersement(versement, tablettes, params.nbBoites, tailleMoyBoite, function (err, result) {
                                 if (err)
-                                    callback(err);
+                                    return callback(err);
                                 callback();
                             })
                         } else {
@@ -319,10 +322,10 @@ var Versement = (function () {
                         }
                     },
                     function (callback) {//update cotesExtremes
-                        var sql = "update versement set cotesExtremesBoites='" + versementObj.cotesExtremesBoites + "' where id=" + versementObj.id;
+                        var sql = "update versement set cotesExtremesBoites='" + versement.cotesExtremesBoites + "' where id=" + versement.id;
                         mainController.execSql(sql, function (err, result) {
                             if (err)
-                                callback(err);
+                                return callback(err);
                             callback();
                         })
                     }
@@ -335,61 +338,106 @@ var Versement = (function () {
                         return mainController.setErrorMessage(err);
                     }
                     context.currentTable = "versement";
-                    listController.listRecords("select * from versement where id=" + versementObj.id);
+                    listController.listRecords("select * from versement where id=" + versement.id);
                     $("#popupD3Div").css("visibility", "hidden");
                     magasinD3.drawMagasins();
                 }
             )
         }
 
-        /**
-         *
-         *  // le taux d'occupation d'une tablette ne doit pas dépasser  config.coefRemplissageTablette si c'est le cas on enlève une boite qu'on met sur la tablette suivante
-         *
-         * @param versement
-         * @param tablettes
-         * @param nbBoites
-         * @param tailleMoyBoite
-         * @param callback
-         * @constructor
-         */
+            , self.refoulerVersement = function (versement, tablette, callback) {
 
-
-        self.setCotesParTablette = function (versement, tablettes, nbBoites, tailleMoyBoite, coteDebut) {
-
-
-            function getTabletteNbBoites(dimTablette) {
-                // le taux d'occupation d'une tablette ne doit pas dépasser  config.coefRemplissageTablette si c'est le cas on enlève une boite qu'on met sur la tablette suivante
-
-                var tabletteNbBoites = dimTablette / tailleMoyBoite;
-                var decimalPart = tabletteNbBoites - Math.floor(tabletteNbBoites);
-                tabletteNbBoites = Math.floor(tabletteNbBoites);
-                if (decimalPart > (1 - config.coefRemplissageTablette))
-                    tabletteNbBoites -= 1;
-                return tabletteNbBoites;
-            }
-
-            var boiteIndex = coteDebut;
-            var totalBoites = 0;
-
-            tablettes.forEach(function (tablette) {
-                var cotesParTablette = "";
-                var tabletteNbBoites = getTabletteNbBoites(tablette.DimTabletteMLineaire);
-                for (var i = 0; i < tabletteNbBoites; i++) {
-                    var cote = versement.numVersement + "/" + util.integerToStringWithFixedLength(boiteIndex, config.coteBoiteNbDigits);
-                    if (i > 0)
-                        cotesParTablette += " ";
-                    cotesParTablette += cote;
-                    boiteIndex += 1;
-                    totalBoites += 1
-                    if (totalBoites >= nbBoites)
-                        break;
-
+            var tablettesRefoulees = currentRefoulement;
+            async.series([
+                function (callbackSeries) {//get tablettes existantes
+                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where id_versement=" + versement.id
+                    mainController.execSql(sql, function (err, result) {
+                        if (err)
+                            return callbackSeries(err);
+                        callbackSeries();
+                    })
+                },
+                function (callbackSeries) {// remove versement attrs from tablettes
+                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where id_versement=" + versement.id
+                    mainController.execSql(sql, function (err, result) {
+                        if (err)
+                            return callbackSeries(err);
+                        callbackSeries();
+                    })
+                },
+                function (callbackSeries) {
+                    var commentaire = "refoulement depuis les tablettes " + JSON.stringify(tablettesRefoulees);
+                    var sql = "update versement set etatTraitement='refoulement',etatTraitementAuteur='" + versement.etatTraitementAuteur + "',commentaire='" + commentaire + "', etatTraitementDate='" + util.dateToMariaDBString(new Date()) + "' where id=" + versement.id;
+                    mainController.execSql(sql, function (err, result) {
+                        if (err)
+                            return callbackSeries(err);
+                        callbackSeries();
+                    })
+                },
+                function (callbackSeries) {
+                    Versement.updateRecordHistory(versement.id, " refoulement");
+                    callbackSeries();
                 }
-                tablette.cotesParTablette = cotesParTablette;
+            ], function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                callback(null, tablettesRefoulees);
+
+
             })
-            return tablettes;
-        }
+
+
+        },
+
+            /**
+             *
+             *  // le taux d'occupation d'une tablette ne doit pas dépasser  config.coefRemplissageTablette si c'est le cas on enlève une boite qu'on met sur la tablette suivante
+             *
+             * @param versement
+             * @param tablettes
+             * @param nbBoites
+             * @param tailleMoyBoite
+             * @param callback
+             * @constructor
+             */
+
+
+            self.setCotesParTablette = function (versement, tablettes, nbBoites, tailleMoyBoite, coteDebut) {
+
+
+                function getTabletteNbBoites(dimTablette) {
+                    // le taux d'occupation d'une tablette ne doit pas dépasser  config.coefRemplissageTablette si c'est le cas on enlève une boite qu'on met sur la tablette suivante
+
+                    var tabletteNbBoites = dimTablette / tailleMoyBoite;
+                    var decimalPart = tabletteNbBoites - Math.floor(tabletteNbBoites);
+                    tabletteNbBoites = Math.floor(tabletteNbBoites);
+                    if (decimalPart > (1 - config.coefRemplissageTablette))
+                        tabletteNbBoites -= 1;
+                    return tabletteNbBoites;
+                }
+
+                var boiteIndex = coteDebut;
+                var totalBoites = 0;
+
+                tablettes.forEach(function (tablette) {
+                    var cotesParTablette = "";
+                    var tabletteNbBoites = getTabletteNbBoites(tablette.DimTabletteMLineaire);
+                    for (var i = 0; i < tabletteNbBoites; i++) {
+                        var cote = versement.numVersement + "/" + util.integerToStringWithFixedLength(boiteIndex, config.coteBoiteNbDigits);
+                        if (i > 0)
+                            cotesParTablette += " ";
+                        cotesParTablette += cote;
+                        boiteIndex += 1;
+                        totalBoites += 1
+                        if (totalBoites >= nbBoites)
+                            break;
+
+                    }
+                    tablette.cotesParTablette = cotesParTablette;
+                })
+                return tablettes;
+            }
 
 
         /**
@@ -430,8 +478,9 @@ var Versement = (function () {
         self.showDialogEntrerVersement = function () {
 
             var html = Tablette.getEnterVersementExistantDialogHtml();
-             html+= "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:50px' > ou <button onclick='Versement.chercherTablettesDisponibles()'>chercher tablettes disponibles</button>"
-
+            html += "<br>magasin<input id='popupD3DivOperationDiv_Magasin'style='width:50px' >"
+            html += "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:50px' > ou <button onclick='Versement.chercherTablettes()'>chercher tablettes</button>"
+            html += "<br>"
             $("#dialogD3").html(html);
 
             $("#popupD3DivOperationDiv_numVersement").attr("disabled", true);
@@ -440,43 +489,76 @@ var Versement = (function () {
             $("#popupD3DivOperationDiv_nbBoites").val(context.currentRecord.nbBoites);
 
 
-
             $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
             dialogD3.dialog("open")
         }
 
-    self.chercherTablettesDisponibles=function() {
+        self.chercherTablettes = function () {
 
-    }
+            function useTablette(tablettes) {
 
-
-
-         /*   var metrage = $("#attr_metrage").val()
-            var nbBoites = $("#attr_nbBoites").val()
-
-
-            if (metrage == "" || nbBoites == "")
-                return alert(" le métrage et le nombre de boites sont obligatoires")
-
-            $("#dialogD3").attr("title", "chercher des tablettes");
-            $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
-
-            dialogD3.dialog("open")
-            $("#dialogD3").load("./htmlSnippets/" + "findTablettesDialogD3.html", function () {
-                $("#findTablettesD3_versement").val(context.currentRecord.numVersement);
-                $("#findTablettesD3_nbBoites").val(metrage)
-                $("#findTablettesD3_metrage").val(nbBoites);
-
-                metrage = parseFloat(metrage.replace(",", ".")) * 100
-                nbBoites = parseInt(nbBoites)
-
-                var ep = "" + (Math.round(parseInt(metrage / nbBoites)) / 100);
-                ep = ep.replace(".", ",");
-                $("#findTablettesD3_epaisseurMoyBoite").val(ep);
+                self.currentCandidateTablettes = tablettes;
+                var html = Tablette.getTabletteProposeesHtml(tablettes);
+                html += "<br><button onclick='Versement.entrerVersement()'>Entrer versement</button>"
+                $("#dialogD3").append(html);
+            }
 
 
-            })
-        }*/
+            var params = Tablette.getIntegrerVersementDialogParams();
+            if (params.error)
+                return alert(err);
+
+            var tabletteDebut = $("#popupD3DivOperationDiv_tabletteDebut").val();
+            var tailleMoyBoite = params.metrage / params.nbBoites;
+            if (tabletteDebut && tabletteDebut != "") {// chercher des tablettes depusi le début au à partir de coteDebutIndex
+                magasinD3.getTablettesContigues(tabletteDebut, params.metrage, tailleMoyBoite, function (err, result) {
+                    if (err)
+                        return callback(err);
+                    useTablette(result)
+
+                })
+            }
+            else {
+                params.magasin = $("#popupD3DivOperationDiv_Magasin").val();
+                var obj = {metrage: params.metrage, magasin: params.magasin}
+
+                magasinD3.chercherTablettesPourVersement(obj, function (err, result) {
+                    if (err)
+                        return callback(err);
+                    useTablette(result)
+                })
+            }
+
+
+        }
+
+
+        /*   var metrage = $("#attr_metrage").val()
+           var nbBoites = $("#attr_nbBoites").val()
+
+
+           if (metrage == "" || nbBoites == "")
+               return alert(" le métrage et le nombre de boites sont obligatoires")
+
+           $("#dialogD3").attr("title", "chercher des tablettes");
+           $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
+
+           dialogD3.dialog("open")
+           $("#dialogD3").load("./htmlSnippets/" + "findTablettesDialogD3.html", function () {
+               $("#findTablettesD3_versement").val(context.currentRecord.numVersement);
+               $("#findTablettesD3_nbBoites").val(metrage)
+               $("#findTablettesD3_metrage").val(nbBoites);
+
+               metrage = parseFloat(metrage.replace(",", ".")) * 100
+               nbBoites = parseInt(nbBoites)
+
+               var ep = "" + (Math.round(parseInt(metrage / nbBoites)) / 100);
+               ep = ep.replace(".", ",");
+               $("#findTablettesD3_epaisseurMoyBoite").val(ep);
+
+
+           })
+       }*/
 
 
         self.getBoiteVersement = function (boite, callback) {
@@ -508,8 +590,8 @@ var Versement = (function () {
 
         }
 
-        self.setNewRecordDisplayNumVersement = function (versementObj) {
-            if (!versementObj.id) {
+        self.setNewRecordDisplayNumVersement = function (versement) {
+            if (!versement.id) {
                 self.getNewNumVersement(function (err, numVersement) {
                     if (err)
                         return console.log(err);

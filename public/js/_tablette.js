@@ -29,8 +29,8 @@ var Tablette = (function () {
 
 
             var html = self.getEnterVersementExistantDialogHtml();
-            html += "<br><button id='popupD3DivOperationDiv_okButtonExistant' onclick='Versement.entrerVersementExistantDialog();'>OK</button>";
-            html += "<br><button style='visibility: hidden' id='popupD3DivOperationDiv_okButtonAll' onclick='Versement.entrerVersementDialog();'>OK</button>";
+            html += "<br><button id='popupD3DivOperationDiv_okButtonExistant' onclick='Versement.doAfterEntrerVersementExistantDialogValidate();'>OK</button>";
+            html += "<br><button style='visibility: hidden' id='popupD3DivOperationDiv_okButtonAll' onclick='Versement.doAfterEntrerVersementDialogValidate();'>OK</button>";
 
             $("#popupD3DivOperationDiv").html(html);
             $(".popupD3DivOperationDiv_hiddenInput").css("visibility", "hidden");
@@ -43,7 +43,7 @@ var Tablette = (function () {
             var html = "metrage <input style='width:30px' id='popupD3DivOperationDiv_metrage'><br>";
             html += "nombre de boites<input style='width:30px' id='popupD3DivOperationDiv_nbBoites'><br>";
             html += "index cote de début<input style='width:30px' id='popupD3DivOperationDiv_coteDebut' value='1'> ";
-            html += "<br><button onclick='Versement.entrerVersementDialog();'>OK</button>";
+            html += "<br><button onclick='Versement.doAfterEntrerVersementDialogValidate();'>OK</button>";
 
             $("#popupD3DivOperationDiv").html(html);
             $("#popupD3DivOperationDiv_metrage").focus();
@@ -78,11 +78,22 @@ var Tablette = (function () {
         var nbBoites = parseInt(nbBoitesFromDialog);
         if (coteDebutFromDialog == "" || isNaN(coteDebutFromDialog))
             error += "Le format de  la cote de début n'est pas correct.";
-        coteDebutIndex = parseInt(coteDebutFromDialog);
+        var coteDebutIndex = parseInt(coteDebutFromDialog);
 
         return {error: error, metrage: metrage, nbBoites: nbBoites, coteDebutIndex: coteDebutIndex};
 
     }
+
+    self.getTabletteProposeesHtml=function(tablettes){
+        var html = "";
+
+        html += "<br>tablettes proposées<div id='popupD3DivOperationDivTablettesProposees' style='height: 200px;overflow: auto'><ul>"
+        tablettes.forEach(function (tablette) {
+            html += "<li>" + tablette + "</li>"
+        })
+        return html;
+    }
+
 
 
     self.split = function () {

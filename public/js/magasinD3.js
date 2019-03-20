@@ -64,6 +64,7 @@ var magasinD3 = (function () {
 
 
     self.init = function (_containerDiv) {
+       // return;
         containerDiv = _containerDiv;
 
         var height = $("#" + containerDiv).height() - 120
@@ -738,7 +739,7 @@ var magasinD3 = (function () {
         return
     }
 
-    self.chercherTablettesPourVersement = function (obj) {
+    self.chercherTablettesPourVersement = function (obj,callback) {
 
         if (!obj.metrage || obj.metrage == null)
             return alert("metrage non spécifié");
@@ -781,8 +782,10 @@ var magasinD3 = (function () {
                 })
 
         })
+        if(tablettesOK.length==0)
+            return callback("aucune tablette disponible")
 
-        return tablettesOK;
+        return callback(null,tablettesOK);
 
 
 
