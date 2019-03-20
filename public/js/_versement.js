@@ -2,7 +2,7 @@ var Versement = (function () {
 
         var self = {};
         self.currentCandidateTablettes = []
-        self.updateRecordHistory = function (id, etat) {
+        self.updateRecordHistory = function (id, etat, commentaire) {
             var sql = "select * from versement where id=" + id;
             mainController.execSql(sql, function (err, result) {
                 if (err)
@@ -12,12 +12,16 @@ var Versement = (function () {
                 if (etat)
                     versement.etatTraitement = etat;
 
+                var commentaireStr = "''";
+                if (commentaire)
+                    commentaireStr = "'" + commentaire + "'";
 
-                var sql2 = " insert into versement_historique (etat,etatAuteur, etatDate,dateModification,id_versement) values (" +
+                var sql2 = " insert into versement_historique (etat,etatAuteur, etatDate,dateModification,commentaire,id_versement) values (" +
                     "'" + versement.etatTraitement + "'," +
                     "'" + versement.etatTraitementAuteur + "'," +
                     "'" + util.longDateStrToShortDateStr(versement.etatTraitementDate) + "'," +
                     "'" + util.dateToMariaDBString(new Date()) + "'," +
+                    commentaireStr +","+
                     "" + versement.id + ")"
                 mainController.execSql(sql2, function (err, result) {
                     if (err)
@@ -184,7 +188,6 @@ var Versement = (function () {
             var tablettes = [];
             var coteDebutIndex = 1;
             var err = "";
-            var tablettesRefoulees = null;
 
             var params = Tablette.getIntegrerVersementDialogParams();
             if (params.error != "")
@@ -192,7 +195,7 @@ var Versement = (function () {
 
 
             var tailleMoyBoite = params.metrage / params.nbBoites;
-            var currentRefoulement = null;
+            var tablettesaRefouler = null;
             var versement = {
                 etatTraitement: "en attente",
                 metrage: params.metrage,
@@ -245,7 +248,7 @@ var Versement = (function () {
                             if (result.length > 0) {//refoulement total
 
                                 if (confirm("Ce versement est déjà entré.confirmez le refoulement de tout ce versement sur les nouvelles tablettes")) {
-                                    currentRefoulement = result;
+                                    tablettesaRefouler = result;
                                     callback();
                                 }
                                 else {
@@ -263,19 +266,21 @@ var Versement = (function () {
                     },
 
                     function (callback) {// process refoulement : libere les tablettes du versement : numVersement et cotesParTablette vides
-                        if (!currentRefoulement)
+                        if (!tablettesaRefouler)
                             callback();
                         else {
                             var etatTraitementAuteur = prompt("auteur du refoulement");
-                            if (!etatTraitementAuteur || etatTraitementAuteur == "")
+                            if (!etatTraitementAuteur || etatTraitementAuteur == "") {
+                                tablettesaRefouler = null;
                                 callback("refoulement abandonné  faute d'auteur")
+                            }
                             versement.etatTraitementAuteur = etatTraitementAuteur;
-                            self.refoulerVersement(versement, null, function (err, result) {
-                                if (err)
+                            self.refoulerVersement(versement, tablettesaRefouler, function (err, result) {
+                                tablettesaRefouler = null;
+                                if (err) {
                                     return callback(err)
+                                }
 
-                                tablettesRefoulees = currentRefoulement;
-                                currentRefoulement = null;
                                 callback();
                             })
 
@@ -345,20 +350,21 @@ var Versement = (function () {
             )
         }
 
-            , self.refoulerVersement = function (versement, tablette, callback) {
+            , self.refoulerVersement = function (versement, tablettesaRefouler, callback) {
 
-            var tablettesRefoulees = currentRefoulement;
+
             async.series([
-                function (callbackSeries) {//get tablettes existantes
-                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where id_versement=" + versement.id
-                    mainController.execSql(sql, function (err, result) {
-                        if (err)
-                            return callbackSeries(err);
-                        callbackSeries();
-                    })
-                },
+
                 function (callbackSeries) {// remove versement attrs from tablettes
-                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where id_versement=" + versement.id
+                    var tablettesStr = ""
+                    tablettesaRefouler.forEach(function (tablette, index) {
+                        if (index > 0)
+                            tablettesStr += ",";
+                        tablettesStr += '"' + tablette.coordonnees + '"';
+
+                    })
+
+                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where coordonnees in (" + tablettesStr + ")";
                     mainController.execSql(sql, function (err, result) {
                         if (err)
                             return callbackSeries(err);
@@ -366,8 +372,8 @@ var Versement = (function () {
                     })
                 },
                 function (callbackSeries) {
-                    var commentaire = "refoulement depuis les tablettes " + JSON.stringify(tablettesRefoulees);
-                    var sql = "update versement set etatTraitement='refoulement',etatTraitementAuteur='" + versement.etatTraitementAuteur + "',commentaire='" + commentaire + "', etatTraitementDate='" + util.dateToMariaDBString(new Date()) + "' where id=" + versement.id;
+
+                    var sql = "update versement set etatTraitement='refoulement',etatTraitementAuteur='" + versement.etatTraitementAuteur + "', etatTraitementDate='" + util.dateToMariaDBString(new Date()) + "' where id=" + versement.id;
                     mainController.execSql(sql, function (err, result) {
                         if (err)
                             return callbackSeries(err);
@@ -375,14 +381,22 @@ var Versement = (function () {
                     })
                 },
                 function (callbackSeries) {
-                    Versement.updateRecordHistory(versement.id, " refoulement");
+                    var tablettesStr = ""
+                    tablettesaRefouler.forEach(function (tablette, index) {
+                        if (index > 0)
+                            tablettesStr += ",";
+                        tablettesStr += tablette.coordonnees ;
+
+                    })
+                    var commentaire = "refoulement depuis les tablettes " + tablettesStr
+                    Versement.updateRecordHistory(versement.id, "refoulement", commentaire);
                     callbackSeries();
                 }
             ], function (err) {
                 if (err) {
                     return callback(err);
                 }
-                callback(null, tablettesRefoulees);
+                callback(null, tablettesaRefouler);
 
 
             })
@@ -479,8 +493,8 @@ var Versement = (function () {
 
             var html = Tablette.getEnterVersementExistantDialogHtml();
             html += "<br>magasin<input id='popupD3DivOperationDiv_Magasin'style='width:50px' >"
-            html += "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:50px' > ou <button onclick='Versement.chercherTablettes()'>chercher tablettes</button>"
-            html += "<br>"
+            html += "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:100px' value='premiere libre'> <button onclick='Versement.chercherTablettes()'>chercher</button>"
+            html += "<br><div id='popupD3DivOperationDiv_tablette'></div>"
             $("#dialogD3").html(html);
 
             $("#popupD3DivOperationDiv_numVersement").attr("disabled", true);
@@ -498,9 +512,10 @@ var Versement = (function () {
             function useTablette(tablettes) {
 
                 self.currentCandidateTablettes = tablettes;
+
                 var html = Tablette.getTabletteProposeesHtml(tablettes);
                 html += "<br><button onclick='Versement.entrerVersement()'>Entrer versement</button>"
-                $("#dialogD3").append(html);
+                $("#popupD3DivOperationDiv_tablette").html(html);
             }
 
 
@@ -508,13 +523,25 @@ var Versement = (function () {
             if (params.error)
                 return alert(err);
 
-            var tabletteDebut = $("#popupD3DivOperationDiv_tabletteDebut").val();
+            var tabletteDebutCoord = $("#popupD3DivOperationDiv_tabletteDebut").val();
             var tailleMoyBoite = params.metrage / params.nbBoites;
-            if (tabletteDebut && tabletteDebut != "") {// chercher des tablettes depusi le début au à partir de coteDebutIndex
+            if (tabletteDebutCoord && tabletteDebutCoord != "premiere libre") {// chercher des tablettes depusi le début au à partir de coteDebutIndex
+
+                var sql="select * from magasin where coordonnees='"+tabletteDebutCoord+"'";
+                mainController.execSql(sql,function(err,result){
+                    if(err)
+                        return alert(err)
+                    if(result.length==0)
+                        return alert("cette tablette n'existe pas" )
+                    if(result[0].id_versement &&  result[0].id_versement!="")
+                        return alert("cette tablette n'est pas vide" )
+                   var  tabletteDebut=result[0]
                 magasinD3.getTablettesContigues(tabletteDebut, params.metrage, tailleMoyBoite, function (err, result) {
                     if (err)
-                        return callback(err);
+                        return alert(err);
                     useTablette(result)
+
+                })
 
                 })
             }

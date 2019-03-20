@@ -700,6 +700,9 @@ var magasinD3 = (function () {
 
     self.getTablettesContigues=function(tabletteDepart, metrage,tailleMoyBoite,callback){
         var tablettesContigues=[];
+
+
+
         if (tabletteDepart.longueurM < metrage) {
 
             var sumLength = 0;
