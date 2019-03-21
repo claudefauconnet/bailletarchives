@@ -491,7 +491,7 @@ var magasinD3 = (function () {
                     if (keys.indexOf(key) > -1)
                         html += "<tr><td>" + key + "</td><td>" + obj[key] + "</td>"
                 }
-                html += "operations boite:<select onchange='boite.onBoiteOperationSelect(this)'>"
+                html += "operations boite:<select onchange='Boite.onBoiteOperationSelect(this)'>"
                     + " <option></option>" +
 
                     "<option value='voirVersement'> voir versement</option>" +
@@ -741,8 +741,16 @@ var magasinD3 = (function () {
 
         return
     }
-
-    self.chercherTablettesPourVersement = function (obj,callback) {
+    /**
+     *
+     * si tabletteDepartCoordonnees on ne commence que lorsqu'on la trouve
+     *
+     *
+     * @param obj
+     * @param callback
+     * @returns {*}
+     */
+    self.chercherTablettesPourVersement = function (obj,tabletteDepartCoords,callback) {
 
         if (!obj.metrage || obj.metrage == null)
             return alert("metrage non spécifié");
@@ -750,6 +758,9 @@ var magasinD3 = (function () {
         var longueurCumulee = 0;
         var tablettesOK = [];
         var done = false;
+        var start=false;
+        if(!tabletteDepartCoords)
+            start=true;
 
         magasinData.children.forEach(function (magasin) {
 
@@ -763,7 +774,10 @@ var magasinD3 = (function () {
                         epi.children.forEach(function (travee) {
                             if (!done)
                                 travee.children.forEach(function (tablette) {
-                                    if (!done)
+                                    if(!start && tablette.name==tabletteDepartCoords)// si tabletteDepartCoords on ne commence que lorsqu'on la trouve
+                                        start=true;
+
+                                    if (!done && start)
                                         if ((!tablette.numVersement || tablette.numVersement == 0) && tablette.children.length == 0) {// tablette vide
                                             if (tablettesOK.length > 0 && !Tablette.areTablettesContigues(tablettesOK[tablettesOK.length - 1], tablette.name)) {
                                                 tablettesOK = []// on recommence si tablettes pas contigues

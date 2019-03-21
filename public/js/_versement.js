@@ -21,7 +21,7 @@ var Versement = (function () {
                     "'" + versement.etatTraitementAuteur + "'," +
                     "'" + util.longDateStrToShortDateStr(versement.etatTraitementDate) + "'," +
                     "'" + util.dateToMariaDBString(new Date()) + "'," +
-                    commentaireStr +","+
+                    commentaireStr + "," +
                     "" + versement.id + ")"
                 mainController.execSql(sql2, function (err, result) {
                     if (err)
@@ -88,6 +88,24 @@ var Versement = (function () {
 
             })
 
+        }
+        self.showDialogEntrerVersement = function () {
+
+            var html = Tablette.getEnterVersementExistantDialogHtml();
+            html += "<br>magasin<input id='popupD3DivOperationDiv_Magasin'style='width:50px' >"
+            html += "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:100px' value=''> <button onclick='Versement.chercherTablettes()'>chercher</button>"
+            html += "<br><div id='popupD3DivOperationDiv_tablette'></div>"
+            $("#dialogD3").html(html);
+
+            $("#popupD3DivOperationDiv_numVersement").attr("disabled", true);
+
+
+
+            $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
+            dialogD3.dialog("open")
+            $("#popupD3DivOperationDiv_numVersement").val(context.currentRecord.numVersement);
+            $("#popupD3DivOperationDiv_metrage").val(context.currentRecord.metrage)
+            $("#popupD3DivOperationDiv_nbBoites").val(context.currentRecord.nbBoites);
         }
 
 
@@ -241,27 +259,37 @@ var Versement = (function () {
 
 
                     function (callback) {// check if tablettes have this versement id
-                        var sql = "select * from magasin where id_versement=" + versement.id;
-                        mainController.execSql(sql, function (err, result) {
-                            if (err)
-                                return callback(err);
-                            if (result.length > 0) {//refoulement total
+                        if(!versement.id)// nouveau
+                           return callback();
+                        else {
+                            var sql = "select * from magasin where id_versement=" + versement.id;
+                            mainController.execSql(sql, function (err, result) {
+                                if (err)
+                                    return callback(err);
+                                if (result.length > 0) {//refoulement total
 
-                                if (confirm("Ce versement est déjà entré.confirmez le refoulement de tout ce versement sur les nouvelles tablettes")) {
-                                    tablettesaRefouler = result;
-                                    callback();
+                                    if (confirm("Ce versement est déjà entré.confirmez le refoulement de tout ce versement sur les nouvelles tablettes")) {
+                                        tablettesaRefouler = result;
+                                        callback();
+                                    }
+                                    else {
+                                        callback("refoulement abandonné");
+                                    }
+
                                 }
                                 else {
-                                    callback("refoulement abandonné");
+                                    callback();
                                 }
 
-                            }
-                            else {
-                                callback();
-                            }
 
+                            })
+                        }
 
-                        })
+                    },
+
+                    function (callback) {// pour mise à jourà la fin  et calcul recherche tablettes contigues
+                        mainController.showInMainDiv("graph");
+                        callback();
 
                     },
 
@@ -327,7 +355,7 @@ var Versement = (function () {
                         }
                     },
                     function (callback) {//update cotesExtremes
-                        var sql = "update versement set cotesExtremesBoites='" + versement.cotesExtremesBoites + "' where id=" + versement.id;
+                        var sql = "update versement set metrage="+versement.metrage+", nbBoites="+versement.nbBoites+",cotesExtremesBoites='" + versement.cotesExtremesBoites + "' where id=" + versement.id;
                         mainController.execSql(sql, function (err, result) {
                             if (err)
                                 return callback(err);
@@ -345,6 +373,7 @@ var Versement = (function () {
                     context.currentTable = "versement";
                     listController.listRecords("select * from versement where id=" + versement.id);
                     $("#popupD3Div").css("visibility", "hidden");
+
                     magasinD3.drawMagasins();
                 }
             )
@@ -385,7 +414,7 @@ var Versement = (function () {
                     tablettesaRefouler.forEach(function (tablette, index) {
                         if (index > 0)
                             tablettesStr += ",";
-                        tablettesStr += tablette.coordonnees ;
+                        tablettesStr += tablette.coordonnees;
 
                     })
                     var commentaire = "refoulement depuis les tablettes " + tablettesStr
@@ -489,23 +518,6 @@ var Versement = (function () {
         }
 
 
-        self.showDialogEntrerVersement = function () {
-
-            var html = Tablette.getEnterVersementExistantDialogHtml();
-            html += "<br>magasin<input id='popupD3DivOperationDiv_Magasin'style='width:50px' >"
-            html += "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:100px' value='premiere libre'> <button onclick='Versement.chercherTablettes()'>chercher</button>"
-            html += "<br><div id='popupD3DivOperationDiv_tablette'></div>"
-            $("#dialogD3").html(html);
-
-            $("#popupD3DivOperationDiv_numVersement").attr("disabled", true);
-            $("#popupD3DivOperationDiv_numVersement").val(context.currentRecord.numVersement);
-            $("#popupD3DivOperationDiv_metrage").val(context.currentRecord.metrage)
-            $("#popupD3DivOperationDiv_nbBoites").val(context.currentRecord.nbBoites);
-
-
-            $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
-            dialogD3.dialog("open")
-        }
 
         self.chercherTablettes = function () {
 
@@ -521,35 +533,35 @@ var Versement = (function () {
 
             var params = Tablette.getIntegrerVersementDialogParams();
             if (params.error)
-                return alert(err);
+                return alert(params.error);
 
             var tabletteDebutCoord = $("#popupD3DivOperationDiv_tabletteDebut").val();
             var tailleMoyBoite = params.metrage / params.nbBoites;
-            if (tabletteDebutCoord && tabletteDebutCoord != "premiere libre") {// chercher des tablettes depusi le début au à partir de coteDebutIndex
-
-                var sql="select * from magasin where coordonnees='"+tabletteDebutCoord+"'";
-                mainController.execSql(sql,function(err,result){
-                    if(err)
-                        return alert(err)
-                    if(result.length==0)
-                        return alert("cette tablette n'existe pas" )
-                    if(result[0].id_versement &&  result[0].id_versement!="")
-                        return alert("cette tablette n'est pas vide" )
-                   var  tabletteDebut=result[0]
-                magasinD3.getTablettesContigues(tabletteDebut, params.metrage, tailleMoyBoite, function (err, result) {
+            if (tabletteDebutCoord && tabletteDebutCoord != "") {// chercher des tablettes depusi le début au à partir de coteDebutIndex
+                var obj = {metrage: params.metrage, magasin: params.magasin}
+                var sql = "select * from magasin where coordonnees='" + tabletteDebutCoord + "'";
+                mainController.execSql(sql, function (err, result) {
                     if (err)
-                        return alert(err);
-                    useTablette(result)
+                        return alert(err)
+                    if (result.length == 0)
+                        return alert("cette tablette n'existe pas")
+                    if (result[0].id_versement && result[0].id_versement != "")
+                        return alert("cette tablette n'est pas vide")
+                    var tabletteDebut = result[0];
 
-                })
+                    magasinD3.chercherTablettesPourVersement(obj,tabletteDebut.coordonnees,function (err, result) {
+                        if (err)
+                            return alert(err);
+                        useTablette(result)
+
+                    })
 
                 })
             }
             else {
                 params.magasin = $("#popupD3DivOperationDiv_Magasin").val();
                 var obj = {metrage: params.metrage, magasin: params.magasin}
-
-                magasinD3.chercherTablettesPourVersement(obj, function (err, result) {
+                magasinD3.chercherTablettesPourVersement(obj, null,function (err, result) {
                     if (err)
                         return callback(err);
                     useTablette(result)

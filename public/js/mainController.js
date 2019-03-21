@@ -36,7 +36,7 @@ var mainController = (function () {
         })
     }
 
-    self.init0=function () {
+    self.init0 = function () {
         mainController.bindActions();
         mainController.loadDataModel(function (err, result) {
             if (err)
@@ -54,7 +54,8 @@ var mainController = (function () {
     self.bindActions = function () {
 
         $("#searchTableInput").bind("change", function () {
-context.currentTable=$(this).val();
+            context.currentTable = $(this).val();
+            mainController.onchangeTable(context.currentTable);
             mainController.showSearchDiv("searchDiv-Autres");
 
 
@@ -208,14 +209,14 @@ context.currentTable=$(this).val();
 
     }
 
-    self.isTextField=function(table, _field){
-        if (!table || !context.dataModel[table] )
-            return  false;
-        var ok=false
+    self.isTextField = function (table, _field) {
+        if (!table || !context.dataModel[table])
+            return false;
+        var ok = false
         context.dataModel[table].forEach(function (field) {
             if (field.name == _field && (field.dataType == "text" || field.maxLength > 60)) {
-                   ok= true;
-                }
+                ok = true;
+            }
         })
         return ok;
 
@@ -318,7 +319,7 @@ context.currentTable=$(this).val();
 
     self.onChangeMainAccordionTab = function (tabName) {
         if (tabName == "Accueil") {
-           // magasinD3.init("graphDiv")
+            // magasinD3.init("graphDiv")
             mainController.showInMainDiv("graph");
 
         }
@@ -482,15 +483,13 @@ context.currentTable=$(this).val();
 
         if (type == "graph" && context.hiddenMainDivContent["graph"]) {
             context.hiddenMainDivContent["graph"].appendTo($("#mainDiv"))
-            magasinD3.clearHighlights() ;
-            magasinD3.initialZoom  ();
+            magasinD3.clearHighlights();
+            magasinD3.initialZoom();
         }
         if (type == "list" && context.hiddenMainDivContent["list"]) {
             context.hiddenMainDivContent["list"].appendTo($("#mainDiv"))
 
         }
-
-
 
 
     }

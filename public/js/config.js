@@ -43,18 +43,18 @@ var config = (function () {
             recordTools: [
                 {
                     title: "Entrer en magasin...",
-                    id:"VersementEntrerEnMagasinButton",
+                    id:"versementEntrerEnMagasinButton",
                     toolFn: "Versement.showDialogEntrerVersement"
                 },
                 {
                     title: "Localiser...",
-                    id:"VersementLocaliserButton",
+                    id:"versementLocaliserButton",
                     toolFn: "Versement.locateCurrentVersement"
                 },
                 {
                     title: "Refouler...",
-                    id:"VersementRefoulerButton",
-                    toolFn: "Versement.refoulerVersement"
+                    id:"versementRefoulerButton",
+                    toolFn: "Versement.showDialogEntrerVersement"
                 }
 
             ],

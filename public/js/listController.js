@@ -176,7 +176,8 @@ var listController = (function () {
                 return mainController.setMessage("Pas de resultat")
             }
             if (json.length == 1) {
-                recordController.displayRecordData(json[0])
+                context.currentRecord=json[0]
+                recordController.displayRecordData(context.currentRecord)
                 return mainController.setMessage("")
             }
             if (err)

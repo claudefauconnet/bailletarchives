@@ -1,4 +1,4 @@
-var boite = (function () {
+var Boite = (function () {
     var self = {}
 
     self.onBoiteOperationSelect = function (select) {
