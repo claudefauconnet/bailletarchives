@@ -90,7 +90,7 @@ var Versement = (function () {
 
         }
         self.showDialogEntrerVersement = function () {
-
+            context.currentRecord=null;
             var html = Tablette.getEnterVersementExistantDialogHtml();
             html += "<br>magasin<input id='popupD3DivOperationDiv_Magasin'style='width:50px' >"
             html += "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:100px' value=''> <button onclick='Versement.chercherTablettes()'>chercher</button>"
@@ -129,6 +129,7 @@ var Versement = (function () {
                             callback("ce numero de versement n'existe pas")
 
                         versement = result[0];
+                        context.currentRecord=versement;
 
                         if (versement.etatTraitement != "en attente" && versement.etatTraitement != "décrit")
                             callback("l'état du versement ne permet pas de l'enter en magasin")
@@ -244,6 +245,7 @@ var Versement = (function () {
                                 if (err)
                                     return callback(err);
                                 versement.id = result[0].id;
+                                context.currentRecord=versement
                                 callback()
                             })
                         }

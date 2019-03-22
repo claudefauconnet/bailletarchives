@@ -8,7 +8,7 @@ var processData = {
     getMagasinTree: function (callback) {
         var tailleMoyenneBoite = 0.09
 
-        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette from magasin"
+        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible from magasin"
         mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
             var tree = {
                 name: "Baillet",
@@ -51,10 +51,15 @@ var processData = {
                         countBoites: 0,
                         longueurTotale: 0, longueurOccupee: 0
                     }
-var isEmpty=true;
-                if(line.cotesParTablette!=null && line.cotesParTablette.trim()!=""){
-                    isEmpty=false;
+                var isEmpty = true;
+                if (line.cotesParTablette != null && line.cotesParTablette.trim() != "") {
+                    isEmpty = false;
                 }
+                var avecVersementSanscotes=null
+                // tablette avec un versement sans cotes
+                if(line.numVersement && (!line.cotesParTablette || line.cotesParTablette==""))
+                    avecVersementSanscotes=line.numVersement;
+
                 if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette])
                     tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette] = {
                         type: "tablette",
@@ -66,8 +71,13 @@ var isEmpty=true;
                         numVersement: line.numVersement,
                         longueurTotale: 0,
                         longueurOccupee: 0,
-                        isEmpty:isEmpty
+                        isEmpty: isEmpty,
+                        indisponible:(line.indisponible?(line.commentaires || "indisponible"):null),
+                        avecVersementSanscotes:avecVersementSanscotes
                     }
+
+
+
 
 
                 var longueurOccupee = 0;

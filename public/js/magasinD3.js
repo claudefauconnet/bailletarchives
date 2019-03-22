@@ -32,12 +32,15 @@ var magasinD3 = (function () {
     var drawTraveeNumber = true;
     var drawTabletteNumber = true;
 
-
+    self.magasinsToDraw = ["A", "B", "C", "D", "G", "H"];
     self.colors = {
         "magasin": "#e8c8b3",
         "epi": "#e0d5ff",
         "travee": "#e8e6e8",
         "tablette": "#fff0f0",
+        "tabletteIndisponible": "#666",
+        "tabletteavecVersementSanscotes": "#133"
+
         //  "tablette": "#e8c8b3",
 
     }
@@ -64,7 +67,7 @@ var magasinD3 = (function () {
 
 
     self.init = function (_containerDiv) {
-       // return;
+        // return;
         containerDiv = _containerDiv;
 
         var height = $("#" + containerDiv).height() - 120
@@ -105,10 +108,12 @@ var magasinD3 = (function () {
 
 
     self.drawMagasins = function (magasinsToDraw, callback) {
-
+        if (!magasinsToDraw)
+            magasinsToDraw = self.magasinsToDraw
 
         var htmlStr = "<div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
-            "<button onclick='magasinD3.initialZoom()'>zoom out</button><span id='magasind3MouseInfo'></span></div> " +
+            "<button onclick='magasinD3.initialZoom()'>zoom out</button>" +
+            "<button onclick='magasinD3.zoomOnMagasin()'>zoom on Magasin</button><span id='magasind3MouseInfo'></span></div> " +
             "<div style=' z-index:100 ' id='graphDiv'  class='myDatatable cell-border display nowrap'></div>"
 
 
@@ -151,7 +156,6 @@ var magasinD3 = (function () {
 
             var magX = 50;
             var magY = 50;
-
 
             data.children.forEach(function (magasin, indexMagasin) {
                     if (magasinsToDraw != null && magasinsToDraw.indexOf(magasin.name) < 0)
@@ -214,7 +218,7 @@ var magasinD3 = (function () {
                                                 tab.y = tabY;
                                                 tab.h = tabH;
                                                 tab.w = tabW;
-                                                tab.index = indexTab
+                                                tab.index = indexTab;
                                                 var gTablette = self.drawTablette(tab, gTravee)
 
                                                 // draw boites
@@ -382,7 +386,11 @@ var magasinD3 = (function () {
 
     self.drawTablette = function (tablette, parentG) {
         var gTablette = parentG.append("g").attr("class", "tablette").attr("id", tablette.name).attr("longueurM", tablette.longueurM);
-
+        var color = magasinD3.colors["tablette"];
+        if (tablette.indisponible)
+            color = magasinD3.colors["tabletteIndisponible"];
+        if (tablette.avecVersementSanscotes)
+            color = magasinD3.colors["tabletteavecVersementSanscotes"];
         if (drawTabletteNumber) {
             gTablette.append("text")
                 .attr("x", tablette.x - 1)
@@ -394,6 +402,8 @@ var magasinD3 = (function () {
                     return tablette.index + 1;
                 })
         }
+
+
         gTablette.append('rect')
             .attrs({
                 x: tablette.x,
@@ -401,9 +411,12 @@ var magasinD3 = (function () {
                 width: tablette.w - tabletteTextSpacing,
                 height: tablette.h,
                 name: tablette.name,
-                isEmpty:tablette.isEmpty,
+                isEmpty: tablette.isEmpty,
+                avecVersementSanscotes: tablette.avecVersementSanscotes,
+                indisponible: tablette.indisponible,
+
                 class: "tablette",
-                fill: magasinD3.colors["tablette"],
+                fill: color,
                 stroke: "blue",
                 "stroke-width": "1"
             }).on("click", function (e) {
@@ -423,18 +436,27 @@ var magasinD3 = (function () {
         function onTabletteClick(obj, x, y) {
             self.currentTablette = obj;
 
-            var html = "tablette " + tablette.name + "<br>"
-            html += "operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
-                " <option></option>" +
-                "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
-                "<option value='entrerVersementExistant'> entrer versement existant</option>" +
-                "<option value='createUnder'> creer nouvelle</option>" +
-                "<option value='split'> diviser </option>" +
-                "<option value='delete'> supprimer </option>"
+            var html = "";
+
+            if (obj.avecVersementSanscotes)
+                html = "tablette avec versement sans boites cotées : " + obj.avecVersementSanscotes;
+            else if (obj.indisponible)
+                html = "tablette indisponible : " + obj.indisponible;
+            else {
+                html += "tablette " + tablette.name + "<br>"
+                html += "operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
+                    " <option></option>" +
+                    "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
+                    "<option value='entrerVersementExistant'> entrer versement existant</option>" +
+                    "<option value='createUnder'> creer nouvelle</option>" +
+                    "<option value='split'> diviser </option>" +
+                    "<option value='delete'> supprimer </option>"
 
 
-            html += "</select>";
-            html += "<div id='popupD3DivOperationDiv'></div>"
+                html += "</select>";
+                html += "<div id='popupD3DivOperationDiv'></div>"
+
+            }
 
 
             $("#popupD3Div").html(html);
@@ -698,21 +720,20 @@ var magasinD3 = (function () {
         $("#magasind3MouseInfo").html(str)
     }
 
-    self.getTablettesContigues=function(tabletteDepart, metrage,tailleMoyBoite,callback){
-        var tablettesContigues=[];
-
+    self.getTablettesContigues = function (tabletteDepart, metrage, tailleMoyBoite, callback) {
+        var tablettesContigues = [];
 
 
         if (tabletteDepart.longueurM < metrage) {
 
             var sumLength = 0;
             var started = false;
-            var stop=false;
+            var stop = false;
             d3.selectAll("g .tablette").each(function (d, i) {
-                if(stop==false) {
+                if (stop == false) {
                     var name = d3.select(this).attr("id");
                     var longueurM = parseInt(d3.select(this).attr("longueurM"));
-                    longueurM=longueurM-(config.coefRemplissageTablette*tailleMoyBoite)
+                    longueurM = longueurM - (config.coefRemplissageTablette * tailleMoyBoite)
                     if (name == tabletteDepart.name) {
                         started = true;
                         sumLength += longueurM;
@@ -735,9 +756,9 @@ var magasinD3 = (function () {
         } else
             tablettesContigues.push(tabletteDepart.name);
 
-        if( stop)
-            return callback("pas de tablettes contigues  vides a partir de la tablette "+tabletteDepart.name+" et la longueur "+metrage);
-        return callback(null,tablettesContigues);
+        if (stop)
+            return callback("pas de tablettes contigues  vides a partir de la tablette " + tabletteDepart.name + " et la longueur " + metrage);
+        return callback(null, tablettesContigues);
 
         return
     }
@@ -750,7 +771,7 @@ var magasinD3 = (function () {
      * @param callback
      * @returns {*}
      */
-    self.chercherTablettesPourVersement = function (obj,tabletteDepartCoords,callback) {
+    self.chercherTablettesPourVersement = function (obj, tabletteDepartCoords, callback) {
 
         if (!obj.metrage || obj.metrage == null)
             return alert("metrage non spécifié");
@@ -758,9 +779,9 @@ var magasinD3 = (function () {
         var longueurCumulee = 0;
         var tablettesOK = [];
         var done = false;
-        var start=false;
-        if(!tabletteDepartCoords)
-            start=true;
+        var start = false;
+        if (!tabletteDepartCoords)
+            start = true;
 
         magasinData.children.forEach(function (magasin) {
 
@@ -774,8 +795,8 @@ var magasinD3 = (function () {
                         epi.children.forEach(function (travee) {
                             if (!done)
                                 travee.children.forEach(function (tablette) {
-                                    if(!start && tablette.name==tabletteDepartCoords)// si tabletteDepartCoords on ne commence que lorsqu'on la trouve
-                                        start=true;
+                                    if (!start && tablette.name == tabletteDepartCoords)// si tabletteDepartCoords on ne commence que lorsqu'on la trouve
+                                        start = true;
 
                                     if (!done && start)
                                         if ((!tablette.numVersement || tablette.numVersement == 0) && tablette.children.length == 0) {// tablette vide
@@ -799,12 +820,30 @@ var magasinD3 = (function () {
                 })
 
         })
-        if(tablettesOK.length==0)
+        if (tablettesOK.length == 0)
             return callback("aucune tablette disponible")
 
-        return callback(null,tablettesOK);
+        return callback(null, tablettesOK);
+
+    }
+    self.zoomOnMagasin = function () {
+        var magasin = prompt("magasin");
+        if (magasin && self.magasinsToDraw.indexOf(magasin.toUpperCase()) > -1) {
+            magasin = magasin.toUpperCase();
+
+            var magasinD3 = d3.select("#" + magasin);
+
+            d3.selectAll("#" + magasin + " rect").each(function (d, i) {
+                var xx = d3.select(this).attr("x");
+                var yy = d3.select(this).attr("y");
+                zoom.scaleTo(svg, 1);
+                zoom.translateTo(svg, xx, 0)
+            })
 
 
+        } else {
+            alert("le magasin n'existe pas")
+        }
 
 
     }
