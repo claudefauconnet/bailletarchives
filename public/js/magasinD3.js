@@ -21,9 +21,9 @@ var magasinD3 = (function () {
     var boiteColor = "";
     var containerDiv = null;
     var zoom;
-    self.minZoom = .2
+    self.minZoom = .28
     self.maxZoom = 3
-    self.avgZoom = 0.3
+    self.avgZoom = 0.6
     var nMagByLine = 10;
     var drawEpis = true;
     var drawTravees = true;
@@ -74,9 +74,7 @@ var magasinD3 = (function () {
 
         var startTime = new Date();
         var endTime = new Date();
-        console.log("duration " + Math.floor((endTime - startTime) / 1000));
-        // magasinD3.drawBoites(["A"], function () {
-        // magasinD3.drawBoites(null, function () {
+
         $("#magasinD3MessageDiv").html("Chargement du graphe en cours...")
         magasinD3.drawMagasins(null, function () {
             $("#magasinD3MessageDiv").html("")
@@ -85,6 +83,7 @@ var magasinD3 = (function () {
             var zzz = d3.select("svg")
 
             self.initialZoom()
+         //   zoom.translateTo(svg, 0, 0)
 
 
         })
@@ -100,7 +99,8 @@ var magasinD3 = (function () {
         //  zoom.scaleTo(svg, self.avgZoom);
         //  zoom.translateTo(d3.select(".viewport"),0, 0);
         zoom.scaleTo(svg, 1);
-        zoom.translateTo(svg, svgWidth, svgHeight)
+       // zoom.translateTo(svg, svgWidth, svgHeight)
+        zoom.translateBy(svg, -svgWidth, -svgHeight)
         zoom.scaleTo(svg, self.minZoom);
 
         //  zoom.translateTo(svg,-(svgWidth/2)/self.avgZoom, -(svgHeight/2)/self.avgZoom)
@@ -110,10 +110,18 @@ var magasinD3 = (function () {
     self.drawMagasins = function (magasinsToDraw, callback) {
         if (!magasinsToDraw)
             magasinsToDraw = self.magasinsToDraw
+        var strMagasins = " Magasin :<span style='display: flex;flex-direction: row'>";
+        magasinsToDraw.forEach(function (magasin) {
+            strMagasins += "<span style='font-size: 18px;font-weight: bold;margin: 5px;padding:5px;border-style: solid ; border-width: 1px' onclick=magasinD3.zoomOnMagasin('" + magasin + "')>" + magasin + "</span>"
+        })
+        strMagasins += "</span>";
 
         var htmlStr = "<div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
             "<button onclick='magasinD3.initialZoom()'>zoom out</button>" +
-            "<button onclick='magasinD3.zoomOnMagasin()'>zoom on Magasin</button><span id='magasind3MouseInfo'></span></div> " +
+            // "<button onclick='magasinD3.zoomOnMagasin()'>zoom on Magasin</button>" +
+            strMagasins +
+            "<span id='magasind3MouseInfo'></span></div> " +
+
             "<div style=' z-index:100 ' id='graphDiv'  class='myDatatable cell-border display nowrap'></div>"
 
 
@@ -131,7 +139,7 @@ var magasinD3 = (function () {
             totalWidth = $("#mainDiv").width() - 50;
             totalHeight = $("#mainDiv").height() - 50;
             svgWidth = totalWidth
-            svgHeight = totalHeight * .8
+            svgHeight = totalHeight //* .8
             $("#graphDiv").width(svgWidth)
             $("#graphDiv").height(svgHeight)
 
@@ -154,8 +162,8 @@ var magasinD3 = (function () {
             var magW = totalWidth / 2;
             var magH = totalHeight * 2;
 
-            var magX = 50;
-            var magY = 50;
+            var magX = 10;
+            var magY = 10;
 
             data.children.forEach(function (magasin, indexMagasin) {
                     if (magasinsToDraw != null && magasinsToDraw.indexOf(magasin.name) < 0)
@@ -279,7 +287,6 @@ var magasinD3 = (function () {
 
                 }
             )
-
 
             if (callback)
                 callback();
@@ -439,9 +446,9 @@ var magasinD3 = (function () {
             var html = "";
 
             if (obj.avecVersementSanscotes)
-                html = "tablette avec versement sans boites cotées : " + obj.avecVersementSanscotes;
+                html = "tablette " + obj.name + "<br>avec versement sans boites cotées : " + obj.avecVersementSanscotes;
             else if (obj.indisponible)
-                html = "tablette indisponible : " + obj.indisponible;
+                html = "tablette  " + obj.name + "indisponible : " + obj.indisponible;
             else {
                 html += "tablette " + tablette.name + "<br>"
                 html += "operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
@@ -826,18 +833,22 @@ var magasinD3 = (function () {
         return callback(null, tablettesOK);
 
     }
-    self.zoomOnMagasin = function () {
-        var magasin = prompt("magasin");
+    self.zoomOnMagasin = function (magasin) {
+        if (!magasin)
+            var magasin = prompt("magasin");
         if (magasin && self.magasinsToDraw.indexOf(magasin.toUpperCase()) > -1) {
             magasin = magasin.toUpperCase();
 
             var magasinD3 = d3.select("#" + magasin);
 
-            d3.selectAll("#" + magasin + " rect").each(function (d, i) {
-                var xx = d3.select(this).attr("x");
-                var yy = d3.select(this).attr("y");
-                zoom.scaleTo(svg, 1);
-                zoom.translateTo(svg, xx, 0)
+            d3.selectAll(".magasin").each(function (d, i) {
+                if (d3.select(this).attr("id") == magasin) {
+                    var xx = parseInt(d3.select(this).select("rect").attr("x"));
+                    var yy =  parseInt(d3.select(this).select("rect").attr("y"));
+
+                    zoom.translateTo(svg, xx+300, 400)
+                    zoom.scaleTo(svg, self.avgZoom);
+                }
             })
 
 
