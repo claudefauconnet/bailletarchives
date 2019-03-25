@@ -156,8 +156,16 @@ var recordController = (function () {
 
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
-            if (fn)
-                fn(context.currentRecord.id)
+            if (fn) {
+                var options={
+                    currentRecord:context.currentRecord,
+                    changes:self.currentRecordChanges
+
+                }
+
+
+                fn(options)
+            }
 
 
             ///*******************************A finir*******************************************************************************
@@ -180,8 +188,15 @@ var recordController = (function () {
             context.currentRecord.id = newId;
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
-            if (fn)
-                fn(newId)
+            if (fn){
+                var options={
+                    currentRecord:{id:newId},
+                    changes:self.currentRecordChanges
+
+                }
+                fn(options)
+            }
+
 
 
             mainController.setRecordMessage("enregistrement sauvé");

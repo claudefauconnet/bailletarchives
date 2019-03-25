@@ -4,6 +4,9 @@ var authentication = (function () {
 
     self.authenticationUrl = "../authentication";
     self.userIndexes = [];
+    self.currentUser="admin";
+
+
 
 
     self.init = function (activate) {
@@ -56,6 +59,7 @@ var authentication = (function () {
 
                 $("#loginDiv").css("visibility", "hidden");
                   $("#main").css("visibility", "visible");
+                self.currentUser=login;
                   mainController.init0();
                // $("#panels").css("display", "block")
 

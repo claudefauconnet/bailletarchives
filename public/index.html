@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Archives Baillet</title>
+    <link rel="icon" href="./images/logoATD.png">
     <link rel="stylesheet" media="screen" type="text/css" title="Design" href="js/jquery/jquery-ui.min.css"/>
     <link rel="stylesheet" href="js/jsTree/themes/default/style.min.css"/>
 
@@ -32,7 +33,9 @@
 
 
     <script src="js/_versement.js"></script>
-
+    <script src="js/_sortie.js"></script>
+    <script src="js/_tablette.js"></script>
+    <script src="js/_boite.js"></script>
 
     <script src="js/mainController.js"></script>
     <script src="js/statistics.js"></script>
@@ -45,10 +48,7 @@
 
 
     <script src="js/magasinD3.js"></script>
-    <script src="js/_sortie.js"></script>
 
-    <script src="js/_tablette.js"></script>
-    <script src="js/_boite.js"></script>
     <script src="js/authentication.js"></script>
 
     <script src="js/d3/d3.js"></script>
@@ -440,7 +440,7 @@
             });*/
 
 
-            if (false) {
+            if (true) {
 
                 authentication.init(true, function (err, result) {
 
@@ -489,13 +489,13 @@
 
             <h1>Sorties</h1>
             <div id="sortiesDiv" class="alignCenterFlex">
-                <button onclick="sortie.create()">Creer</button>
+                <button onclick="Sortie.create()">Creer</button>
                 <br>
-                <button onclick="sortie.listActives()">Lister en cours</button>
+                <button onclick="Sortie.listActives()">Lister en cours</button>
                 <br>
-                <button onclick="sortie.listHistory()">Lister historique</button>
+                <button onclick="Sortie.listHistory()">Lister historique</button>
                 <br>
-                <button onclick="sortie.highlightSorties()" class="locateButton">voir en cours</button>
+                <button onclick="Sortie.highlightSorties()" class="locateButton">voir en cours</button>
                 <br>
 
 

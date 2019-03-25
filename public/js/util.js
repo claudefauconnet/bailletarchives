@@ -4,7 +4,7 @@ var util = (function () {
     self.dateToStringFR = function (date) {
         var str = ""
         if (date instanceof Date && isFinite(date)) {
-            var month = "" + date.getMonth();
+            var month = "" + (date.getMonth()+1);
             month = month.length == 2 ? "" + month : "0" + month;
             var day = "" + date.getDate();
             day = day.length == 2 ? "" + day : "0" + day;
@@ -35,6 +35,13 @@ var util = (function () {
         var day = parseInt(array[2])
         str = array[0] + "-" + month + "-" + day;
         return str;
+
+    }
+
+
+    self.uiStrDateToDate=function(uiStrDate){
+        uiStrDate=uiStrDate.replace(/\//g,"-");
+        return new Date(uiStrDate);
 
     }
 

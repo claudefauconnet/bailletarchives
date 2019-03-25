@@ -1,18 +1,34 @@
-var winston=require('winston)');
+var winston = require('winston');
 
-const logger = winston.createLogger({
+
+const {createLogger, format, transports} = require('winston');
+const {combine, timestamp, json} = format;
+
+const logger = createLogger({
     level: 'info',
-    format: winston.format.json(),
-    defaultMeta: { service: 'user-service' },
+
+    format: combine(
+        timestamp({
+            format: 'YYYY-MM-DD HH:mm:ss'
+        }),
+        json(),
+    ),
+
+
+    //  format: winston.format.json(),
+
+
+    defaultMeta: {service: 'user-connection'},
     transports: [
         //
         // - Write to all logs with level `info` and below to `combined.log`
         // - Write all logs error (and below) to `error.log`.
         //
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'combined.log' })
+        new winston.transports.File({filename: 'error.log', level: 'error'}),
+        new winston.transports.File({filename: '../logs/connections.log', level: 'info'})
     ]
 });
+
 
 //
 // If we're not in production then log to the `console` with the format:
@@ -23,3 +39,5 @@ if (process.env.NODE_ENV !== 'production') {
         format: winston.format.simple()
     }));
 }
+
+module.exports = logger;

@@ -9,33 +9,7 @@ var config = (function () {
     self.coteBoiteNbDigits=3
 
     self.tableDefs = {
-        "magasin": {
-            defaultSearchField: "coordonnees",
-            tabs: ["versement"],
-            type: "n-1",
-            sortFields: ["magasin"],
-            relations: {
-                "versement": {
-                    joinObj: {
-                        tables: "versement,magasin",
-                        where: "versement.id=magasin.id_versement"
-                    },
-                    createRelSql: "update magasin set id_versement=<%data.id%> where  id=<%context.currentRecord.id%>\"",
-                    deleteRelSql: "update magasin set id_versement=null where  id=<%context.currentRecord.id%>\"",
 
-
-                    selectfields: ["numVersement", "theme", "deposant"]
-                }
-            },
-
-            fieldConstraints: {
-                coordonnees: {mandatory:true},
-                magasin: {readOnly:true},
-                epi: {readOnly:true},
-                travee: {readOnly:true},
-                tablette: {readOnly:true},
-            }
-        },
         "versement": {
             defaultSearchField: "numVersement",
             tabs: ["versement_historique", "magasin", "sortie_boite"],
@@ -75,14 +49,16 @@ var config = (function () {
                     type: "1-n",
                     joinObj: {
                         tables: "versement,versement_historique",
-                        where: " versement_historique.id_versement=versement.id "
+                        where: " versement_historique.id_versement=versement.id",
+
                     },
                     createRelSql: "update versement_historique set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update versement_historique set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"],
                   //  onRowClickedFn:Versement.onDataTableRowClicked,
                     editableColumns: ["commentaire"],
-                    columns:["etat","etatAuteur","etatDate","commentaire","dateModification"]
+                    columns:["etat","etatAuteur","etatDate","commentaire","dateModification"],
+                    order:[[ 2, 'desc' ]]
 
                 },
                 "magasin": {
@@ -136,10 +112,37 @@ var config = (function () {
                 etatTraitementDate: {mandatory:true},
                 DimTabletteMLineaire: {mandatory:true},
             },
-            onAfterDisplay: Versement.setNewRecordDisplayNumVersement,
-            onAfterSave: Versement.updateRecordHistory
+            onAfterDisplay: Versement.setNewRecordDefaultValues,
+            onAfterSave: Versement.updateRecordHistoryAfterVersementSave
 
 
+        },
+        "magasin": {
+            defaultSearchField: "coordonnees",
+            tabs: ["versement"],
+            type: "n-1",
+            sortFields: ["magasin"],
+            relations: {
+                "versement": {
+                    joinObj: {
+                        tables: "versement,magasin",
+                        where: "versement.id=magasin.id_versement"
+                    },
+                    createRelSql: "update magasin set id_versement=<%data.id%> where  id=<%context.currentRecord.id%>\"",
+                    deleteRelSql: "update magasin set id_versement=null where  id=<%context.currentRecord.id%>\"",
+
+
+                    selectfields: ["numVersement", "theme", "deposant"]
+                }
+            },
+
+            fieldConstraints: {
+                coordonnees: {mandatory:true},
+                magasin: {readOnly:true},
+                epi: {readOnly:true},
+                travee: {readOnly:true},
+                tablette: {readOnly:true},
+            }
         },
         "article": {
 
@@ -185,7 +188,8 @@ var config = (function () {
                 }
 
 
-            }
+            },
+            onAfterDisplay: Sortie.setNewRecordDefaultValues,
         },
         "versement_historique": {
             tableConstraints: {

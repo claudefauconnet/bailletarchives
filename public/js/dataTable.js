@@ -201,7 +201,6 @@ var dataTable = function () {
 
         this.table = table;
 
-
         $('#table_' + containerDiv + ' tbody').on('click', 'tr', function (event) {
             if ($(this).hasClass('selected')) {
                 $(this).removeClass('selected');

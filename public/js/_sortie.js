@@ -1,6 +1,13 @@
-var sortie=(function(){
+var Sortie=(function(){
     var self={};
 
+
+    self.setNewRecordDefaultValues = function (sortie) {
+        if(!sortie.sortieArchiviste) {
+            $("#attr_sortieArchiviste").val(authentication.currentUser);
+            recordController.incrementChanges(attr_sortieArchiviste);
+        }
+    }
 
 
     self.highlightSorties=function(){

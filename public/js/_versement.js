@@ -2,33 +2,61 @@ var Versement = (function () {
 
         var self = {};
         self.currentCandidateTablettes = []
-        self.updateRecordHistory = function (id, etat, commentaire) {
-            var sql = "select * from versement where id=" + id;
-            mainController.execSql(sql, function (err, result) {
-                if (err)
-                    return console.log(err);
-                var versement = result[0];
+        //   self.updateRecordHistory = function (id, etat, commentaire) {
 
-                if (etat)
-                    versement.etatTraitement = etat;
 
-                var commentaireStr = "''";
-                if (commentaire)
-                    commentaireStr = "'" + commentaire + "'";
+        self.updateRecordHistoryAfterVersementSave = function (options) {
 
-                var sql2 = " insert into versement_historique (etat,etatAuteur, etatDate,dateModification,commentaire,id_versement) values (" +
-                    "'" + versement.etatTraitement + "'," +
-                    "'" + versement.etatTraitementAuteur + "'," +
-                    "'" + util.longDateStrToShortDateStr(versement.etatTraitementDate) + "'," +
-                    "'" + util.dateToMariaDBString(new Date()) + "'," +
-                    commentaireStr + "," +
-                    "" + versement.id + ")"
-                mainController.execSql(sql2, function (err, result) {
-                    if (err)
-                        return console.log(err);
-                    listController.loadLinkedDivs()
-                })
+            var idVersement = options.currentRecord.id;
+            var etatTraitement = options.changes.etatTraitement || options.currentRecord.etatTraitement;
+            var etatTraitementDate = util.uiStrDateToDate(options.changes.etatTraitementDate || options.currentRecord.etatTraitementDate);
+            var etatTraitementAuteur = options.changes.etatTraitementAuteur || options.currentRecord.etatTraitementAuteur;
+
+            self.updateRecordHistory(idVersement, etatTraitement, etatTraitementAuteur, null, etatTraitementDate, function(err,result){
+                if(err)
+                  return   console.log(err);
+                listController.loadLinkedDivs();
             })
+        }
+
+        /**
+         *
+         *
+         * @param options  :idVersement, etatTraitement,etatTraitementAuteur, date(optional),etatTraitementDate
+         */
+
+        self.updateRecordHistory = function (idVersement, etatTraitement, etatTraitementAuteur, etatTraitementCommentaire, etatTraitementDate, callback) {
+            var date;
+            if (typeof etatTraitementDate == "string")
+                date = util.longDateStrToShortDateStr(etatTraitementDate)
+            else
+                date = util.dateToMariaDBString(etatTraitementDate);
+
+
+            var commentaireStr = "''";
+            if (etatTraitementCommentaire)
+                commentaireStr = "'" + etatTraitementCommentaire + "'";
+
+            var sql2 = " insert into versement_historique (etat,etatAuteur, etatDate,dateModification,commentaire,id_versement) values (" +
+                "'" + etatTraitement + "'," +
+                "'" + etatTraitementAuteur + "'," +
+                "'" + date+"'," +
+                "'" + util.dateToMariaDBString(new Date()) + "'," +
+                commentaireStr + "," +
+                "" + idVersement + ")"
+            mainController.execSql(sql2, function (err, result) {
+                if (err) {
+                    if(callback)
+                        return callback(err)
+                    else
+                    return console.log(err);
+                }
+                if(callback)return callback(null)
+
+
+            })
+
+
         }
 
 
@@ -90,7 +118,7 @@ var Versement = (function () {
 
         }
         self.showDialogEntrerVersement = function () {
-            context.currentRecord=null;
+          //  context.currentRecord = null;
             var html = Tablette.getEnterVersementExistantDialogHtml();
             html += "<br>magasin<input id='popupD3DivOperationDiv_Magasin'style='width:50px' >"
             html += "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:100px' value=''> <button onclick='Versement.chercherTablettes()'>chercher</button>"
@@ -98,7 +126,6 @@ var Versement = (function () {
             $("#dialogD3").html(html);
 
             $("#popupD3DivOperationDiv_numVersement").attr("disabled", true);
-
 
 
             $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
@@ -129,7 +156,7 @@ var Versement = (function () {
                             callback("ce numero de versement n'existe pas")
 
                         versement = result[0];
-                        context.currentRecord=versement;
+                        context.currentRecord = versement;
 
                         if (versement.etatTraitement != "en attente" && versement.etatTraitement != "décrit")
                             callback("l'état du versement ne permet pas de l'enter en magasin")
@@ -196,7 +223,7 @@ var Versement = (function () {
 
 
         self.entrerVersement = function () {
-
+            context.currentTable = "versement";
             // cas versement existant
             var numVersement = $("#popupD3DivOperationDiv_numVersement").val();
             if (numVersement == "")
@@ -245,7 +272,7 @@ var Versement = (function () {
                                 if (err)
                                     return callback(err);
                                 versement.id = result[0].id;
-                                context.currentRecord=versement
+                                context.currentRecord = versement
                                 callback()
                             })
                         }
@@ -261,8 +288,8 @@ var Versement = (function () {
 
 
                     function (callback) {// check if tablettes have this versement id
-                        if(!versement.id)// nouveau
-                           return callback();
+                        if (!versement.id)// nouveau
+                            return callback();
                         else {
                             var sql = "select * from magasin where id_versement=" + versement.id;
                             mainController.execSql(sql, function (err, result) {
@@ -299,12 +326,7 @@ var Versement = (function () {
                         if (!tablettesaRefouler)
                             callback();
                         else {
-                            var etatTraitementAuteur = prompt("auteur du refoulement");
-                            if (!etatTraitementAuteur || etatTraitementAuteur == "") {
-                                tablettesaRefouler = null;
-                                callback("refoulement abandonné  faute d'auteur")
-                            }
-                            versement.etatTraitementAuteur = etatTraitementAuteur;
+                            versement.etatTraitementAuteur = authentication.currentUser;
                             self.refoulerVersement(versement, tablettesaRefouler, function (err, result) {
                                 tablettesaRefouler = null;
                                 if (err) {
@@ -357,13 +379,22 @@ var Versement = (function () {
                         }
                     },
                     function (callback) {//update cotesExtremes
-                        var sql = "update versement set metrage="+versement.metrage+", nbBoites="+versement.nbBoites+",cotesExtremesBoites='" + versement.cotesExtremesBoites + "' where id=" + versement.id;
+                        var sql = "update versement set metrage=" + versement.metrage + ", nbBoites=" + versement.nbBoites + ",cotesExtremesBoites='" + versement.cotesExtremesBoites + "' where id=" + versement.id;
                         mainController.execSql(sql, function (err, result) {
                             if (err)
                                 return callback(err);
                             callback();
                         })
-                    }
+                    },
+                function(callback){
+
+                    Versement.updateRecordHistory(versement.id, "en attente", authentication.currentUser, "", new Date(),function(err,result){
+                        if(err)
+                            return callback(err);
+                        return callback();
+                    });
+
+                }
                 ]
                 ,
                 function (err) {// at the end dispalay  versement and tablettes
@@ -372,7 +403,7 @@ var Versement = (function () {
                         console.log(err);
                         return mainController.setErrorMessage(err);
                     }
-                    context.currentTable = "versement";
+
                     listController.listRecords("select * from versement where id=" + versement.id);
                     $("#popupD3Div").css("visibility", "hidden");
 
@@ -383,7 +414,7 @@ var Versement = (function () {
 
             , self.refoulerVersement = function (versement, tablettesaRefouler, callback) {
 
-
+            context.currentTable = "versement";
             async.series([
 
                 function (callbackSeries) {// remove versement attrs from tablettes
@@ -404,7 +435,7 @@ var Versement = (function () {
                 },
                 function (callbackSeries) {
 
-                    var sql = "update versement set etatTraitement='refoulement',etatTraitementAuteur='" + versement.etatTraitementAuteur + "', etatTraitementDate='" + util.dateToMariaDBString(new Date()) + "' where id=" + versement.id;
+                    var sql = "update versement set etatTraitement='en attente',etatTraitementAuteur='" + versement.etatTraitementAuteur + "', etatTraitementDate='" + util.dateToMariaDBString(new Date()) + "' where id=" + versement.id;
                     mainController.execSql(sql, function (err, result) {
                         if (err)
                             return callbackSeries(err);
@@ -419,8 +450,8 @@ var Versement = (function () {
                         tablettesStr += tablette.coordonnees;
 
                     })
-                    var commentaire = "refoulement depuis les tablettes " + tablettesStr
-                    Versement.updateRecordHistory(versement.id, "refoulement", commentaire);
+                    var commentaire = "refoulement depuis les tablettes " + tablettesStr;
+                    Versement.updateRecordHistory(versement.id, "refoulement", authentication.currentUser, commentaire, new Date());
                     callbackSeries();
                 }
             ], function (err) {
@@ -520,7 +551,6 @@ var Versement = (function () {
         }
 
 
-
         self.chercherTablettes = function () {
 
             function useTablette(tablettes) {
@@ -551,7 +581,7 @@ var Versement = (function () {
                         return alert("cette tablette n'est pas vide")
                     var tabletteDebut = result[0];
 
-                    magasinD3.chercherTablettesPourVersement(obj,tabletteDebut.coordonnees,function (err, result) {
+                    magasinD3.chercherTablettesPourVersement(obj, tabletteDebut.coordonnees, function (err, result) {
                         if (err)
                             return alert(err);
                         useTablette(result)
@@ -563,7 +593,7 @@ var Versement = (function () {
             else {
                 params.magasin = $("#popupD3DivOperationDiv_Magasin").val();
                 var obj = {metrage: params.metrage, magasin: params.magasin}
-                magasinD3.chercherTablettesPourVersement(obj, null,function (err, result) {
+                magasinD3.chercherTablettesPourVersement(obj, null, function (err, result) {
                     if (err)
                         return callback(err);
                     useTablette(result)
@@ -631,7 +661,7 @@ var Versement = (function () {
 
         }
 
-        self.setNewRecordDisplayNumVersement = function (versement) {
+        self.setNewRecordDefaultValues = function (versement) {
             if (!versement.id) {
                 self.getNewNumVersement(function (err, numVersement) {
                     if (err)
@@ -640,7 +670,11 @@ var Versement = (function () {
                     recordController.incrementChanges(attr_numVersement);
                 })
             }
+            if(!versement.etatTraitementAuteur) {
 
+                $("#attr_etatTraitementAuteur").val(authentication.currentUser);
+                recordController.incrementChanges(attr_etatTraitementAuteur);
+            }
         }
 
         self.getNewNumVersement = function (callback) {

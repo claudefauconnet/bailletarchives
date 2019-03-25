@@ -121,6 +121,8 @@ var listController = (function () {
             var sql = "";
             if (joinObj) {
                 sql = " select distinct " + context.currentJoinTable + ".* from  " + joinObj.tables + " WHERE " + joinObj.where + " and " + whereStrAll;
+                if(joinObj.orderBy && joinObj.orderBy!="")
+                    sql+=" order by "+joinObj.orderBy;
                 // on remet la table initiale comme currentTable
                 context.currentTable = context.currentJoinTable;
                 $("#searchTableInput").val(context.currentTable);
@@ -131,7 +133,7 @@ var listController = (function () {
                     whereStrAll = " WHERE " + whereStrAll;
                 sql = "select * from " + table + whereStrAll
             }
-            var sortClause = "";
+          var sortClause = "";
             var sortFields = config.tableDefs[table].sortFields;
             if (sortFields) {
                 sortFields.forEach(function (field, index) {
@@ -221,6 +223,7 @@ var listController = (function () {
         var onRowClickedFn = null;
         var editableColumns = null;
         var definedColumns = null;
+        var order = null;
 
         context.currentLinkedTable = linkedTable;
 
@@ -231,6 +234,7 @@ var listController = (function () {
             onRowClickedFn = relations[linkedTable].onRowClickedFn;
             editableColumns = relations[linkedTable].editableColumns;
             definedColumns = relations[linkedTable].columns;
+            order = relations[linkedTable].order;
         }
         else {
             context.currentLinkedTable = {};
@@ -242,6 +246,8 @@ var listController = (function () {
 
         var joinObj = relations[linkedTable].joinObj;
         var sql = " select " + linkedTable + ".* from  " + joinObj.tables + " where " + joinObj.where + " and " + context.currentTable + ".id=" + context.currentRecord.id;
+        if(joinObj.orderBy && joinObj.orderBy!="")
+            sql+=" order by "+joinObj.orderBy;
         mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err)
@@ -289,6 +295,8 @@ var listController = (function () {
                 data: json,
                 columns: columns,
                 fixedHeader: true,
+                pageLength: 500,
+                order:order,
              //   "autoWidth": false,
                 "dom": "",
 
@@ -299,7 +307,7 @@ var listController = (function () {
 
                     {  "visible": false,targets:nonVisibleColumns},
 
-                  {'width': 400, 'targets': columns.textColumns},
+                  {'width': 200, 'targets': columns.textColumns},
                     {//dates
                         "render": function (data, type, row, meta) {
                             var str = "";
