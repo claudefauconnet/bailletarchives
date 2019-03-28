@@ -169,6 +169,7 @@ var listController = (function () {
     }
 
     self.listRecords = function (sql) {
+        $("#popupD3Div").css("visibility","hidden")
         mainController.showInMainDiv("list")
         context.currentListQueries[context.currentTable] = sql;
         var table = context.currentTable;

@@ -105,7 +105,7 @@ var config = (function () {
             },
             fieldConstraints: {
 
-                numVersement: {mandatory:true,format:{regex:/^1\d{3}$/,message:"4 chiffres commençant par 1"}},
+                numVersement: {mandatory:true,format:{regex:/^[0-9]\d{3}$/,message:"4 chiffres commençant par 1"}},
                 nature: {mandatory:true},
                 etatTraitement: {mandatory:true},
                 etatTraitementAuteur: {mandatory:true},
@@ -184,7 +184,7 @@ var config = (function () {
             fieldTools: {
                 numVersement: {
                     title: "selectionner boites",
-                    toolFn: "sortiesShowBoitesCbx"
+                    toolFn:"Sortie.sortiesShowBoitesCbx"
                 }
 
 
