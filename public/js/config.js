@@ -173,9 +173,10 @@ var config = (function () {
             },
             tabs: [],
             fieldConstraints: {
-                id_versement: {hidden:true},
+                id_versement: {disabled:true},
                 sortieDate:{mandatory:true},
                 sortieArchiviste:{mandatory:true},
+                cotesBoites:{disabled:true}
 
 
 
