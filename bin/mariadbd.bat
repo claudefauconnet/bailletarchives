@@ -6,4 +6,5 @@ config server
 CREATE USER 'bailletarchives' IDENTIFIED BY 'nodeApp55';
 GRANT USAGE ON *.* TO 'bailletarchives'@localhost IDENTIFIED BY 'nodeApp55';
 GRANT ALL privileges ON 'bailletarchives'.* TO 'bailletarchives'@localhost;
+GRANT ALL privileges ON 'bailletarchives_test'.* TO 'bailletarchives'@localhost;
 mysql> FLUSH PRIVILEGES;
