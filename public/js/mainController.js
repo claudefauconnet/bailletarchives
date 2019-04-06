@@ -37,13 +37,14 @@ var mainController = (function () {
     }
 
     self.init0 = function () {
+        mainController.setDivsSize();
         mainController.bindActions();
         mainController.loadDataModel(function (err, result) {
             if (err)
                 return;
             mainController.initTablesSelects();
             mainController.loadLists();
-            if (true)
+            if (false)
                 magasinD3.init("mainDiv");
 
 
@@ -320,12 +321,13 @@ var mainController = (function () {
     self.onChangeMainAccordionTab = function (tabName) {
         if (tabName == "Accueil") {
             // magasinD3.init("graphDiv")
-            mainController.showInMainDiv("graph");
+        //    mainController.showInMainDiv("graph");
 
         }
 
         else if (tabName == "Versements") {
             self.onchangeTable("versement");
+
             mainController.showSearchDiv("searchDiv-Versements");
         }
         /*    else if (tabName == "Sorties") {
@@ -333,7 +335,7 @@ var mainController = (function () {
                 mainController.showSearchDiv("searchDiv-Sorties");
             }*/
 
-        else if (tabName == "Autres") {
+        else if (tabName == "Autres"  || tabName=="GestionTables") {
             self.onchangeTable("versement");
             mainController.showSearchDiv("searchDiv-Autres");
         }
