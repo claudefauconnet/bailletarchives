@@ -90,7 +90,7 @@
             $(function () {
 
 
-                if (false) {
+                if (true) {
 
                     authentication.init(true, function (err, result) {
 
@@ -111,17 +111,11 @@
         <style>
             ._accordionpanel {
                 min-height: 100px;
-                max-height: 500px;
+                max-height: 400px;
 
-            }
-
-            .card-header {
+            }.card-header{
                 padding: 10px
-            }
-
-            .btn {
-                margin: 5px;
-            }
+                         }
 
         </style>
 
@@ -141,18 +135,28 @@
                     <h5 class="mb-0">
                         <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
                                 data-target="#main_accueilDiv"
-                                aria-expanded="true" aria-controls="collapseOne" onclick=" mainController.onChangeMainAccordionTab('Accueil');  ">
+                                aria-expanded="true" aria-controls="collapseOne" onclick="   mainController.showSearchDiv('searchDiv-Versements');">
                             Accueil
                         </button>
                     </h5>
                 </div>
+<<<<<<< HEAD
    <div id="main_accueilDiv " class="collapse _accordionpanel hide text-center" aria-labelledby="headingOne" data-parent="#accordionExample">
                         <B>archives du centre Joseph Wresinski</B><br>
                         <img src="images/logoATD.png" width="100px">
                         <br>
                         <div id="magasinD3MessageDiv"></div>
                 </div>
+=======
+>>>>>>> parent of f5734e7... bootstrap suite
 
+                <div id="main_accueilDiv" class="collapse _accordionpanel hide text-center show" aria-labelledby="headingOne"
+                     data-parent="#accordionExample">
+                    <B>Archives de Baillet</B><br>
+                    <img src="images/logoATD.png" width="100px">
+                    <br>
+                    <div id="magasinD3MessageDiv"></div>
+                </div>
             </div>
 
             <div class="card z-depth-0 bordered">
@@ -160,8 +164,8 @@
                     <h5 class="mb-0">
                         <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
                                 data-target="#main_versementsDiv"
-                                aria-expanded="true" aria-controls="collapseOne" onclick=" mainController.onChangeMainAccordionTab('Versements');  ">
-                            Versements
+                                aria-expanded="true" aria-controls="collapseOne" onclick="   mainController.showSearchDiv('searchDiv-Versements');">
+                            Versement
                         </button>
                     </h5>
                 </div>
@@ -170,6 +174,7 @@
                      data-parent="#accordionExample">
                     <div id="searchDiv-Versements"></div>
 
+<<<<<<< HEAD
                         <div class="form-row">
                             <div class="col">
                                 <select class="form-control" id="versement_searchColumnInput" placeholder="Champ"></select>
@@ -201,6 +206,8 @@
 
 
 
+=======
+>>>>>>> parent of f5734e7... bootstrap suite
                 </div>
             </div>
             <div class="card z-depth-0 bordered">
@@ -216,167 +223,62 @@
 
                 <div id="main_sortiesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
                      data-parent="#accordionExample">
-                    <div class=" d-flex justify-content-center d-none">
-
-
-                        <form>
-                            <div class="form-row">
-                                <div class="col">
-                                    <button class="btn btn-secondary" onclick="Sortie.create()">Creer</button>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="col">
-                                    <button class="btn btn-secondary" onclick="Sortie.listActives()">Lister en cours</button>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="col">
-                                    <button class="btn btn-secondary" onclick="Sortie.listHistory()">Lister historique</button>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="col">
-                                    <button class="btn btn-primary" onclick="Sortie.highlightSorties()">voir en cours</button>
-                                </div>
-                            </div>
-
-                        </form>
-
-
-                    </div>
-                </div>
-
-                <div class="card z-depth-0 bordered">
-                    <div class="card-header" id="heading4">
-                        <h5 class="mb-0">
-                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                    data-target="#main_tablettesDiv"
-                                    aria-expanded="true" aria-controls="collapseOne">
-                                Tablettes
-                            </button>
-                        </h5>
-                    </div>
-
-                    <div id="main_tablettesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                         data-parent="#accordionExample">
-                        <div class=" d-flex justify-content-center d-none">
-                            <form>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <button class="btn btn-secondary" onclick="Tablette.locate()">Localiser</button>
-                                    </div>
-                                </div>
-
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card z-depth-0 bordered">
-                    <div class="card-header" id="heading5">
-                        <h5 class="mb-0">
-                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                    data-target="#main_boitesDiv"
-                                    aria-expanded="true" aria-controls="collapseOne">
-                                Boites
-                            </button>
-                        </h5>
-                    </div>
-
-                    <div id="main_boitesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                         data-parent="#accordionExample">
-                        <div class=" d-flex justify-content-center d-none">
-                            <form>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <button class="btn btn-secondary" onclick="Boites.locate()">Localiser</button>
-                                    </div>
-                                </div>
-
-                            </form>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="card z-depth-0 bordered">
-                    <div class="card-header" id="heading6">
-                        <h5 class="mb-0">
-                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                    data-target="#main_gestionTablesDiv"
-                                    aria-expanded="true" aria-controls="collapseOne" onclick=" mainController.onChangeMainAccordionTab('GestionTables')" ;>
-                                Gestion tables
-                            </button>
-                        </h5>
-                    </div>
-
-                    <div id="main_gestionTablesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                         data-parent="#accordionExample">
-                                <select class="form-control" id="searchTableInput" ></select>
-                        <div id="searchDiv-Autres">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card z-depth-0 bordered">
-                    <div class="card-header" id="heading7">
-                        <h5 class="mb-0">
-                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                    data-target="#main_outilsDiv"
-                                    aria-expanded="true" aria-controls="collapseOne">
-                                Outils
-                            </button>
-                        </h5>
-                    </div>
-
-                    <div id="main_outilsDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                         data-parent="#accordionExample">
-
-                        <div class=" d-flex justify-content-center d-none">
-                            <form>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <select id="toolsSelect" class="btn btn-secondary"></select>
-                                    </div>
-                                </div>
-
-                            </form>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="card z-depth-0 bordered">
-                    <div class="card-header" id="heading8">
-                        <h5 class="mb-0">
-                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                    data-target="#main_statisitiquesDiv"
-                                    aria-expanded="true" aria-controls="collapseOne">
-                                Statistiques
-                            </button>
-                        </h5>
-                    </div>
-
-                    <div id="main_statisitiquesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                         data-parent="#accordionExample">
-
-                        <div class=" d-flex justify-content-center d-none">
-                            <form>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <select id="statsSelect" class="btn btn-secondary"></select>
-                                    </div>
-                                </div>
-
-                            </form>
-                        </div>
-                    </div>
-
+                    ggggg
 
                 </div>
             </div>
 
-    </nav>
+            <div class="card z-depth-0 bordered">
+                <div class="card-header" id="heading4">
+                    <h5 class="mb-0">
+                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                data-target="#main_tablettesDiv"
+                                aria-expanded="true" aria-controls="collapseOne">
+                            Tablettes
+                        </button>
+                    </h5>
+                </div>
 
+                <div id="main_tablettesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                     data-parent="#accordionExample">
+                    ggggg
+
+                </div>
+            </div>
+
+            <div class="card z-depth-0 bordered">
+                <div class="card-header" id="heading5">
+                    <h5 class="mb-0">
+                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                data-target="#main_boitesDiv"
+                                aria-expanded="true" aria-controls="collapseOne">
+                            Boites
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="main_boitesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                     data-parent="#accordionExample">
+                    ggggg
+
+                </div>
+            </div>
+            <div class="card z-depth-0 bordered">
+                <div class="card-header" id="heading6">
+                    <h5 class="mb-0">
+                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                data-target="#main_gestionTablesDiv"
+                                aria-expanded="true" aria-controls="collapseOne">
+                            Gestion tables
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="main_gestionTablesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                     data-parent="#accordionExample">
+                    ggggg
+
+<<<<<<< HEAD
     <!-- Page Content  -->
     <div id="content">
         <div id="mainDiv" class="dataTableDiv">
@@ -388,27 +290,57 @@
 
         <div id="graphWrapperDiv" class="dataTableDiv d-none" style="position: relative;">
 
+=======
+                </div>
+            </div>
 
-        </div>
+            <div class="card z-depth-0 bordered">
+                <div class="card-header" id="heading7">
+                    <h5 class="mb-0">
+                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                data-target="#main_outilsDiv"
+                                aria-expanded="true" aria-controls="collapseOne">
+                            Outils
+                        </button>
+                    </h5>
+                </div>
+>>>>>>> parent of f5734e7... bootstrap suite
 
+                <div id="main_outilsDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                     data-parent="#accordionExample">
+                    ggggg
+
+<<<<<<< HEAD
         <div id="listWrapperDiv" class="dataTableDiv" style="position: relative;">
 
-
-        </div>
-    </div>
-
-    <!-- end of Page Content -->
-
-</div>
-
-<!--<div id="movableSearchDiv" class=" d-flex justify-content-center d-none">
-
-
-    <form>
-        <div class="form-row">
-            <div class="col">
-                <select class="form-control" id="searchColumnInput" placeholder="Champ"></select>
+=======
+                </div>
             </div>
+            <div class="card z-depth-0 bordered">
+                <div class="card-header" id="heading6">
+                    <h5 class="mb-0">
+                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                data-target="#main_statisitiquesDiv"
+                                aria-expanded="true" aria-controls="collapseOne">
+                            Statisitiques
+                        </button>
+                    </h5>
+                </div>
+>>>>>>> parent of f5734e7... bootstrap suite
+
+                <div id="main_statisitiquesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                     data-parent="#accordionExample">
+                    ggggg
+
+<<<<<<< HEAD
+<!--<div id="movableSearchDiv" class=" d-flex justify-content-center d-none">
+=======
+                </div>
+>>>>>>> parent of f5734e7... bootstrap suite
+
+
+            </div>
+<<<<<<< HEAD
         </div>
         <div class="form-row">
             <div class="col">
@@ -433,29 +365,68 @@
         </div>
 
     </form>-->
+=======
 
+>>>>>>> parent of f5734e7... bootstrap suite
 
-    <!--   <button class="btn btn-primary" id="andSearchButton" > +</button>
-       <img src='images/clear.png' style="vertical-align: middle" width='20px'
-            onclick='listController.removeSearchCriteria(-1)'>
+    </nav>
 
-       <div id="searchCriteriaDiv">-->
+    <!-- Page Content  -->
+    <div id="content">
 
-
-</div>
-
-<div id="loginDiv"
-     style="position: absolute;visibility: hidden;display: flex;justify-content:center;align-items: center">
-    <div> login<input id="loginInput">
-        password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
-                        document.getElementById('loginButton').click()">
-        <button id="loginButton" onclick="authentication.doLogin()">OK</button>
-        <div id="loginMessage"></div>
     </div>
+
+    <!-- end of Page Content -->
+
 </div>
 
-<div id="popupD3Div">
-    <div id="dialogContentDiv"></div>
+<div id="movableSearchDiv" style="display: none">
+    <table>
+        <tr>
+            <td>
+                <button id="addRecordButton" style="width:60px">Ajouter</button>&nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td>
+                champ
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <select id="searchColumnInput"></select>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <select id="searchOperatorInput"></select> <input id="searchValueInput"
+                                                                  style="width:100px"/>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+
+                <button id="andSearchButton" style="width:20px"> +</button>
+                <img src='images/clear.png' style="vertical-align: middle" width='20px'
+                     onclick='listController.removeSearchCriteria(-1)'>
+                <br>
+                <button id="searchButton"> Lister</button>
+                <button id="locateButton" class="locateButton"> Localiser</button>
+
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div id="searchCriteriaDiv">
+
+
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
 
 </body>

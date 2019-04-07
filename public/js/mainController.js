@@ -37,19 +37,23 @@ var mainController = (function () {
     }
 
     self.init0 = function () {
-        mainController.setDivsSize();
         mainController.bindActions();
         mainController.loadDataModel(function (err, result) {
             if (err)
                 return;
             mainController.initTablesSelects();
             mainController.loadLists();
+<<<<<<< HEAD
             if (true) {
              //   self.onChangeMainAccordionTab("graph")
                 magasinD3.init("graphWrapperDiv");
 
             }
                // magasinD3.init("mainDiv");
+=======
+            if (true)
+                magasinD3.init("mainDiv");
+>>>>>>> parent of f5734e7... bootstrap suite
 
 
         });
@@ -327,21 +331,25 @@ var mainController = (function () {
     self.onChangeMainAccordionTab = function (tabName) {
         if (tabName == "Accueil") {
             // magasinD3.init("graphDiv")
-        //    mainController.showInMainDiv("graph");
+            mainController.showInMainDiv("graph");
 
         }
 
         else if (tabName == "Versements") {
             self.onchangeTable("versement");
+<<<<<<< HEAD
 
           //  mainController.showSearchDiv("searchDiv-Versements");
+=======
+            mainController.showSearchDiv("searchDiv-Versements");
+>>>>>>> parent of f5734e7... bootstrap suite
         }
         /*    else if (tabName == "Sorties") {
                 context.currentTable = "sortie_boite"
                 mainController.showSearchDiv("searchDiv-Sorties");
             }*/
 
-        else if (tabName == "Autres"  || tabName=="GestionTables") {
+        else if (tabName == "Autres") {
             self.onchangeTable("versement");
         //    mainController.showSearchDiv("searchDiv-Autres");
         }
