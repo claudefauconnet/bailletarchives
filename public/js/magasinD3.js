@@ -136,8 +136,8 @@ var magasinD3 = (function () {
             var nMag = data.children.length;
             magasinData = data;
 
-            totalWidth = $("#mainDiv").width() - 50;
-            totalHeight = $("#mainDiv").height() - 50;
+            totalWidth = $('#' + containerDiv).width() - 50;
+            totalHeight = $('#' + containerDiv).height() - 50;
             svgWidth = totalWidth
             svgHeight = totalHeight //* .8
             $("#graphDiv").width(svgWidth)

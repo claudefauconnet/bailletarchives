@@ -36,7 +36,7 @@ var statistics = (function () {
                 mainController.setErrorMessage(err)
            if (!context.dataTables["stats"])
                 context.dataTables["stats"] = new dataTable();
-            context.dataTables["stats"].loadJson(null,"mainDiv", json, {dom: "ltiB",noFixedColumns:true,})
+            context.dataTables["stats"].loadJson(null,"listWrapperDiv", json, {dom: "ltiB",noFixedColumns:true,})
 
            // listController.loadLinkedRecords("stats", "stats", function(){
 

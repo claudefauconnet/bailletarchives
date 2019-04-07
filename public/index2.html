@@ -146,7 +146,7 @@
                         </button>
                     </h5>
                 </div>
-   <div id="main_accueilDiv " class="collapse _accordionpanel hide text-center show" aria-labelledby="headingOne" data-parent="#accordionExample">
+   <div id="main_accueilDiv " class="collapse _accordionpanel hide text-center" aria-labelledby="headingOne" data-parent="#accordionExample">
                         <B>archives du centre Joseph Wresinski</B><br>
                         <img src="images/logoATD.png" width="100px">
                         <br>
@@ -169,9 +169,38 @@
                 <div id="main_versementsDiv" class="collapse _accordionpanel hide text-center" aria-labelledby="headingOne"
                      data-parent="#accordionExample">
                     <div id="searchDiv-Versements"></div>
-                    <div class="col">
-                        <button class="btn btn-primary" id="locateButton" class="locateButton"> Localiser</button>
-                    </div>
+
+                        <div class="form-row">
+                            <div class="col">
+                                <select class="form-control" id="versement_searchColumnInput" placeholder="Champ"></select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <select class="form-control" id="versement_searchOperatorInput" placeholder="Operateur"></select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <input class="form-control" id="versement_searchValueInput" placeholder="Valeur"></input>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <button class="btn btn-secondary" id="versement_addRecordButton">Ajouter</button>&nbsp;
+                            </div>
+                            <div class="col">
+                                <button class="btn btn-secondary" id="versement_searchButton"> Lister</button>
+                            </div>
+                            <div class="col">
+                                <button class="btn btn-primary" id="versement_locateButton" class="locateButton"> Localiser</button>
+                            </div>
+
+
+                        </div>
+
+
+
                 </div>
             </div>
             <div class="card z-depth-0 bordered">
@@ -351,23 +380,19 @@
     <!-- Page Content  -->
     <div id="content">
         <div id="mainDiv" class="dataTableDiv">
-            <div style="display:flex;justify-content: center">
+        <!--    <div style="display:flex;justify-content: center">
                 <img src="images/photoBaillet.jpg">
-            </div>
+            </div>-->
 
         </div>
 
-        <div id="grapDiv" class="dataTableDiv">
-            <div style="display:flex;justify-content: center">
-                <img src="images/photoBaillet.jpg">
-            </div>
+        <div id="graphWrapperDiv" class="dataTableDiv d-none" style="position: relative;">
+
 
         </div>
 
-        <div id="listDiv" class="dataTableDiv">
-            <div style="display:flex;justify-content: center">
-                <img src="images/photoBaillet.jpg">
-            </div>
+        <div id="listWrapperDiv" class="dataTableDiv" style="position: relative;">
+
 
         </div>
     </div>
@@ -376,7 +401,7 @@
 
 </div>
 
-<div id="movableSearchDiv" class=" d-flex justify-content-center d-none">
+<!--<div id="movableSearchDiv" class=" d-flex justify-content-center d-none">
 
 
     <form>
@@ -397,15 +422,17 @@
         </div>
         <div class="form-row">
             <div class="col">
-                <button class="btn btn-secondary" id="addRecordButton">Ajouter</button>&nbsp;
+                <button class="btn btn-secondary" id="versement_addRecordButton">Ajouter</button>&nbsp;
             </div>
             <div class="col">
-                <button class="btn btn-secondary" id="searchButton"> Lister</button>
+                <button class="btn btn-secondary" id="versement_searchButton"> Lister</button>
             </div>
+            <button class="btn btn-secondary" onclick="$('#mainDiv').html('zzzzz')"  id="xxxx"> WWW</button>
+
 
         </div>
 
-    </form>
+    </form>-->
 
 
     <!--   <button class="btn btn-primary" id="andSearchButton" > +</button>
