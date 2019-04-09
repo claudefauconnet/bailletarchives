@@ -39,7 +39,7 @@ var magasinD3 = (function () {
         "travee": "#e8e6e8",
         "tablette": "#fff0f0",
         "tabletteIndisponible": "#666",
-        "tabletteavecVersementSanscotes": "#133"
+        "tabletteavecVersementSanscotes": "#8EE889"
 
         //  "tablette": "#e8c8b3",
 
@@ -136,8 +136,8 @@ var magasinD3 = (function () {
             var nMag = data.children.length;
             magasinData = data;
 
-            totalWidth = $('#' + containerDiv).width() - 50;
-            totalHeight = $('#' + containerDiv).height() - 50;
+            totalWidth = $("#mainDiv").width() - 50;
+            totalHeight = $("#mainDiv").height() - 50;
             svgWidth = totalWidth
             svgHeight = totalHeight //* .8
             $("#graphDiv").width(svgWidth)
@@ -455,6 +455,7 @@ var magasinD3 = (function () {
                     " <option></option>" +
                     "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
                     "<option value='entrerVersementExistant'> entrer versement existant</option>" +
+                    "<option value='setUnavailable'> rendre indisponible</option>" +
                     "<option value='createUnder'> creer nouvelle</option>" +
                     "<option value='split'> diviser </option>" +
                     "<option value='delete'> supprimer </option>"

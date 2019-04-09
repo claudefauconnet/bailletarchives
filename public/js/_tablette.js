@@ -25,6 +25,14 @@ var Tablette = (function () {
             $("#popupD3DivOperationDiv").html(html);
 
         }
+        else if (operation == "setUnavailable") {
+            return alert("en construction");
+            html = "<button onclick='Tablette.delete();'>OK</button>";
+            $("#popupD3DivOperationDiv").html(html);
+
+        }
+
+
         if (operation == "entrerVersementExistant") {
 
 

@@ -650,6 +650,7 @@ var Versement = (function () {
                 $("#versementEntrerEnMagasinButton").css("visibility", "hidden");
                 $("#versementLocaliserButton").css("visibility", "visible");
                 $("#versementRefoulerButton").css("visibility", "visible");
+                
 
             }
             else {
@@ -735,8 +736,11 @@ var Versement = (function () {
                         infos.tablettes.metrage += tablette.metrage;
                         infos.tablettes.tailleTotaleTablettes += tablette.DimTabletteMLineaire
                         var tabletteBoites = [];
-                        if (tablette.cotesParTablette)
+                        if (tablette.cotesParTablette) {
+                            tablette.cotesParTablette=tablette.cotesParTablette.replace(/\s+/g," ");// si plusieurs blancs
                             tabletteBoites = tablette.cotesParTablette.split(" ");
+
+                        }
                         tabletteBoites.forEach(function (boite, index) {
                             var p = boite.indexOf("/");
                             if (p > -1)

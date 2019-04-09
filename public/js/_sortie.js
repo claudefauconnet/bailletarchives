@@ -84,7 +84,7 @@ var Sortie=(function(){
                         boites=boitesStr.split(" ");
                     allBoites=allBoites.concat(boites)
                 })
-                html="<div style='display:block;width: 250px'><input type='checkbox' onchange=util.checkUncheckAllBoxes($(this),'.boite_cbx')><B>Boites</B><br><div>"
+                html="<div style='display:block;width: 250px'><input type='checkbox' onchange=util.checkUncheckAllBoxes($(this),'.boite_cbx')><B>Toutes les boites</B><br><div>"
                 allBoites.sort();
                 allBoites.forEach(function(boite){
                     html+="<input type='checkbox'  id='"+boite+"'class='boite_cbx'>"+boite+"<br>"

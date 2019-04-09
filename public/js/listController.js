@@ -188,14 +188,10 @@ var listController = (function () {
 
             if (!context.dataTables[table])
                 context.dataTables[table] = new dataTable();
-
-
-            $("#listWrapperDiv").removeClass("d-none");
-            context.dataTables[table].loadJson(table, "listWrapperDiv", json, {onClick: recordController.displayRecordData})
+            context.dataTables[table].loadJson(table, "mainDiv", json, {onClick: recordController.displayRecordData})
             //   $("#tabs").tabs("option", "active", 0);
             $("#addLinkedRecordButton").attr("disabled", true);
             $("#deleteLinkedRecordButton").attr("disabled", true);
-            var xx=3;
 
         })
     }

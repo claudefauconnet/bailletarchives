@@ -157,9 +157,9 @@ var recordController = (function () {
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
             if (fn) {
-                var options = {
-                    currentRecord: context.currentRecord,
-                    changes: self.currentRecordChanges
+                var options={
+                    currentRecord:context.currentRecord,
+                    changes:self.currentRecordChanges
 
                 }
 
@@ -178,19 +178,22 @@ var recordController = (function () {
 
     }
 
-    self.saveNewRecord = function () {
+   self.saveNewRecord = function () {
 
         self.execSqlCreateRecord(context.currentTable, self.currentRecordChanges, function (err, newId) {
             if (err) {
 
                 return mainController.setRecordErrorMessage(err);
             }
+            
+            
+            context.currentRecord=self.currentRecordChanges
             context.currentRecord.id = newId;
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
             if (fn) {
                 var options = {
-                    currentRecord: {id: newId},
+                    currentRecord:  context.currentRecord,
                     changes: self.currentRecordChanges
 
                 }
@@ -298,20 +301,11 @@ var recordController = (function () {
 
     self.setAttributesValue = function (table, targetObj, sourceObj, changeType) {
         self.currentRecordChanges = []
-        var fieldsConstraints = config.tableDefs[table].fieldConstraints;
-        if (!fieldsConstraints)
-            fieldsConstraints = {};
 
         if (!changeType)
             changeType = "table";
         for (var key in targetObj) {
-            var fieldConstraint = fieldsConstraints[key];
-            if (!fieldConstraint)
-                fieldConstraint = {};
 
-            var disabledStr = "";
-            if(fieldConstraint.disabled)
-                disabledStr=" readonly  "
             var value = "";
             if (sourceObj)
                 var value = sourceObj[key];
@@ -373,7 +367,7 @@ var recordController = (function () {
                             + key + "' value='" + value + "'>";
 
                 }*/
-            else if (!type || type == 'string' || type == 'number' || type == 'date' ) {
+            else if (!type || type == 'string' || type == 'number' || type == 'date') {
 
                 if (type == 'date') {
                     var date = new Date(value);
@@ -388,20 +382,18 @@ var recordController = (function () {
 
                 var cols = targetObj[key].cols;
                 var rows = targetObj[key].rows;
-                var strCols = "";
-
-
+                var strCols = ""
 
                 if (rows) {// textarea
                     if (cols)
                         strCols = " cols='" + cols + "' ";
                     rows = " rows='" + rows + "' ";
-                    value = "<textArea "+disabledStr+" onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + type + "' " + strCols + rows
+                    value = "<textArea  onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + type + "' " + strCols + rows
                         + "id='attr_" + key + "' > " + value + "</textarea>";
                 } else {
                     if (cols)
                         strCols = " size='" + cols + "' ";
-                    value = "<input  "+disabledStr+" onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput " + type + "' " + strCols + "id='attr_"
+                    value = "<input onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput " + type + "' " + strCols + "id='attr_"
                         + key + "' value='" + value + "'>";
                 }
             }
