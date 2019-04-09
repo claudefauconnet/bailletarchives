@@ -123,13 +123,28 @@ var Versement = (function () {
             html += "<br>magasin<input id='popupD3DivOperationDiv_Magasin'style='width:50px' >"
             html += "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:100px' value=''> <button onclick='Versement.chercherTablettes()'>chercher</button>"
             html += "<br><div id='popupD3DivOperationDiv_tablette'></div>"
-            $("#dialogD3").html(html);
+           // $("#dialogD3").html(html);
 
             $("#popupD3DivOperationDiv_numVersement").attr("disabled", true);
 
 
-            $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
-            dialogD3.dialog("open")
+          //  $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
+          //  dialogD3.dialog("open");
+           // $("#versementMagasinModalMenu").modal("show");
+
+          //  $("#versementMagasinModal_contentDiv").html(html).css("background-color","#e9e9e9");
+            $("#magasinD3popover") .popover({container: 'body',placement:'auto'})
+
+            $("#magasinD3popover") .popover('show')
+         $("#magasinD3popover-content").html(html).css("background-color","#e9e9e9");
+
+
+
+
+
+
+
+
             $("#popupD3DivOperationDiv_numVersement").val(context.currentRecord.numVersement);
             $("#popupD3DivOperationDiv_metrage").val(context.currentRecord.metrage)
             $("#popupD3DivOperationDiv_nbBoites").val(context.currentRecord.nbBoites);
@@ -604,37 +619,12 @@ var Versement = (function () {
         }
 
 
-        /*   var metrage = $("#attr_metrage").val()
-           var nbBoites = $("#attr_nbBoites").val()
 
-
-           if (metrage == "" || nbBoites == "")
-               return alert(" le métrage et le nombre de boites sont obligatoires")
-
-           $("#dialogD3").attr("title", "chercher des tablettes");
-           $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
-
-           dialogD3.dialog("open")
-           $("#dialogD3").load("./htmlSnippets/" + "findTablettesDialogD3.html", function () {
-               $("#findTablettesD3_versement").val(context.currentRecord.numVersement);
-               $("#findTablettesD3_nbBoites").val(metrage)
-               $("#findTablettesD3_metrage").val(nbBoites);
-
-               metrage = parseFloat(metrage.replace(",", ".")) * 100
-               nbBoites = parseInt(nbBoites)
-
-               var ep = "" + (Math.round(parseInt(metrage / nbBoites)) / 100);
-               ep = ep.replace(".", ",");
-               $("#findTablettesD3_epaisseurMoyBoite").val(ep);
-
-
-           })
-       }*/
 
 
         self.getBoiteVersement = function (boite, callback) {
 
-            var numVersement = boite.numVersement;
+            var numVersement = boite.numVersement
             if (!numVersement)
                 return;
             var sql = "select * from versement where numVersement='" + numVersement + "'"
@@ -647,15 +637,15 @@ var Versement = (function () {
 
         self.onMagasinsLoaded = function (magasins) {
             if (magasins.length > 0) {
-                $("#versementEntrerEnMagasinButton").css("visibility", "hidden");
-                $("#versementLocaliserButton").css("visibility", "visible");
-                $("#versementRefoulerButton").css("visibility", "visible");
+                $("#versementEntrerEnMagasinButton").addClass("d-none");
+                $("#versementLocaliserButton").removeClass("d-none");
+                $("#versementRefoulerButton").removeClass("d-none");
 
             }
             else {
-                $("#versementEntrerEnMagasinButton").css("visibility", "visible");
-                $("#versementLocaliserButton").css("visibility", "hidden");
-                $("#versementRefoulerButton").css("visibility", "hidden");
+                $("#versementEntrerEnMagasinButton").removeClass("d-none");
+                $("#versementLocaliserButton").addClass("d-none");
+                $("#versementRefoulerButton").addClass("d-none");
             }
 
 
@@ -668,6 +658,7 @@ var Versement = (function () {
                         return console.log(err);
                     $("#attr_numVersement").val(numVersement);
                     recordController.incrementChanges(attr_numVersement);
+
                 })
             }
             if(!versement.etatTraitementAuteur) {

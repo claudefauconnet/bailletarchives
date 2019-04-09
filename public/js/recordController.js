@@ -49,11 +49,11 @@ var recordController = (function () {
         recordController.setAttributesValue(table, targetObj, obj);
 
 
-        $("#dialogDiv").dialog({title: table});
+        $("#recordModalMenu").modal("show")
 
         //$("#dialogDiv").load("./htmlSnippets/versement.html", function () {
 
-        $("#dialogDiv").html("<div id=\"recordDiv\">\n" +
+        $("#recordModal_contentDiv").html("<div id=\"recordDiv\">\n" +
             "    <div id=\"recordDetailsDiv\" class=\"recordDetailsDiv\"></div>\n" +
             "    <div id=\"recordLinkedDivs\"></div>\n" +
             "</div>");
@@ -67,25 +67,29 @@ var recordController = (function () {
                     var id = recordTool.id;
                     if (!id)
                         id = "" + Math.random();
-                    recordToolsHtml += "&nbsp;&nbsp;<Button id='" + id + "' onclick='" + recordTool.toolFn + "()'>" + recordTool.title + "</Button>"
+                    recordToolsHtml += "&nbsp;&nbsp;<Button class='btn btn-secondary' id='" + id + "' onclick='" + recordTool.toolFn + "()'>" + recordTool.title + "</Button>"
                 })
             }
         }
 
 
-        recordController.drawAttributes(targetObj, "recordDetailsDiv");
+      recordController.drawAttributes(targetObj, "recordDetailsDiv");
+      //  recordController.drawAttributesBootstrap(targetObj, "recordDetailsDiv");
+
+
+
         if (mode != "readOnly") {
             if (recordToolsHtml != "")
                 $("#recordDetailsDiv").prepend(recordToolsHtml);
 
             if (obj && obj.id && (!config.tableDefs[context.currentTable].tableConstraints || config.tableDefs[context.currentTable].tableConstraints.cannotDelete !== true))
-                $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
-            $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
+                $("#recordDetailsDiv").prepend("<button class='btn btn-secondary' id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
+            $("#recordDetailsDiv").prepend("<button class='btn btn-primary' id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
 
 
-            $("#recordDetailsDiv").prepend("<div id='recordMessageDiv' class='message'></div>")
         }
-        $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
+        $("#recordModalLabel").html("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
+        $("#recordModalLabel").append("<div id='recordMessageDiv' class='message'></div>")
 
         if (obj && obj.id)
             listController.loadLinkedDivs()
@@ -185,12 +189,15 @@ var recordController = (function () {
 
                 return mainController.setRecordErrorMessage(err);
             }
+
+
+            context.currentRecord=self.currentRecordChanges
             context.currentRecord.id = newId;
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
             if (fn) {
                 var options = {
-                    currentRecord: {id: newId},
+                    currentRecord:  context.currentRecord,
                     changes: self.currentRecordChanges
 
                 }
@@ -310,8 +317,8 @@ var recordController = (function () {
                 fieldConstraint = {};
 
             var disabledStr = "";
-            if(fieldConstraint.disabled)
-                disabledStr=" readonly  "
+            if (fieldConstraint.disabled)
+                disabledStr = " readonly  "
             var value = "";
             if (sourceObj)
                 var value = sourceObj[key];
@@ -334,7 +341,14 @@ var recordController = (function () {
 
             //if (type && type == 'select' && selectValues) {
             if (selectValues) {
-                var str = "<select  onchange='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' id='attr_" + key + "'>"
+                var idStr="attr_" + key;
+                targetObj[key].id = idStr;
+
+                var classStr='col-auto input-string';
+                classStr="";
+
+
+                var str = "<select  class='"+classStr+"'  onchange='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' id='" + idStr + "'>"
                 str += "<option  value=''></option>";
                 for (var i = 0; i < selectValues.length; i++) {
 
@@ -361,9 +375,9 @@ var recordController = (function () {
                 value = str;
             }
             else if (type == 'hidden') {
-                value = "<input type='hidden'  id='attr_" + key + "'value='" + value + "'>";
+                value = "<input class='"+classStr+"' type='hidden'  id='attr_" + key + "'value='" + value + "'>";
             } else if (type == 'password') {
-                value = "<input type='password' onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
+                value = "<input class='"+classStr+"'   type='password' onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
                     + key + "'value='" + value + "'>";
             }
             /*    else if(type=='date'){
@@ -373,7 +387,7 @@ var recordController = (function () {
                             + key + "' value='" + value + "'>";
 
                 }*/
-            else if (!type || type == 'string' || type == 'number' || type == 'date' ) {
+            else if (!type || type == 'string' || type == 'number' || type == 'date') {
 
                 if (type == 'date') {
                     var date = new Date(value);
@@ -391,21 +405,23 @@ var recordController = (function () {
                 var strCols = "";
 
 
-
                 if (rows) {// textarea
                     if (cols)
                         strCols = " cols='" + cols + "' ";
                     rows = " rows='" + rows + "' ";
-                    value = "<textArea "+disabledStr+" onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + type + "' " + strCols + rows
+
+
+                    value = "<textArea class='"+classStr+"' " + disabledStr + " onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput_text' " + strCols + rows
                         + "id='attr_" + key + "' > " + value + "</textarea>";
                 } else {
                     if (cols)
                         strCols = " size='" + cols + "' ";
-                    value = "<input  "+disabledStr+" onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput " + type + "' " + strCols + "id='attr_"
+                    value = "<input class='"+classStr+"'  " + disabledStr + " onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput_string' " + "id='attr_"
                         + key + "' value='" + value + "'>";
                 }
             }
             targetObj[key].value = value;
+
         }
 
     }
@@ -549,6 +565,94 @@ var recordController = (function () {
         // }
     }
 
+
+    self.getFieldToolHtml = function (key) {
+
+        var fieldTools = config.tableDefs[context.currentTable].fieldTools;
+        if (!fieldTools)
+            fieldTools = {};
+
+
+        var fieldToolStr = ""
+        if (fieldTools[key]) {
+            if (!Array.isArray(fieldTools[key]))
+                fieldTools[key] = [fieldTools[key]];
+            fieldTools[key].forEach(function (tool) {
+                fieldToolStr = "&nbsp;&nbsp;<Button  type=\"button\" class=\"btn btn-secondary\" onclick='" + tool.toolFn + "(" + context.currentRecord.id + ")'>" + tool.title + "</Button>"
+            })
+        }
+        return fieldToolStr;
+    }
+
+    self.drawAttributesBootstrap = function (targetObj, zoneId) {
+
+
+
+
+        var html = "<div>";
+        var strHidden = "";
+        var dateFieldIds = [];
+
+        for (var key in targetObj) {
+
+            var strVal = targetObj[key].value;
+            var id= targetObj[key].id;
+            var fieldTitle = targetObj[key].title;
+
+
+            if (targetObj[key].type == "date") {
+                dateFieldIds.push("attr_" + key);
+
+            }
+
+
+            var desc = targetObj[key].desc;
+            if (desc) {
+                desc = "<img src='/toutlesens/icons/questionMark.png' width=" + self.iconSize + " title='" + desc + "'>";
+            }
+            else
+                desc = "";
+
+            if (targetObj[key].type == 'hidden') {
+                strHidden += "<input type='hidden' id='attr_" + key + "' value='" + strVal + ">"
+            } else {
+                className = 'mandatoryFieldLabel';
+                if (!fieldTitle)
+                    fieldTitle = key;
+                var className = 'fieldLabel';
+
+
+                if (targetObj[key].control == 'mandatory')
+                    className = 'mandatoryFieldLabel';
+
+                var fieldToolStr = self.getFieldToolHtml(key);
+
+
+                html+= ' <div class="form-group row">' +
+                    '    <label for="' + id + ' class="col-sm col-form-label">'+fieldTitle+'</label>' +
+                    '    <div class="col-sm-10">' +
+                    strVal + fieldToolStr+
+                '    </div>' +
+                    '  </div>'
+
+
+
+             //   html += "<tr><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal + fieldToolStr + "</span></td></tr>";
+            }
+        }
+
+        html +="</div>"
+            //   html += "</table>" + strHidden;
+        $("#" + zoneId).css("visibility", "visible");
+        $("#" + zoneId).html(html).promise().done(function () {
+            setDatePickerOnFields(dateFieldIds);
+
+        });
+
+
+    }
+
+
     self.drawAttributes = function (targetObj, zoneId) {
         var str = "<table>";
         var strHidden = "";
@@ -593,6 +697,9 @@ var recordController = (function () {
                 className = 'mandatoryFieldLabel';
                 if (!fieldTitle)
                     fieldTitle = key;
+
+                if( fieldTitle.length>30)
+                    fieldTitle=fieldTitle.substring(0,30)+"..."
                 var className = 'fieldLabel';
 
 
@@ -600,7 +707,7 @@ var recordController = (function () {
                     className = 'mandatoryFieldLabel';
 
 
-                str += "<tr><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal + fieldToolStr + "</span></td></tr>";
+                str += "<tr><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><div class='fieldvalue'>" + strVal + fieldToolStr + "</div></td></tr>";
             }
         }
         str += "</table>" + strHidden;

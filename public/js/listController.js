@@ -133,7 +133,7 @@ var listController = (function () {
                     whereStrAll = " WHERE " + whereStrAll;
                 sql = "select * from " + table + whereStrAll
             }
-          var sortClause = "";
+            var sortClause = "";
             var sortFields = config.tableDefs[table].sortFields;
             if (sortFields) {
                 sortFields.forEach(function (field, index) {
@@ -188,14 +188,10 @@ var listController = (function () {
 
             if (!context.dataTables[table])
                 context.dataTables[table] = new dataTable();
-
-
-            $("#listWrapperDiv").removeClass("d-none");
             context.dataTables[table].loadJson(table, "listWrapperDiv", json, {onClick: recordController.displayRecordData})
             //   $("#tabs").tabs("option", "active", 0);
             $("#addLinkedRecordButton").attr("disabled", true);
             $("#deleteLinkedRecordButton").attr("disabled", true);
-            var xx=3;
 
         })
     }
@@ -263,8 +259,8 @@ var listController = (function () {
 
             if (json.length == 0) {
                 $("#" + dataTableDivName).css("border-style", "none")
-                $("#" + dataTableDivName).html(linkedTable + " 0 ");
-                $("#" + dataTableDivName).height(20).css("padding", "10px");
+                $("#" + dataTableDivName).html(linkedTable + " : aucun ");
+                $("#" + dataTableDivName).height(30).css("padding", "2px");
                 if (callback)
                     return callback(null, json);
             }
@@ -274,19 +270,19 @@ var listController = (function () {
 
 
             $("#recordLinkedDivs").removeAttr("overflow")
-            $("#" + dataTableDivName).width(width).height(height).css("padding", "20px");
+           // $("#" + dataTableDivName).width(width).height(height).css("padding", "20px");
             if (!context.dataTables["linked_" + linkedTable])
                 context.dataTables["linked_" + linkedTable] = new dataTable();
 
             var columns = context.dataTables["linked_" + linkedTable].getColumns(json, linkedTable,null);
 
-          var nonVisibleColumns=[];
-          if(definedColumns) {
-              columns.forEach(function (column, index) {
-                  if (definedColumns.indexOf(column.data) < 0)
-                      nonVisibleColumns.push(index);
-              })
-          }
+            var nonVisibleColumns=[];
+            if(definedColumns) {
+                columns.forEach(function (column, index) {
+                    if (definedColumns.indexOf(column.data) < 0)
+                        nonVisibleColumns.push(index);
+                })
+            }
 
 
             var htmlStr = "<div class='title'>" + linkedTable + "</div>"
@@ -302,7 +298,7 @@ var listController = (function () {
                 fixedHeader: true,
                 pageLength: 500,
                 order:order,
-             //   "autoWidth": false,
+                //   "autoWidth": false,
                 "dom": "",
 
                 //  fixedColumns: true,
@@ -312,7 +308,7 @@ var listController = (function () {
 
                     {  "visible": false,targets:nonVisibleColumns},
 
-                  {'width': 200, 'targets': columns.textColumns},
+                    {'width': 200, 'targets': columns.textColumns},
                     {//dates
                         "render": function (data, type, row, meta) {
                             var str = "";

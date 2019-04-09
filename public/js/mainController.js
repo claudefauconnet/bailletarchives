@@ -37,23 +37,15 @@ var mainController = (function () {
     }
 
     self.init0 = function () {
+        mainController.setDivsSize();
         mainController.bindActions();
         mainController.loadDataModel(function (err, result) {
             if (err)
                 return;
             mainController.initTablesSelects();
             mainController.loadLists();
-<<<<<<< HEAD
-            if (true) {
-             //   self.onChangeMainAccordionTab("graph")
-                magasinD3.init("graphWrapperDiv");
-
-            }
-               // magasinD3.init("mainDiv");
-=======
             if (true)
-                magasinD3.init("mainDiv");
->>>>>>> parent of f5734e7... bootstrap suite
+                magasinD3.init("graphWrapperDiv");
 
 
         });
@@ -75,12 +67,12 @@ var mainController = (function () {
             $("#searchValueInput").focus();
         })
 
-        $("#versement_searchButton").bind("click", function () {
+        $("#searchButton").bind("click", function () {
 
             listController.addSearchCriteria(listController.listRecords);
         })
 
-        $("#versement_locateButton").bind("click", function () {
+        $("#locateButton").bind("click", function () {
             self.showInMainDiv("graph")
             context.currentCriteria = [];
             listController.addSearchCriteria(Versement.locateBySql);
@@ -127,7 +119,7 @@ var mainController = (function () {
         })
 
 
-        $("#versement_addRecordButton").bind("click", function () {
+        $("#addRecordButton").bind("click", function () {
             mainController.showNewRecordDialog();
         })
 
@@ -331,27 +323,23 @@ var mainController = (function () {
     self.onChangeMainAccordionTab = function (tabName) {
         if (tabName == "Accueil") {
             // magasinD3.init("graphDiv")
-            mainController.showInMainDiv("graph");
+             mainController.showInMainDiv("graph");
 
         }
 
         else if (tabName == "Versements") {
             self.onchangeTable("versement");
-<<<<<<< HEAD
 
-          //  mainController.showSearchDiv("searchDiv-Versements");
-=======
             mainController.showSearchDiv("searchDiv-Versements");
->>>>>>> parent of f5734e7... bootstrap suite
         }
         /*    else if (tabName == "Sorties") {
                 context.currentTable = "sortie_boite"
                 mainController.showSearchDiv("searchDiv-Sorties");
             }*/
 
-        else if (tabName == "Autres") {
+        else if (tabName == "Autres"  || tabName=="GestionTables") {
             self.onchangeTable("versement");
-        //    mainController.showSearchDiv("searchDiv-Autres");
+            mainController.showSearchDiv("searchDiv-Autres");
         }
 
     }
@@ -391,7 +379,7 @@ var mainController = (function () {
         }
         context.currentRecord.id = null;
         recordController.displayRecordData({});
-        $(dialog.dialog("open"))
+     //   $(dialog.dialog("open"))
         //  $("#tabs").tabs({disabled: [1, 2]});
         self.execCustomization({type: "newRecord"});
 
@@ -473,11 +461,15 @@ var mainController = (function () {
 
     }
     self.showSearchDiv = function (targetDiv) {
-return;
 
-        $("#movableSearchDiv").css("display", "block")
+
+       // $("#movableSearchDiv").css("display", "block")
+
+
         var searchhDiv = $("#movableSearchDiv").detach();
-        searchhDiv.appendTo("#" + targetDiv)
+        searchhDiv.appendTo("#" + targetDiv);
+        $("#movableSearchDiv").removeClass("d-none")
+        $("#movableSearchDiv").addClass("d-flex")
         if (targetDiv = "searchDiv-Versements")
             $("#locateButton").css("visibility", "visible");
         else
@@ -488,17 +480,18 @@ return;
 
     self.showInMainDiv = function (type) {
 
-
         if (type == "graph") {
             $("#graphWrapperDiv").removeClass("d-none");
             $("#listWrapperDiv").addClass("d-none");
         }
-        else if (type == "graph") {
+        else if (type == "list") {
             $("#graphWrapperDiv").addClass("d-none");
             $("#listWrapperDiv").removeClass("d-none");
         }
 
         return
+
+
         var html = $("#mainDiv").html();
         if (html.indexOf("graphDiv") > -1) {
             context.hiddenMainDivContent["graph"] = $("#graphDiv").detach();
@@ -509,7 +502,7 @@ return;
 
 
         if (type == "graph" && context.hiddenMainDivContent["graph"]) {
-            context.hiddenMainDivContent["graph"].appendTo($("#retumainDiv"))
+            context.hiddenMainDivContent["graph"].appendTo($("#mainDiv"))
             magasinD3.clearHighlights();
             magasinD3.initialZoom();
         }

@@ -82,7 +82,8 @@ var magasinD3 = (function () {
 
             var zzz = d3.select("svg")
 
-            self.initialZoom()
+            self.initialZoom();
+            $("#mainDiv").css("opacity",0.1);
          //   zoom.translateTo(svg, 0, 0)
 
 

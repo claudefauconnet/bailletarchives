@@ -87,10 +87,11 @@
 
 
         <script>
+            var dialogD3;
             $(function () {
 
 
-                if (true) {
+                if (false) {
 
                     authentication.init(true, function (err, result) {
 
@@ -103,6 +104,16 @@
                     mainController.init0();
                 }
 
+                dialogD3 = $("#dialogD3").dialog({
+                    autoOpen: false,
+                    modal: false,
+                    position: {my: "left top", at: "left top", of: window},
+                    close: function () {
+                        // allFields.removeClass("ui-state-error");
+                    }
+                });
+
+
 
             })
 
@@ -111,12 +122,90 @@
         <style>
             ._accordionpanel {
                 min-height: 100px;
-                max-height: 400px;
+                max-height: 500px;
 
-            }.card-header{
-                padding: 10px
-                         }
+            }
 
+            .card-header {
+                padding: 2px;
+            }
+
+            .btn {
+                margin: 5px;
+            }
+            .btn-block{
+                padding:3px;
+            }
+
+            @media (min-width: 576px) {
+                .modal-dialogXL { max-width: none; }
+            }
+
+            .modal-dialogXL {
+                width: 98%;
+                height: 92%;
+                padding: 0;
+            }
+
+            .modal-contentXL {
+                height: 99%;
+            }
+
+            #recordDiv{
+                display: flex;
+                flex-direction: row;
+              //  width: 800px;
+
+            }
+
+            .recordDetailsDiv {
+
+                margin: 10px;
+                padding: 10px;
+
+                max-height: 800px;
+                max-width:600px;
+                background-color: #e9e9e9;
+                border: #261803 solid 2px;
+                border-radius: 10px;
+                display: block;
+            }
+
+            .recordLinkedDiv {
+                max-width: 500px;
+                height: 200px;
+                background-color: #e9e9e9;
+                border: #261803 solid 2px;
+                border-radius: 10px;
+                display: block;
+                overflow: auto;
+
+            }
+
+            #recordLinkedDivs {
+
+                background-color: #d3f4f2e3;
+                max-height: 800px;
+                max-width: 500px;
+                border: #261803 solid 2px;
+                border-radius: 10px;
+                display: flex;
+                margin: 10px;
+                padding: 10px;
+                margin-bottom: 40px;
+                flex-direction: column;
+
+            }
+            .input-text{
+                width: 300px;
+            }
+
+            .input-string{
+                width: 100px;
+            }
+            .objAttrInput_string{
+                width: 100px;
+            }
         </style>
 
     </head>
@@ -135,28 +224,18 @@
                     <h5 class="mb-0">
                         <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
                                 data-target="#main_accueilDiv"
-                                aria-expanded="true" aria-controls="collapseOne" onclick="   mainController.showSearchDiv('searchDiv-Versements');">
+                                aria-expanded="true" aria-controls="collapseOne" onclick=" mainController.onChangeMainAccordionTab('Accueil');  ">
                             Accueil
                         </button>
                     </h5>
                 </div>
-<<<<<<< HEAD
-   <div id="main_accueilDiv " class="collapse _accordionpanel hide text-center" aria-labelledby="headingOne" data-parent="#accordionExample">
-                        <B>archives du centre Joseph Wresinski</B><br>
-                        <img src="images/logoATD.png" width="100px">
-                        <br>
-                        <div id="magasinD3MessageDiv"></div>
-                </div>
-=======
->>>>>>> parent of f5734e7... bootstrap suite
-
-                <div id="main_accueilDiv" class="collapse _accordionpanel hide text-center show" aria-labelledby="headingOne"
-                     data-parent="#accordionExample">
-                    <B>Archives de Baillet</B><br>
+                <div id="main_accueilDiv " class="collapse _accordionpanel hide text-center show" aria-labelledby="headingOne" data-parent="#accordionExample">
+                    <B>archives du centre Joseph Wresinski</B><br>
                     <img src="images/logoATD.png" width="100px">
                     <br>
                     <div id="magasinD3MessageDiv"></div>
                 </div>
+
             </div>
 
             <div class="card z-depth-0 bordered">
@@ -164,8 +243,8 @@
                     <h5 class="mb-0">
                         <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
                                 data-target="#main_versementsDiv"
-                                aria-expanded="true" aria-controls="collapseOne" onclick="   mainController.showSearchDiv('searchDiv-Versements');">
-                            Versement
+                                aria-expanded="true" aria-controls="collapseOne" onclick=" mainController.onChangeMainAccordionTab('Versements');  ">
+                            Versements
                         </button>
                     </h5>
                 </div>
@@ -174,40 +253,6 @@
                      data-parent="#accordionExample">
                     <div id="searchDiv-Versements"></div>
 
-<<<<<<< HEAD
-                        <div class="form-row">
-                            <div class="col">
-                                <select class="form-control" id="versement_searchColumnInput" placeholder="Champ"></select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="col">
-                                <select class="form-control" id="versement_searchOperatorInput" placeholder="Operateur"></select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="col">
-                                <input class="form-control" id="versement_searchValueInput" placeholder="Valeur"></input>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="col">
-                                <button class="btn btn-secondary" id="versement_addRecordButton">Ajouter</button>&nbsp;
-                            </div>
-                            <div class="col">
-                                <button class="btn btn-secondary" id="versement_searchButton"> Lister</button>
-                            </div>
-                            <div class="col">
-                                <button class="btn btn-primary" id="versement_locateButton" class="locateButton"> Localiser</button>
-                            </div>
-
-
-                        </div>
-
-
-
-=======
->>>>>>> parent of f5734e7... bootstrap suite
                 </div>
             </div>
             <div class="card z-depth-0 bordered">
@@ -223,128 +268,204 @@
 
                 <div id="main_sortiesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
                      data-parent="#accordionExample">
-                    ggggg
+                    <div class=" d-flex justify-content-center d-none">
+
+
+                        <form>
+                            <div class="form-row">
+                                <div class="col">
+                                    <button type="button" class="btn btn-secondary" onclick="Sortie.create()">Creer</button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <button type="button" class="btn btn-secondary" onclick="Sortie.listActives()">Lister en cours</button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <button type="button" class="btn btn-secondary" onclick="Sortie.listHistory()">Lister historique</button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col">
+                                    <button type="button" class="btn btn-primary" onclick="Sortie.highlightSorties()">voir en cours</button>
+                                </div>
+                            </div>
+
+                        </form>
+
+
+                    </div>
+                </div>
+
+                <div class="card z-depth-0 bordered">
+                    <div class="card-header" id="heading4">
+                        <h5 class="mb-0">
+                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                    data-target="#main_tablettesDiv"
+                                    aria-expanded="true" aria-controls="collapseOne">
+                                Tablettes
+                            </button>
+                        </h5>
+                    </div>
+
+                    <div id="main_tablettesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                         data-parent="#accordionExample">
+                        <div class=" d-flex justify-content-center d-none">
+                            <form>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <button type="button" class="btn btn-secondary" onclick="Tablette.locate()">Localiser</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card z-depth-0 bordered">
+                    <div class="card-header" id="heading5">
+                        <h5 class="mb-0">
+                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                    data-target="#main_boitesDiv"
+                                    aria-expanded="true" aria-controls="collapseOne">
+                                Boites
+                            </button>
+                        </h5>
+                    </div>
+
+                    <div id="main_boitesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                         data-parent="#accordionExample">
+                        <div class=" d-flex justify-content-center d-none">
+                            <form>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <button type="button" class="btn btn-secondary" onclick="Boites.locate()">Localiser</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="card z-depth-0 bordered">
+                    <div class="card-header" id="heading6">
+                        <h5 class="mb-0">
+                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                    data-target="#main_gestionTablesDiv"
+                                    aria-expanded="true" aria-controls="collapseOne" onclick=" mainController.onChangeMainAccordionTab('GestionTables')" ;>
+                                Gestion tables
+                            </button>
+                        </h5>
+                    </div>
+
+                    <div id="main_gestionTablesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                         data-parent="#accordionExample">
+                        <select class="form-control" id="searchTableInput"></select>
+                        <div id="searchDiv-Autres">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card z-depth-0 bordered">
+                    <div class="card-header" id="heading7">
+                        <h5 class="mb-0">
+                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                    data-target="#main_outilsDiv"
+                                    aria-expanded="true" aria-controls="collapseOne">
+                                Outils
+                            </button>
+                        </h5>
+                    </div>
+
+                    <div id="main_outilsDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                         data-parent="#accordionExample">
+
+                        <div class=" d-flex justify-content-center d-none">
+                            <form>
+                                <div class="form-row">
+                                    <div class="col">
+                                        <select id="toolsSelect" class="btn btn-secondary"></select>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="card z-depth-0 bordered">
+                    <div class="card-header" id="heading8">
+                        <h5 class="mb-0">
+                            <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
+                                    data-target="#main_statisitiquesDiv"
+                                    aria-expanded="true" aria-controls="collapseOne">
+                                Statistiques
+                            </button>
+                        </h5>
+                    </div>
+
+                    <div id="main_statisitiquesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
+                         data-parent="#accordionExample">
+
+                        <div class=" d-flex justify-content-center d-none">
+
+                            <div class="form-row">
+                                <div class="col">
+                                    <select id="statsSelect" class="btn btn-secondary"></select>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
 
                 </div>
             </div>
 
-            <div class="card z-depth-0 bordered">
-                <div class="card-header" id="heading4">
-                    <h5 class="mb-0">
-                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                data-target="#main_tablettesDiv"
-                                aria-expanded="true" aria-controls="collapseOne">
-                            Tablettes
-                        </button>
-                    </h5>
-                </div>
+    </nav>
 
-                <div id="main_tablettesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                     data-parent="#accordionExample">
-                    ggggg
-
-                </div>
-            </div>
-
-            <div class="card z-depth-0 bordered">
-                <div class="card-header" id="heading5">
-                    <h5 class="mb-0">
-                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                data-target="#main_boitesDiv"
-                                aria-expanded="true" aria-controls="collapseOne">
-                            Boites
-                        </button>
-                    </h5>
-                </div>
-
-                <div id="main_boitesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                     data-parent="#accordionExample">
-                    ggggg
-
-                </div>
-            </div>
-            <div class="card z-depth-0 bordered">
-                <div class="card-header" id="heading6">
-                    <h5 class="mb-0">
-                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                data-target="#main_gestionTablesDiv"
-                                aria-expanded="true" aria-controls="collapseOne">
-                            Gestion tables
-                        </button>
-                    </h5>
-                </div>
-
-                <div id="main_gestionTablesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                     data-parent="#accordionExample">
-                    ggggg
-
-<<<<<<< HEAD
     <!-- Page Content  -->
     <div id="content">
-        <div id="mainDiv" class="dataTableDiv">
-        <!--    <div style="display:flex;justify-content: center">
+        <div id="mainDiv" style="position: absolute;top:120px">
+            <div style="display:flex;justify-content: center">
                 <img src="images/photoBaillet.jpg">
-            </div>-->
+            </div>
 
         </div>
 
-        <div id="graphWrapperDiv" class="dataTableDiv d-none" style="position: relative;">
-
-=======
-                </div>
+        <div id="graphWrapperDiv" style="position: absolute;top:0px">
+            <div style="display:flex;justify-content: center">
+                <img src="images/photoBaillet.jpg">
             </div>
 
-            <div class="card z-depth-0 bordered">
-                <div class="card-header" id="heading7">
-                    <h5 class="mb-0">
-                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                data-target="#main_outilsDiv"
-                                aria-expanded="true" aria-controls="collapseOne">
-                            Outils
-                        </button>
-                    </h5>
-                </div>
->>>>>>> parent of f5734e7... bootstrap suite
+        </div>
 
-                <div id="main_outilsDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                     data-parent="#accordionExample">
-                    ggggg
+        <div id="listWrapperDiv" class="dataTableDiv">
 
-<<<<<<< HEAD
-        <div id="listWrapperDiv" class="dataTableDiv" style="position: relative;">
 
-=======
-                </div>
+        </div>
+    </div>
+
+    <!-- end of Page Content -->
+
+</div>
+
+<div id="movableSearchDiv" class="justify-content-center d-none">
+
+    <form>
+        <div class="form-row">
+            <div class="col">
+                <select class="form-control" id="searchColumnInput" placeholder="Champ"></select>
             </div>
-            <div class="card z-depth-0 bordered">
-                <div class="card-header" id="heading6">
-                    <h5 class="mb-0">
-                        <button class="btn btn-primary btn-lg btn-block" type="button" data-toggle="collapse"
-                                data-target="#main_statisitiquesDiv"
-                                aria-expanded="true" aria-controls="collapseOne">
-                            Statisitiques
-                        </button>
-                    </h5>
-                </div>
->>>>>>> parent of f5734e7... bootstrap suite
-
-                <div id="main_statisitiquesDiv" class="collapse _accordionpanel hide" aria-labelledby="headingOne"
-                     data-parent="#accordionExample">
-                    ggggg
-
-<<<<<<< HEAD
-<!--<div id="movableSearchDiv" class=" d-flex justify-content-center d-none">
-=======
-                </div>
->>>>>>> parent of f5734e7... bootstrap suite
-
-
-            </div>
-<<<<<<< HEAD
         </div>
         <div class="form-row">
             <div class="col">
-                <select class="form-control" id="searchOperatorInput" placeholder="Operateur"></select>
+                <select class="form-control" id="searchOperatorInput" placeholder="Operateur"></select²>
             </div>
         </div>
         <div class="form-row">
@@ -354,79 +475,103 @@
         </div>
         <div class="form-row">
             <div class="col">
-                <button class="btn btn-secondary" id="versement_addRecordButton">Ajouter</button>&nbsp;
+                <button type="button" class="btn btn-secondary" id="addRecordButton">Ajouter</button>&nbsp;
             </div>
             <div class="col">
-                <button class="btn btn-secondary" id="versement_searchButton"> Lister</button>
+                <button type="button" class="btn btn-secondary" id="searchButton"> Lister</button>
             </div>
-            <button class="btn btn-secondary" onclick="$('#mainDiv').html('zzzzz')"  id="xxxx"> WWW</button>
-
+            <div class="col">
+                <button type="button" class="btn btn-primary" id="locateButton" class="locateButton"> Localiser</button>
+            </div>
 
         </div>
 
-    </form>-->
-=======
+    </form>
 
->>>>>>> parent of f5734e7... bootstrap suite
 
-    </nav>
+    <!--   <button class="btn btn-primary" id="andSearchButton" > +</button>
+       <img src='images/clear.png' style="vertical-align: middle" width='20px'
+            onclick='listController.removeSearchCriteria(-1)'>
 
-    <!-- Page Content  -->
-    <div id="content">
+       <div id="searchCriteriaDiv">-->
 
-    </div>
-
-    <!-- end of Page Content -->
 
 </div>
 
-<div id="movableSearchDiv" style="display: none">
-    <table>
-        <tr>
-            <td>
-                <button id="addRecordButton" style="width:60px">Ajouter</button>&nbsp;
-            </td>
-        </tr>
-        <tr>
-            <td>
-                champ
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <select id="searchColumnInput"></select>
-            </td>
-        </tr>
+<div id="loginDiv"
+     style="position: absolute;visibility: hidden;display: flex;justify-content:center;align-items: center">
+    <div> login<input id="loginInput">
+        password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
+                        document.getElementById('loginButton').click()">
+        <button id="loginButton" onclick="authentication.doLogin()">OK</button>
+        <div id="loginMessage"></div>
+    </div>
+</div>
 
-        <tr>
-            <td>
-                <select id="searchOperatorInput"></select> <input id="searchValueInput"
-                                                                  style="width:100px"/>
-            </td>
-        </tr>
-
-        <tr>
-            <td>
-
-                <button id="andSearchButton" style="width:20px"> +</button>
-                <img src='images/clear.png' style="vertical-align: middle" width='20px'
-                     onclick='listController.removeSearchCriteria(-1)'>
-                <br>
-                <button id="searchButton"> Lister</button>
-                <button id="locateButton" class="locateButton"> Localiser</button>
+<div id="popupD3Div">
+    <div id="dialogContentDiv"></div>
+</div>
 
 
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div id="searchCriteriaDiv">
+<div class="modal fade bd-example-modal-lg" id="recordModalMenu" tabindex="-1" role="dialog"
+     aria-labelledby="displayModalLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-dialogXL modal-lg" role="document">
+        <div class="modal-content modal-contentXL">
+          <!--  <div class="modal-header">
+                <h5 class="modal-title" id="recordModalLabel">Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>-->
+            <div class="modal-body" id="recordModal_contentDiv">
+
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div id="dialogD3"></div>
 
 
-                </div>
-            </td>
-        </tr>
-    </table>
+
+
+
+<div class="popover" id="magasinD3popover" role="tooltip">
+    <div class="arrow"></div>
+    <h3 class="popover-header"></h3>
+    <div class="popover-body" style="width:200px;">
+        <div id="magasinD3popover-content" class="hide">
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-example-modal-sm" id="versementMagasinModalMenu" tabindex="-1" role="dialog"
+     aria-labelledby="displayModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+             <div class="modal-header">
+                  <h5 class="modal-title" id="versementMagasinModalLabel">Recherche de tablettes</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+            <div class="modal-body" id="versementMagasinModal_contentDiv">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+
+        </div>
+    </div>
+
 </div>
 
 </body>

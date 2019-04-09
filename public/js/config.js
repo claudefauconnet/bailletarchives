@@ -218,8 +218,8 @@ var config = (function () {
 
     self.default = {
         textArea: {
-            cols: 50,
-            rows: 4
+            cols: 45,
+            rows: 2
         }
 
 
