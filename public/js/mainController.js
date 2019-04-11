@@ -43,8 +43,16 @@ var mainController = (function () {
                 return;
             mainController.initTablesSelects();
             mainController.loadLists();
-            if (true)
-                magasinD3.init("mainDiv");
+            if (true) {
+                magasinD3.init("mainDiv",function() {
+                $("#dialogDiv").dialog("close");
+                });
+                $("#dialogDiv").html(" <div style=\"height: 100%; display: flex;flex-direction: column; align-items: center; justify-content: center;\">" +
+                    "   <div style='font:bold 18px sans-serif;color: #5f3f3f'>Bienvenue aux archives du centre Joseph Wrésinski</div>" +
+                    "           <br> <div></div><img src=\"images/photoBaillet.jpg\" width='800px'></div>" +
+                    "            </div>");
+                $("#dialogDiv").dialog("open");
+            }
 
 
         });

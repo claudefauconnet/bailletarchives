@@ -66,7 +66,7 @@ var magasinD3 = (function () {
     var tabletteFillColor = "#d5d7cc"
 
 
-    self.init = function (_containerDiv) {
+    self.init = function (_containerDiv, callback) {
         // return;
         containerDiv = _containerDiv;
 
@@ -78,12 +78,11 @@ var magasinD3 = (function () {
         $("#magasinD3MessageDiv").html("Chargement du graphe en cours...")
         magasinD3.drawMagasins(null, function () {
             $("#magasinD3MessageDiv").html("")
-            cachedHtml = $("#graphDiv").html();
 
-            var zzz = d3.select("svg")
-
-            self.initialZoom()
-         //   zoom.translateTo(svg, 0, 0)
+            self.initialZoom();
+            if (callback)
+                return callback();
+            //   zoom.translateTo(svg, 0, 0)
 
 
         })
@@ -99,7 +98,7 @@ var magasinD3 = (function () {
         //  zoom.scaleTo(svg, self.avgZoom);
         //  zoom.translateTo(d3.select(".viewport"),0, 0);
         zoom.scaleTo(svg, 1);
-       // zoom.translateTo(svg, svgWidth, svgHeight)
+        // zoom.translateTo(svg, svgWidth, svgHeight)
         zoom.translateBy(svg, -svgWidth, -svgHeight)
         zoom.scaleTo(svg, self.minZoom);
 
@@ -107,14 +106,16 @@ var magasinD3 = (function () {
     }
 
 
-    self.drawMagasins = function (magasinsToDraw, callback) {
-        if (!magasinsToDraw)
-            magasinsToDraw = self.magasinsToDraw
+    self.initDrawMagasins = function (options) {
+
         var strMagasins = " Magasin :<span style='display: flex;flex-direction: row'>";
-        magasinsToDraw.forEach(function (magasin) {
+        strMagasins += "</span>";
+
+        if (!options.magasinsToDraw)
+            options.magasinsToDraw = self.magasinsToDraw;
+        options.magasinsToDraw.forEach(function (magasin) {
             strMagasins += "<span style='font-size: 18px;font-weight: bold;margin: 5px;padding:5px;border-style: solid ; border-width: 1px' onclick=magasinD3.zoomOnMagasin('" + magasin + "')>" + magasin + "</span>"
         })
-        strMagasins += "</span>";
 
         var htmlStr = "<div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
             "<button onclick='magasinD3.initialZoom()'>zoom out</button>" +
@@ -132,33 +133,65 @@ var magasinD3 = (function () {
         $("#graphDiv").html("");
 
 
+        totalWidth = $("#mainDiv").width() - 50;
+        totalHeight = $("#mainDiv").height() - 50;
+
+        svgWidth = totalWidth
+        svgHeight = totalHeight //* .8
+        $("#graphDiv").width(svgWidth)
+        $("#graphDiv").height(svgHeight)
+
+
+        zoom = d3.zoom().on("zoom", function () {
+            svg.attr("transform", d3.event.transform)
+
+        }).scaleExtent([self.minZoom, self.maxZoom])
+
+        svg = d3.select('#graphDiv')
+            .append('svg')
+            .attrs({width: svgWidth, height: svgHeight})
+            .on("click", function () {
+                $("#popupD3Div").css("visibility", "hidden")
+            })
+            .call(zoom)
+            .append("g").attr("class", "viewport")
+
+        ;
+
+    }
+
+
+    self.shouldDrawObject = function (options, type, obj) {
+
+        if (options.filter) {
+            if (!options.filter[type])
+                return false;
+            var index = options.filter[type].indexOf(obj.name);
+            if (index < 0)
+                return false;
+            return true;
+
+
+        }
+        return true;
+    }
+
+    self.drawMagasins = function (options, callback) {
+        if (!options)
+            options = {}
+
+
+        if (!options.filter) {
+            self.initDrawMagasins(options);
+
+        }
+
+
         d3.json(mainController.urlPrefix + "/magasinD3Tree", function (data) {
             var nMag = data.children.length;
             magasinData = data;
 
-            totalWidth = $("#mainDiv").width() - 50;
-            totalHeight = $("#mainDiv").height() - 50;
-            svgWidth = totalWidth
-            svgHeight = totalHeight //* .8
-            $("#graphDiv").width(svgWidth)
-            $("#graphDiv").height(svgHeight)
 
-
-            zoom = d3.zoom().on("zoom", function () {
-                svg.attr("transform", d3.event.transform)
-
-            }).scaleExtent([self.minZoom, self.maxZoom])
-
-            svg = d3.select('#graphDiv')
-                .append('svg')
-                .attrs({width: svgWidth, height: svgHeight})
-                .on("click", function () {
-                    $("#popupD3Div").css("visibility", "hidden")
-                })
-                .call(zoom)
-                .append("g").attr("class", "viewport")
-
-            ;
             var magW = totalWidth / 2;
             var magH = totalHeight * 2;
 
@@ -166,16 +199,19 @@ var magasinD3 = (function () {
             var magY = 10;
 
             data.children.forEach(function (magasin, indexMagasin) {
-                    if (magasinsToDraw != null && magasinsToDraw.indexOf(magasin.name) < 0)
+                    if (options.magasinsToDraw != null && options.magasinsToDraw.indexOf(magasin.name) < 0)
                         return;
 
                     if (magasin.name == "" || !magasin.name)
                         return;
+
+
                     magasin.x = magX;
                     magasin.y = magY;
                     magasin.h = magH;
                     magasin.w = magW;
-                    var gMag = self.drawMagasin(magasin, svg);
+
+                    var gMag = self.drawMagasin(magasin, svg, options);
 
 
                     // draw epi
@@ -189,11 +225,13 @@ var magasinD3 = (function () {
 
 
                         magasin.children.forEach(function (epi, indexEpi) {
+
+
                                 epi.x = epiX;
                                 epi.y = epiY;
                                 epi.w = epiW;
                                 epi.h = epiH;
-                                var gEpi = self.drawEpi(epi, gMag);
+                                var gEpi = self.drawEpi(epi, gMag, options);
 
 
                                 if (drawTravees) {
@@ -203,6 +241,8 @@ var magasinD3 = (function () {
                                     var traveeX = epiX + 10;
                                     var traveeY = epiY;
                                     epi.children.forEach(function (travee, indexTravee) {
+
+
                                         travee.x = traveeX;
                                         travee.y = traveeY;
                                         travee.w = traveeW;
@@ -212,7 +252,7 @@ var magasinD3 = (function () {
                                         if (indexTravee == epi.children.length - 1)
                                             travee.w -= 30;
 
-                                        var gTravee = self.drawTravee(travee, gEpi);
+                                        var gTravee = self.drawTravee(travee, gEpi, options);
 
 
                                         // draw tablettes
@@ -220,14 +260,17 @@ var magasinD3 = (function () {
                                         var tabH = traveeH / travee.children.length;
                                         var tabX = traveeX;
                                         var tabY = traveeY;
+
+
                                         if (drawTablettes) {
                                             travee.children.forEach(function (tab, indexTab) {
+
                                                 tab.x = tabX;
                                                 tab.y = tabY;
                                                 tab.h = tabH;
                                                 tab.w = tabW;
                                                 tab.index = indexTab;
-                                                var gTablette = self.drawTablette(tab, gTravee)
+                                                var gTablette = self.drawTablette(tab, gTravee, options)
 
                                                 // draw boites
                                                 var bteW = (tabW - tabletteTextSpacing) / nBoitesTablette
@@ -296,7 +339,16 @@ var magasinD3 = (function () {
     }
 
 
-    self.drawMagasin = function (magasin, parentG) {
+    self.drawMagasin = function (magasin, parentG, options) {
+
+
+        var shouldDraw = self.shouldDrawObject(options, "magasins", magasin);
+        if (!shouldDraw)
+            return d3.selectAll("#" + magasin.name);
+        else
+            d3.selectAll("#" + magasin.name).remove();
+
+
         var gMag = parentG.append("g").attr("class", "magasin").attr("id", magasin.name);
 
 
@@ -330,8 +382,16 @@ var magasinD3 = (function () {
     }
 
 
-    self.drawEpi = function (epi, parentG) {
-        var gEpi = parentG.append("g").attr("class", "epi");
+    self.drawEpi = function (epi, parentG, options) {
+
+        var shouldDraw = self.shouldDrawObject(options, "epis", epi);
+        if (!shouldDraw)
+            return d3.selectAll("#" + epi.name);
+        else
+            d3.selectAll("#" + epi.name).remove();
+
+
+        var gEpi = parentG.append("g").attr("class", "epis").attr("id", epi.name);
 
         gEpi.append("text")
             .attr("x", epi.x - 20)
@@ -360,7 +420,15 @@ var magasinD3 = (function () {
 
     }
 
-    self.drawTravee = function (travee, parentG) {
+    self.drawTravee = function (travee, parentG, options) {
+
+        var shouldDraw = self.shouldDrawObject(options, "travees", travee);
+        if (!shouldDraw)
+            return d3.selectAll("#" + travee.name);
+        else
+            d3.selectAll("#" + travee.name).remove();
+
+
         var gTravee = parentG.append("g").attr("class", "travee").attr("id", travee.name);
 
         if (drawTraveeNumber) {
@@ -391,7 +459,18 @@ var magasinD3 = (function () {
         return gTravee;
     }
 
-    self.drawTablette = function (tablette, parentG) {
+    self.drawTablette = function (tablette, parentG, options) {
+
+        var shouldDraw = self.shouldDrawObject(options, "tablettes", tablette);
+        if (!shouldDraw)
+            return d3.selectAll("#" + tablette.name);
+        else
+        //    d3.selectAll("#" + tablette.name).remove();
+
+
+
+
+
         var gTablette = parentG.append("g").attr("class", "tablette").attr("id", tablette.name).attr("longueurM", tablette.longueurM);
         var color = magasinD3.colors["tablette"];
         if (tablette.indisponible)
@@ -442,6 +521,8 @@ var magasinD3 = (function () {
 
         function onTabletteClick(obj, x, y) {
             self.currentTablette = obj;
+            self.currentVersement = null;
+            self.currentBoite = null;
 
             var html = "";
 
@@ -509,6 +590,9 @@ var magasinD3 = (function () {
             });
 
         onBoiteClick = function (boite, x, y) {
+            self.currentTablette = null;
+            self.currentVersement = null;
+            self.currentBoite = boite;
 
             Versement.getBoiteVersement(boite, function (err, obj) {
                 if (err)
@@ -728,6 +812,7 @@ var magasinD3 = (function () {
         $("#magasind3MouseInfo").html(str)
     }
 
+
     self.getTablettesContigues = function (tabletteDepart, metrage, tailleMoyBoite, callback) {
         var tablettesContigues = [];
 
@@ -845,9 +930,9 @@ var magasinD3 = (function () {
             d3.selectAll(".magasin").each(function (d, i) {
                 if (d3.select(this).attr("id") == magasin) {
                     var xx = parseInt(d3.select(this).select("rect").attr("x"));
-                    var yy =  parseInt(d3.select(this).select("rect").attr("y"));
+                    var yy = parseInt(d3.select(this).select("rect").attr("y"));
 
-                    zoom.translateTo(svg, xx+300, 400)
+                    zoom.translateTo(svg, xx + 300, 400)
                     zoom.scaleTo(svg, self.avgZoom);
                 }
             })
@@ -858,6 +943,32 @@ var magasinD3 = (function () {
         }
 
 
+    }
+
+    self.isTabletteLastInTravee = function (tablette) {
+        var ok=false;
+        var tabletteElts = Tablette.getCoordonneesElements(tablette.name)
+        magasinData.children.forEach(function (magasin) {
+            if (magasin.name == tabletteElts.magasin) {
+                magasin.children.forEach(function (epi) {
+                    if (epi.name == tabletteElts.epi) {
+                        epi.children.forEach(function (travee) {
+                            if (travee.name == tabletteElts.travee) {
+                                travee.children.forEach(function (tablette,index) {
+                                    if (tablette.name == tabletteElts.tablette) {
+                                        if(index>=travee.children.length-1)
+                                            ok= true;
+
+                                    }
+                                })
+
+                            }
+                        })
+                    }
+                })
+            }
+        })
+        return ok;
     }
 
 

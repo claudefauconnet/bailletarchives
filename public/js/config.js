@@ -137,12 +137,14 @@ var config = (function () {
             },
 
             fieldConstraints: {
-                coordonnees: {mandatory:true},
+                coordonnees: {mandatory:true,format:{regex:/^[A-Z]-\d{2}-\d{2}-\d{1,2}$/,message:" example A-01-03-5"}},
                 magasin: {readOnly:true},
                 epi: {readOnly:true},
                 travee: {readOnly:true},
                 tablette: {readOnly:true},
-            }
+            },
+           onAfterDisplay: Tablette.setNewTabletteCoordonnees,
+            onAfterSave: Tablette.onAfterSave
         },
         "article": {
 

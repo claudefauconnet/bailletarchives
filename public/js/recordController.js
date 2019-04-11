@@ -49,6 +49,14 @@ var recordController = (function () {
         recordController.setAttributesValue(table, targetObj, obj);
 
 
+
+
+
+
+
+
+
+
         $("#dialogDiv").dialog({title: table});
 
         //$("#dialogDiv").load("./htmlSnippets/versement.html", function () {
@@ -117,8 +125,9 @@ var recordController = (function () {
         }
 
 
-        if (!context.currentRecord.id)// new Record
+        if (!context.currentRecord.id) {// new Record
             return self.saveNewRecord();
+        }
 
         var sql = "Update " + context.currentTable + " set ";
         var i = 0;
@@ -163,6 +172,8 @@ var recordController = (function () {
 
                 }
 
+                self.currentRecordChanges={};
+
 
                 fn(options)
             }
@@ -187,7 +198,8 @@ var recordController = (function () {
             }
             
             
-            context.currentRecord=self.currentRecordChanges
+            context.currentRecord=self.currentRecordChanges;
+
             context.currentRecord.id = newId;
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
@@ -197,8 +209,11 @@ var recordController = (function () {
                     changes: self.currentRecordChanges
 
                 }
+                self.currentRecordChanges={};
                 fn(options)
+
             }
+
 
 
             mainController.setRecordMessage("enregistrement sauvé");

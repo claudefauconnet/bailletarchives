@@ -394,7 +394,22 @@ var Versement = (function () {
                         return callback();
                     });
 
+                },
+                function(callback) {// redraw tablettes
+                    if (coordonneesTablettes) {
+                    //    mainController.showInMainDiv("graph");
+                        $("#popupD3Div").css("visibility", "hidden");
+                        var options = {filter: {tablettes: coordonneesTablettes}}
+                       magasinD3.drawMagasins(options);
+                    }
+                    callback(null);
                 }
+                ,   function(callback) {// redraw tablettes
+                    // listController.listRecords("select * from versement where id=" + versement.id);
+
+                        recordController.displayRecordData(context.currentRecord)
+                        callback(null);
+                    }
                 ]
                 ,
                 function (err) {// at the end dispalay  versement and tablettes
@@ -404,10 +419,11 @@ var Versement = (function () {
                         return mainController.setErrorMessage(err);
                     }
 
-                    listController.listRecords("select * from versement where id=" + versement.id);
-                    $("#popupD3Div").css("visibility", "hidden");
 
-                    magasinD3.drawMagasins();
+
+
+
+
                 }
             )
         }
@@ -432,6 +448,14 @@ var Versement = (function () {
                             return callbackSeries(err);
                         callbackSeries();
                     })
+                },
+                function (callbackSeries) {// redraw tablettes
+                        if (tablettesaRefouler) {
+                            var options = {filter: {tablettes: tablettesaRefouler}}
+                            magasinD3.drawMagasins(options);
+                        }
+                        callback(null);
+
                 },
                 function (callbackSeries) {
 
