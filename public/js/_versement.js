@@ -12,9 +12,9 @@ var Versement = (function () {
             var etatTraitementDate = util.uiStrDateToDate(options.changes.etatTraitementDate || options.currentRecord.etatTraitementDate);
             var etatTraitementAuteur = options.changes.etatTraitementAuteur || options.currentRecord.etatTraitementAuteur;
 
-            self.updateRecordHistory(idVersement, etatTraitement, etatTraitementAuteur, null, etatTraitementDate, function(err,result){
-                if(err)
-                  return   console.log(err);
+            self.updateRecordHistory(idVersement, etatTraitement, etatTraitementAuteur, null, etatTraitementDate, function (err, result) {
+                if (err)
+                    return console.log(err);
                 listController.loadLinkedDivs();
             })
         }
@@ -40,18 +40,18 @@ var Versement = (function () {
             var sql2 = " insert into versement_historique (etat,etatAuteur, etatDate,dateModification,commentaire,id_versement) values (" +
                 "'" + etatTraitement + "'," +
                 "'" + etatTraitementAuteur + "'," +
-                "'" + date+"'," +
+                "'" + date + "'," +
                 "'" + util.dateToMariaDBString(new Date()) + "'," +
                 commentaireStr + "," +
                 "" + idVersement + ")"
             mainController.execSql(sql2, function (err, result) {
                 if (err) {
-                    if(callback)
+                    if (callback)
                         return callback(err)
                     else
-                    return console.log(err);
+                        return console.log(err);
                 }
-                if(callback)return callback(null)
+                if (callback) return callback(null)
 
 
             })
@@ -118,7 +118,7 @@ var Versement = (function () {
 
         }
         self.showDialogEntrerVersement = function () {
-          //  context.currentRecord = null;
+            //  context.currentRecord = null;
             var html = Tablette.getEnterVersementExistantDialogHtml();
             html += "<br>magasin<input id='popupD3DivOperationDiv_Magasin'style='width:50px' >"
             html += "<br>tablette debut<input id='popupD3DivOperationDiv_tabletteDebut'style='width:100px' value=''> <button onclick='Versement.chercherTablettes()'>chercher</button>"
@@ -386,29 +386,36 @@ var Versement = (function () {
                             callback();
                         })
                     },
-                function(callback){
+                    function (callback) {
 
-                    Versement.updateRecordHistory(versement.id, "en attente", authentication.currentUser, "", new Date(),function(err,result){
-                        if(err)
-                            return callback(err);
-                        return callback();
-                    });
+                        Versement.updateRecordHistory(versement.id, "en attente", authentication.currentUser, "", new Date(), function (err, result) {
+                            if (err)
+                                return callback(err);
+                            return callback();
+                        });
 
-                },
-                function(callback) {// redraw tablettes
-                    if (coordonneesTablettes) {
-                    //    mainController.showInMainDiv("graph");
-                        $("#popupD3Div").css("visibility", "hidden");
-                        var options = {filter: {tablettes: coordonneesTablettes}}
-                       magasinD3.drawMagasins(options);
-                    }
-                    callback(null);
-                }
-                ,   function(callback) {// redraw tablettes
-                    // listController.listRecords("select * from versement where id=" + versement.id);
-
-                        recordController.displayRecordData(context.currentRecord)
+                    },
+                    function (callback) {// redraw tablettes
+                        if (coordonneesTablettes) {
+                            //    mainController.showInMainDiv("graph");
+                            $("#popupD3Div").css("visibility", "hidden");
+                            var options = {filter: {tablettes: coordonneesTablettes}}
+                            magasinD3.drawMagasins(options);
+                            magasinD3.zoomOnMagasin(coordonneesTablettes[0].substring(0,1))
+                        }
                         callback(null);
+                    }
+                    , function (callback) {// display record
+                        // listController.listRecords("select * from versement where id=" + versement.id);
+                        var sql = "select * from versement where id=" + versement.id;
+                        mainController.execSql(sql, function(err,result){
+                            if(err)
+                                return callback(err);
+
+                            recordController.displayRecordData(result[0]);
+                            callback(null);
+                        })
+
                     }
                 ]
                 ,
@@ -418,10 +425,6 @@ var Versement = (function () {
                         console.log(err);
                         return mainController.setErrorMessage(err);
                     }
-
-
-
-
 
 
                 }
@@ -450,11 +453,11 @@ var Versement = (function () {
                     })
                 },
                 function (callbackSeries) {// redraw tablettes
-                        if (tablettesaRefouler) {
-                            var options = {filter: {tablettes: tablettesaRefouler}}
-                            magasinD3.drawMagasins(options);
-                        }
-                        callback(null);
+                    if (tablettesaRefouler) {
+                        var options = {filter: {tablettes: tablettesaRefouler}}
+                        magasinD3.drawMagasins(options);
+                    }
+                    callback(null);
 
                 },
                 function (callbackSeries) {
@@ -674,7 +677,7 @@ var Versement = (function () {
                 $("#versementEntrerEnMagasinButton").css("visibility", "hidden");
                 $("#versementLocaliserButton").css("visibility", "visible");
                 $("#versementRefoulerButton").css("visibility", "visible");
-                
+
 
             }
             else {
@@ -695,7 +698,7 @@ var Versement = (function () {
                     recordController.incrementChanges(attr_numVersement);
                 })
             }
-            if(!versement.etatTraitementAuteur) {
+            if (!versement.etatTraitementAuteur) {
 
                 $("#attr_etatTraitementAuteur").val(authentication.currentUser);
                 recordController.incrementChanges(attr_etatTraitementAuteur);
@@ -761,7 +764,7 @@ var Versement = (function () {
                         infos.tablettes.tailleTotaleTablettes += tablette.DimTabletteMLineaire
                         var tabletteBoites = [];
                         if (tablette.cotesParTablette) {
-                            tablette.cotesParTablette=tablette.cotesParTablette.replace(/\s+/g," ");// si plusieurs blancs
+                            tablette.cotesParTablette = tablette.cotesParTablette.replace(/\s+/g, " ");// si plusieurs blancs
                             tabletteBoites = tablette.cotesParTablette.split(" ");
 
                         }
