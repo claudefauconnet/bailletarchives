@@ -4,6 +4,8 @@ var Boite = (function () {
     self.onBoiteOperationSelect = function (select) {
         var operation = $(select).val();
 
+        $("#popupD3Div").css("visibility","hidden");
+        $("#select").val("");
 
         if (operation == "voirVersement") {
 

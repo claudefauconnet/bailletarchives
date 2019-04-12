@@ -261,7 +261,6 @@ var magasinD3 = (function () {
                                         var tabX = traveeX;
                                         var tabY = traveeY;
 
-
                                         if (drawTablettes) {
                                             travee.children.forEach(function (tab, indexTab) {
 

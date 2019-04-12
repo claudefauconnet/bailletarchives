@@ -367,7 +367,7 @@ var listController = (function () {
 
     self.editCellContent = function (linkedTable, editableColumns, datatable, line, rowIndex, colIndex) {
         var colName = context.dataTables["linked_" + linkedTable].columns[colIndex].title;
-        if (editableColumns.indexOf(colName) > -1) {
+        if (editableColumns.indexOf(colName)>-1) {
 
             var data = prompt(colName, line[colName]);
             if (data != null && data != line[colName] && confirm("modifier " + colName + " : " + colName)) {
@@ -375,6 +375,10 @@ var listController = (function () {
                 mainController.execSql(sql, function (err, result) {
                     if (err)
                         return console.log(err);
+                    if(colName=="cotesParTablette"){
+                        var options = {filter: {tablettes: [line.coordonnees]}}
+                        magasinD3.drawMagasins(options);
+                    }
 
                     mainController.setRecordMessage(colName + "  sauvegarde");
                     datatable.cell(rowIndex, colIndex).data(data).draw();

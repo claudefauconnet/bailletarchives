@@ -328,7 +328,7 @@ var Versement = (function () {
                         else {
                             versement.etatTraitementAuteur = authentication.currentUser;
                             self.refoulerVersement(versement, tablettesaRefouler, function (err, result) {
-                                tablettesaRefouler = null;
+
                                 if (err) {
                                     return callback(err)
                                 }
@@ -397,7 +397,14 @@ var Versement = (function () {
                     },
                     function (callback) {// redraw tablettes
                         if (coordonneesTablettes) {
-                            //    mainController.showInMainDiv("graph");
+
+                         if(tablettesaRefouler)
+                             tablettesaRefouler.forEach(function(tablette){
+                                 coordonneesTablettes.push(tablette.coordonnees)
+                             })
+
+
+
                             $("#popupD3Div").css("visibility", "hidden");
                             var options = {filter: {tablettes: coordonneesTablettes}}
                             magasinD3.drawMagasins(options);
@@ -420,6 +427,7 @@ var Versement = (function () {
                 ]
                 ,
                 function (err) {// at the end dispalay  versement and tablettes
+                    tablettesaRefouler = null;
                     $("#popupD3DivOperationDiv").css("visibility", "hidden");
                     if (err) {
                         console.log(err);
@@ -452,14 +460,7 @@ var Versement = (function () {
                         callbackSeries();
                     })
                 },
-                function (callbackSeries) {// redraw tablettes
-                    if (tablettesaRefouler) {
-                        var options = {filter: {tablettes: tablettesaRefouler}}
-                        magasinD3.drawMagasins(options);
-                    }
-                    callback(null);
 
-                },
                 function (callbackSeries) {
 
                     var sql = "update versement set etatTraitement='en attente',etatTraitementAuteur='" + versement.etatTraitementAuteur + "', etatTraitementDate='" + util.dateToMariaDBString(new Date()) + "' where id=" + versement.id;

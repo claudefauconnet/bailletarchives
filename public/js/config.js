@@ -71,8 +71,9 @@ var config = (function () {
                     deleteRelSql: "update magasin set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"],
                     onListLoadedFn:Versement.onMagasinsLoaded,
-                   // onRowClickedFn:Versement.onDataTableRowClicked,
+
                     editableColumns: ["cotesParTablette","commentaires"],
+
                    columns : ["coordonnees","cotesParTablette","commentaires","DimTabletteMLineaire"]
 
                 }

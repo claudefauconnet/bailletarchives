@@ -5,6 +5,10 @@ var Tablette = (function () {
         self.onTabletteOperationSelect = function (select) {
             var operation = $(select).val();
 
+            $("#popupD3Div").css("visibility","hidden");
+            $("#select").val("");
+
+
             if (operation == "createUnder") {
                 //   return alert("en construction");
                 if (!magasinD3.isTabletteLastInTravee(magasinD3.currentTablette)) {
