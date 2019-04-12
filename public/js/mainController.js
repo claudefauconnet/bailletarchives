@@ -44,7 +44,9 @@ var mainController = (function () {
             mainController.initTablesSelects();
             mainController.loadLists();
             if (true) {
-                magasinD3.init("mainDiv",function() {
+
+                magasinD3.init("graphWrapperDiv",function() {
+              //  magasinD3.init("mainDiv",function() {
                 $("#dialogDiv").dialog("close");
                 });
                 $("#dialogDiv").html(" <div style=\"height: 100%; display: flex;flex-direction: column; align-items: center; justify-content: center;\">" +
@@ -249,6 +251,8 @@ var mainController = (function () {
         mainController.totalDims.h = $(window).height();
         var dataTableWidth = mainController.totalDims.w - (self.leftPanelWidth);
         $("#mainDiv").width(mainController.totalDims.w - (self.leftPanelWidth + 20)).height(mainController.totalDims.h - 20);
+        $("#graphWrapperDiv").width(mainController.totalDims.w - (self.leftPanelWidth + 20)).height(mainController.totalDims.h - 20);
+        $("#listWrapperDiv").width(mainController.totalDims.w - (self.leftPanelWidth + 20)).height(mainController.totalDims.h - 20);
         //  $("#dataTableDiv").width(dataTableWidth).height(500);
         //  $(".dataTableDiv").width(dataTableWidth).height(mainController.totalDims.h - 50);
 
@@ -336,13 +340,19 @@ var mainController = (function () {
             self.onchangeTable("versement");
             mainController.showSearchDiv("searchDiv-Versements");
         }
+
+        else if (tabName == "Tablettes") {
+
+            self.onchangeTable("magasin");
+            mainController.showSearchDiv("searchDiv-Tablettes");
+        }
         /*    else if (tabName == "Sorties") {
                 context.currentTable = "sortie_boite"
                 mainController.showSearchDiv("searchDiv-Sorties");
             }*/
 
         else if (tabName == "Autres") {
-            self.onchangeTable("versement");
+
             mainController.showSearchDiv("searchDiv-Autres");
         }
 
@@ -479,6 +489,18 @@ var mainController = (function () {
     }
 
     self.showInMainDiv = function (type) {
+
+        if (type == "graph") {
+            $("#graphWrapperDiv").css("display","block");
+            $("#listWrapperDiv").css("display","none");
+        }
+        else if (type == "list") {
+            $("#graphWrapperDiv").css("display","none");
+            $("#listWrapperDiv").css("display","block");
+        }
+
+        return;
+
 
         var html = $("#mainDiv").html();
         if (html.indexOf("graphDiv") > -1) {
