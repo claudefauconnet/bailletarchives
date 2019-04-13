@@ -114,10 +114,10 @@ var magasinD3 = (function () {
         if (!options.magasinsToDraw)
             options.magasinsToDraw = self.magasinsToDraw;
         options.magasinsToDraw.forEach(function (magasin) {
-            strMagasins += "<span style='font-size: 18px;font-weight: bold;margin: 5px;padding:5px;border-style: solid ; border-width: 1px' onclick=magasinD3.zoomOnMagasin('" + magasin + "')>" + magasin + "</span>"
+            strMagasins += "<span style='font-size: 18px;font-weight: bold;margin: 3px;padding:3px;border-style: solid ; border-width: 1px' onclick=magasinD3.zoomOnMagasin('" + magasin + "')>" + magasin + "</span>"
         })
 
-        var htmlStr = "<div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
+        var htmlStr = "<br><div><button onclick='magasinD3.clearHighlights()'>retour</button> " +
             "<button onclick='magasinD3.initialZoom()'>zoom out</button>" +
             // "<button onclick='magasinD3.zoomOnMagasin()'>zoom on Magasin</button>" +
             strMagasins +

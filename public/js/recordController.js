@@ -49,14 +49,6 @@ var recordController = (function () {
         recordController.setAttributesValue(table, targetObj, obj);
 
 
-
-
-
-
-
-
-
-
         $("#dialogDiv").dialog({title: table});
 
         //$("#dialogDiv").load("./htmlSnippets/versement.html", function () {
@@ -115,105 +107,106 @@ var recordController = (function () {
 
     self.saveRecord = function () {
 
-        var errors = self.checkConstraints()
-        if (errors.length > 0) {
-            var message = "";
-            errors.forEach(function (err) {
-                message += err + "<br>"
-            })
-            return mainController.setRecordErrorMessage(message);
-        }
-
-
-        if (!context.currentRecord.id) {// new Record
-            return self.saveNewRecord();
-        }
-
-        var sql = "Update " + context.currentTable + " set ";
-        var i = 0;
-        for (var key in self.currentRecordChanges) {
-
-
-            if (i++ > 0)
-                sql += ","
-            var type = mainController.getFieldType(context.currentTable, key)
-            if (type == "number") {
-                if (self.currentRecordChanges[key] == "")
-                    sql += key + "= null"
-                else
-                    sql += key + "=" + self.currentRecordChanges[key].replace(",", ".");
-
-            }
-
-            else if (type == "string")
-                sql += key + "='" + self.currentRecordChanges[key] + "'";
-            else if (type == "date") {
-                var str = self.currentRecordChanges[key].replace(/\//g, "-");// date mysql  2018-09-21
-                sql += key + "='" + str + "'";
-            }
-        }
-        sql += " where id= " + context.currentRecord.id;
-        console.log(sql);
-
-
-        mainController.execSql(sql, function (err, json) {
+        self.checkConstraints(function (err, errors) {
             if (err)
-                return mainController.setRecordErrorMessage(err)
+                return mainController.setRecordErrorMessage(err);
+            if (errors.length > 0) {
+                var message = "";
+                errors.forEach(function (err) {
+                    message += err + "<br>"
+                })
+                return mainController.setRecordErrorMessage(message);
+            }
 
-            mainController.setRecordMessage("enregistrement sauvé");
-            //  dialog.dialog("close");
+
+            if (!context.currentRecord.id) {// new Record
+                return self.saveNewRecord();
+            }
+
+            var sql = "Update " + context.currentTable + " set ";
+            var i = 0;
+            for (var key in self.currentRecordChanges) {
 
 
-            var fn = config.tableDefs[context.currentTable].onAfterSave
-            if (fn) {
-                var options={
-                    currentRecord:context.currentRecord,
-                    changes:self.currentRecordChanges
+                if (i++ > 0)
+                    sql += ","
+                var type = mainController.getFieldType(context.currentTable, key)
+                if (type == "number") {
+                    if (self.currentRecordChanges[key] == "")
+                        sql += key + "= null"
+                    else
+                        sql += key + "=" + self.currentRecordChanges[key].replace(",", ".");
 
                 }
 
-                self.currentRecordChanges={};
-
-
-                fn(options)
+                else if (type == "string")
+                    sql += key + "='" + self.currentRecordChanges[key] + "'";
+                else if (type == "date") {
+                    var str = self.currentRecordChanges[key].replace(/\//g, "-");// date mysql  2018-09-21
+                    sql += key + "='" + str + "'";
+                }
             }
+            sql += " where id= " + context.currentRecord.id;
+            console.log(sql);
 
 
-            ///*******************************A finir*******************************************************************************
-            if (context.dataTables[context.currentTable])
-                context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    return mainController.setRecordErrorMessage(err)
 
+                mainController.setRecordMessage("enregistrement sauvé");
+                //  dialog.dialog("close");
+
+
+                var fn = config.tableDefs[context.currentTable].onAfterSave
+                if (fn) {
+                    var options = {
+                        currentRecord: context.currentRecord,
+                        changes: self.currentRecordChanges
+
+                    }
+
+                    self.currentRecordChanges = {};
+
+
+                    fn(options)
+                }
+
+
+                ///*******************************A finir*******************************************************************************
+                if (context.dataTables[context.currentTable])
+                    context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
+
+
+            })
 
         })
-
-
     }
 
-   self.saveNewRecord = function () {
+    self.saveNewRecord = function () {
 
         self.execSqlCreateRecord(context.currentTable, self.currentRecordChanges, function (err, newId) {
             if (err) {
 
                 return mainController.setRecordErrorMessage(err);
             }
-            
-            
-            context.currentRecord=self.currentRecordChanges;
+
+
+            context.currentRecord = self.currentRecordChanges;
 
             context.currentRecord.id = newId;
 
             var fn = config.tableDefs[context.currentTable].onAfterSave
             if (fn) {
                 var options = {
-                    currentRecord:  context.currentRecord,
+                    currentRecord: context.currentRecord,
                     changes: self.currentRecordChanges
 
                 }
-                self.currentRecordChanges={};
+                self.currentRecordChanges = {};
                 fn(options)
 
             }
-
 
 
             mainController.setRecordMessage("enregistrement sauvé");
@@ -417,30 +410,90 @@ var recordController = (function () {
 
     }
 
-    self.checkConstraints = function () {
-        var errors = [];
+    self.checkConstraints = function (callbackOuter) {
+        var constraintErrors = [];
+        var constraintsArray = [];
         $(".objAttrInput").each(function () {
             var value = $(this).val();
             var fieldName = $(this).attr("id").substring(5);
             var constraints = config.tableDefs[context.currentTable].fieldConstraints[fieldName];
             if (constraints) {
 
-                for (var key in constraints) {
-                    if (key == "mandatory") {
-                        if (value == null || value == "")
-                            errors.push(fieldName + " est obligatoire")
-                    }
-                    else if (key == "format") {
-                        if (constraints[key].regex) {
-                            if (value == null || !value.match(constraints[key].regex))
-                                errors.push(fieldName + " doit avoir le format " + constraints[key].message);
-                        }
-                    }
-                }
+                constraintsArray.push({fieldName: fieldName, value: value, constraints: constraints})
             }
 
         })
-        return errors;
+
+        async.eachSeries(constraintsArray, function (field, callback) {// !! unique is async
+
+                var fieldConstraints = [];
+                for (var key in field.constraints) {
+                    fieldConstraints.push(key);
+                }
+
+                async.eachSeries(fieldConstraints, function (key, callback2) {// !! unique is async
+                    if (key == "mandatory") {
+                        if (field.value == null || field.value == "")
+                            constraintErrors.push(field.fieldName + " est obligatoire");
+                        return callback2();
+
+                    }
+                    else if (key == "unique") { // async
+                        self.isUnique(context.currentTable, field.fieldName, field.value, function (err, result) {
+                            if (err)
+                                return callbackOuter(err)
+                            if (result != true)
+                                constraintErrors.push("la valeur de " + field.fieldName + " doit être unique (" + field.value + ")")
+                            return callback2();
+                        })
+                    }
+                    else if (key == "format") {
+                        if (field.constraints[key].regex) {
+                            if (field.value == null || !field.value.match(field.constraints[key].regex))
+                                constraintErrors.push(field.fieldName + " doit avoir le format " + field.constraints[key].message);
+                            return callback2();
+                        }
+
+                    }
+                }, function (err) {//callback2
+                    if (err) {
+                        return callback(err)
+                    }
+                    return callback();
+
+                })
+
+
+            } ,
+
+                function (err) {
+                    if (err) {
+                        return callbackOuter(err)
+                    }
+                    return callbackOuter(null, constraintErrors);
+
+                }
+
+        )
+
+
+    }
+    self.isUnique = function (table, column, value, callback) {
+        var type = mainController.getFieldType(table, column);
+        if (type == "number")
+            value = value;
+        else if (type == "string")
+            value = "'" + value + "'";
+        else
+            value = "'" + value + "'";
+        var sql = "select " + column + " from " + table + " where " + column + "=" + value;
+        mainController.execSql(sql, function (err, result) {
+            if (err)
+                return clabback(err);
+            if (result.length == 0)
+                return callback(null, true);
+            return callback(null, false);
+        })
 
     }
 
@@ -587,6 +640,15 @@ var recordController = (function () {
 
             var fieldTitle = targetObj[key].title;
 
+
+            var constraintsClassStr = "";
+            var constraints = config.tableDefs[context.currentTable].fieldConstraints[key];
+            if (constraints) {
+                if (constraints.mandatory)
+                    constraintsClassStr = "class='field-mandatory'"
+            }
+
+
             var desc = targetObj[key].desc;
             if (desc) {
                 desc = "<img src='/toutlesens/icons/questionMark.png' width=" + self.iconSize + " title='" + desc + "'>";
@@ -603,11 +665,7 @@ var recordController = (function () {
                 var className = 'fieldLabel';
 
 
-                if (targetObj[key].control == 'mandatory')
-                    className = 'mandatoryFieldLabel';
-
-
-                str += "<tr><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal + fieldToolStr + "</span></td></tr>";
+                str += "<tr " + constraintsClassStr + "><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal + fieldToolStr + "</span></td></tr>";
             }
         }
         str += "</table>" + strHidden;

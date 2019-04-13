@@ -106,7 +106,7 @@ var config = (function () {
             },
             fieldConstraints: {
 
-                numVersement: {mandatory:true,format:{regex:/^[0-9]\d{3}$/,message:"4 chiffres commençant par 1"}},
+                numVersement: {mandatory:true,unique:true,format:{regex:/^[0-9]\d{3}$/,message:"4 chiffres"}},
                 nature: {mandatory:true},
                 etatTraitement: {mandatory:true},
                 etatTraitementAuteur: {mandatory:true},

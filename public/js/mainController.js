@@ -44,7 +44,7 @@ var mainController = (function () {
             mainController.initTablesSelects();
             mainController.loadLists();
             if (true) {
-
+                self.showInMainDiv("graph") ;
                 magasinD3.init("graphWrapperDiv",function() {
               //  magasinD3.init("mainDiv",function() {
                 $("#dialogDiv").dialog("close");
