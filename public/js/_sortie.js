@@ -65,7 +65,7 @@ var Sortie=(function(){
     self.sortiesShowBoitesCbx = function () {
         var numVersement = $("#attr_numVersement").val();
         if (!numVersement || numVersement == "")
-            mainController.setRecordErrorMessage("saisissez un versement")
+           return mainController.setRecordErrorMessage("saisissez un versement")
         var sql = "select * from magasin, versement where versement.id=magasin.id_versement and versement.numVersement="+ numVersement;
         mainController.execSql(sql, function (err, json) {
             if (err)
@@ -84,14 +84,14 @@ var Sortie=(function(){
                         boites=boitesStr.split(" ");
                     allBoites=allBoites.concat(boites)
                 })
-                html="<div style='display:block;width: 250px'><input type='checkbox' onchange=util.checkUncheckAllBoxes($(this),'.boite_cbx')><B>Toutes les boites</B><br><div>"
+                html="<div style='display:block;width: 250px'><input type='checkbox' onchange=Sortie.onCbxChanged($(this),'all')><B>Toutes les boites</B><br><div>"
                 allBoites.sort();
                 allBoites.forEach(function(boite){
                     html+="<input type='checkbox'  id='"+boite+"'class='boite_cbx'>"+boite+"<br>"
                 })
                 html+="</div></div>"
 
-                html+="<script>$('.boite_cbx').on('click',function(){$('#attr_cotesBoites').append(' '+$(this).attr('id'));  recordController.incrementChanges(document.getElementById(\"attr_cotesBoites\"));})"
+                html+="<script>$('.boite_cbx').on('click', function(){Sortie.onCbxChanged ($(this))});</script>"
 
 
 
@@ -105,6 +105,34 @@ var Sortie=(function(){
 
 
     }
+
+    self.onCbxChanged = function (cbxId,mode) {
+        if (mode == "all") {
+            var checked = $(cbxId).prop("checked");
+            var str="";
+            $(".boite_cbx").each(function (index, val) {
+
+                $(this).prop("checked", checked)
+                if(checked)
+                   str+=" "+ $(this).attr('id')
+
+
+            })
+           $('#attr_cotesBoites').val(str)
+
+        } else {
+            var str= $('#attr_cotesBoites').val();
+            str=str.replace(/\s*/g," ");
+            var cote= $(cbxId).attr('id');
+            if(str.indexOf(cote)<0)
+                $('#attr_cotesBoites').append(" "+cote)
+
+        }
+
+
+    }
+
+
 
 
 

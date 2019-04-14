@@ -121,8 +121,8 @@ var listController = (function () {
             var sql = "";
             if (joinObj) {
                 sql = " select distinct " + context.currentJoinTable + ".* from  " + joinObj.tables + " WHERE " + joinObj.where + " and " + whereStrAll;
-                if(joinObj.orderBy && joinObj.orderBy!="")
-                    sql+=" order by "+joinObj.orderBy;
+                if (joinObj.orderBy && joinObj.orderBy != "")
+                    sql += " order by " + joinObj.orderBy;
                 // on remet la table initiale comme currentTable
                 context.currentTable = context.currentJoinTable;
                 $("#searchTableInput").val(context.currentTable);
@@ -133,7 +133,7 @@ var listController = (function () {
                     whereStrAll = " WHERE " + whereStrAll;
                 sql = "select * from " + table + whereStrAll
             }
-          var sortClause = "";
+            var sortClause = "";
             var sortFields = config.tableDefs[table].sortFields;
             if (sortFields) {
                 sortFields.forEach(function (field, index) {
@@ -169,7 +169,7 @@ var listController = (function () {
     }
 
     self.listRecords = function (sql) {
-        $("#popupD3Div").css("visibility","hidden")
+        $("#popupD3Div").css("visibility", "hidden")
         mainController.showInMainDiv("list")
         context.currentListQueries[context.currentTable] = sql;
         var table = context.currentTable;
@@ -179,7 +179,7 @@ var listController = (function () {
                 return mainController.setMessage("Pas de resultat")
             }
             if (json.length == 1) {
-                context.currentRecord=json[0]
+                context.currentRecord = json[0]
                 recordController.displayRecordData(context.currentRecord)
                 return mainController.setMessage("")
             }
@@ -247,8 +247,8 @@ var listController = (function () {
 
         var joinObj = relations[linkedTable].joinObj;
         var sql = " select " + linkedTable + ".* from  " + joinObj.tables + " where " + joinObj.where + " and " + context.currentTable + ".id=" + context.currentRecord.id;
-        if(joinObj.orderBy && joinObj.orderBy!="")
-            sql+=" order by "+joinObj.orderBy;
+        if (joinObj.orderBy && joinObj.orderBy != "")
+            sql += " order by " + joinObj.orderBy;
         mainController.execSql(sql, function (err, json) {
             if (err)
                 mainController.setErrorMessage(err)
@@ -274,15 +274,15 @@ var listController = (function () {
             if (!context.dataTables["linked_" + linkedTable])
                 context.dataTables["linked_" + linkedTable] = new dataTable();
 
-            var columns = context.dataTables["linked_" + linkedTable].getColumns(json, linkedTable,null);
+            var columns = context.dataTables["linked_" + linkedTable].getColumns(json, linkedTable, null);
 
-          var nonVisibleColumns=[];
-          if(definedColumns) {
-              columns.forEach(function (column, index) {
-                  if (definedColumns.indexOf(column.data) < 0)
-                      nonVisibleColumns.push(index);
-              })
-          }
+            var nonVisibleColumns = [];
+            if (definedColumns) {
+                columns.forEach(function (column, index) {
+                    if (definedColumns.indexOf(column.data) < 0)
+                        nonVisibleColumns.push(index);
+                })
+            }
 
 
             var htmlStr = "<div class='title'>" + linkedTable + "</div>"
@@ -297,8 +297,8 @@ var listController = (function () {
                 columns: columns,
                 fixedHeader: true,
                 pageLength: 500,
-                order:order,
-             //   "autoWidth": false,
+                order: order,
+                //   "autoWidth": false,
                 "dom": "",
 
                 //  fixedColumns: true,
@@ -306,9 +306,9 @@ var listController = (function () {
                 select: true,
                 columnDefs: [
 
-                    {  "visible": false,targets:nonVisibleColumns},
+                    {"visible": false, targets: nonVisibleColumns},
 
-                  {'width': 200, 'targets': columns.textColumns},
+                    {'width': 200, 'targets': columns.textColumns},
                     {//dates
                         "render": function (data, type, row, meta) {
                             var str = "";
@@ -367,18 +367,24 @@ var listController = (function () {
 
     self.editCellContent = function (linkedTable, editableColumns, datatable, line, rowIndex, colIndex) {
         var colName = context.dataTables["linked_" + linkedTable].columns[colIndex].title;
-        if (editableColumns.indexOf(colName)>-1) {
+        if (editableColumns[colName]) {
+
 
             var data = prompt(colName, line[colName]);
             if (data != null && data != line[colName] && confirm("modifier " + colName + " : " + colName)) {
+
+                    line[colName] =  data.trim()
+
+
+
                 var sql = "update  " + linkedTable + " set " + colName + "='" + data + "' where id=" + line.id;
                 mainController.execSql(sql, function (err, result) {
                     if (err)
                         return console.log(err);
-                    if(colName=="cotesParTablette"){
-                        var options = {filter: {tablettes: [line.coordonnees]}}
-                        magasinD3.drawMagasins(options);
+                    if (editableColumns[colName].callback) {
+                        editableColumns[colName].callback(line,datatable,rowIndex,colIndex)
                     }
+
 
                     mainController.setRecordMessage(colName + "  sauvegarde");
                     datatable.cell(rowIndex, colIndex).data(data).draw();

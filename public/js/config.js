@@ -5,8 +5,8 @@ var config = (function () {
     self.hiddenTables = ["article", "listes"]
     self.LoadAllrecordsTables = false;
     self.maxVersementsToLocate = 5;
-    self.coefRemplissageTablette=.7
-    self.coteBoiteNbDigits=3
+    self.coefRemplissageTablette = .7
+    self.coteBoiteNbDigits = 3
 
     self.tableDefs = {
 
@@ -17,17 +17,17 @@ var config = (function () {
             recordTools: [
                 {
                     title: "Entrer en magasin...",
-                    id:"versementEntrerEnMagasinButton",
+                    id: "versementEntrerEnMagasinButton",
                     toolFn: "Versement.showDialogEntrerVersement"
                 },
                 {
                     title: "Localiser...",
-                    id:"versementLocaliserButton",
+                    id: "versementLocaliserButton",
                     toolFn: "Versement.locateCurrentVersement"
                 },
                 {
                     title: "Refouler...",
-                    id:"versementRefoulerButton",
+                    id: "versementRefoulerButton",
                     toolFn: "Versement.showDialogEntrerVersement"
                 }
 
@@ -35,14 +35,14 @@ var config = (function () {
             fieldTools: {
 
 
-                 "cotesExtremesBoites": {
-                      title: "mettre à jour",
-                      toolFn: "Versement.SetVersementCotesExtremesFromMagasin"
-                  },
-                  "nbBoites": {
-                      title: "calculer",
-                      toolFn: "Versement.SetVersementnbBoitesFromMagasin"
-                  }
+                "cotesExtremesBoites": {
+                    title: "mettre à jour",
+                    toolFn: "Versement.SetVersementCotesExtremesFromMagasin"
+                },
+                "nbBoites": {
+                    title: "calculer",
+                    toolFn: "Versement.SetVersementnbBoitesFromMagasin"
+                }
             },
             relations: {
                 "versement_historique": {
@@ -55,10 +55,10 @@ var config = (function () {
                     createRelSql: "update versement_historique set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update versement_historique set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"],
-                  //  onRowClickedFn:Versement.onDataTableRowClicked,
-                    editableColumns: ["commentaire"],
-                    columns:["etat","etatAuteur","etatDate","commentaire","dateModification"],
-                    order:[[ 2, 'desc' ]]
+                    //  onRowClickedFn:Versement.onDataTableRowClicked,
+                    editableColumns: {commentaire: {}},
+                    columns: ["etat", "etatAuteur", "etatDate", "commentaire", "dateModification"],
+                    order: [[2, 'desc']]
 
                 },
                 "magasin": {
@@ -70,11 +70,16 @@ var config = (function () {
                     createRelSql: "update magasin set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update magasin set id_versement=null where id=<%data.id%>",
                     selectfields: ["coordonnees"],
-                    onListLoadedFn:Versement.onMagasinsLoaded,
+                    onListLoadedFn: Versement.onMagasinsLoaded,
 
-                    editableColumns: ["cotesParTablette","commentaires"],
+                    editableColumns:
+                        {
+                            cotesParTablette: {callback: Tablette.onAfterEditTaletteTableCell},
+                            commentaires: {}
+                        },
 
-                   columns : ["coordonnees","cotesParTablette","commentaires","DimTabletteMLineaire"]
+
+                    columns: ["coordonnees", "cotesParTablette", "commentaires", "DimTabletteMLineaire"]
 
                 }
                 ,
@@ -86,8 +91,8 @@ var config = (function () {
                     },
                     createRelSql: "update sortie_boite set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update sortie_boite set id_versement=null where id=<%data.id%>",
-                    columns : ["numVersement","sortieDate","sortieArchiviste","retourDate","retourArchiviste","cotesBoite","commentaire"],
-                    editableColumns: ["commentaire"],
+                    columns: ["numVersement", "sortieDate", "sortieArchiviste", "retourDate", "retourArchiviste", "cotesBoite", "commentaire"],
+                    editableColumns: {commentaire: {}},
 
 
                 }
@@ -106,12 +111,14 @@ var config = (function () {
             },
             fieldConstraints: {
 
-                numVersement: {mandatory:true,unique:true,format:{regex:/^[0-9]\d{3}$/,message:"4 chiffres"}},
-                nature: {mandatory:true},
-                etatTraitement: {mandatory:true},
-                etatTraitementAuteur: {mandatory:true},
-                etatTraitementDate: {mandatory:true},
-                DimTabletteMLineaire: {mandatory:true},
+                numVersement: {mandatory: true, unique: true, format: {regex: /^[0-9]\d{3}$/, message: "4 chiffres"}},
+                auteurVersement:{mandatoryOnNew:true},
+                dateVersement:{mandatoryOnNew:true},
+                nature: {mandatory: true},
+                etatTraitement: {mandatory: true},
+                etatTraitementAuteur: {mandatory: true},
+                etatTraitementDate: {mandatory: true},
+                DimTabletteMLineaire: {mandatory: true},
             },
             onAfterDisplay: Versement.setNewRecordDefaultValues,
             onAfterSave: Versement.updateRecordHistoryAfterVersementSave
@@ -138,13 +145,13 @@ var config = (function () {
             },
 
             fieldConstraints: {
-                coordonnees: {mandatory:true,format:{regex:/^[A-Z]-\d{2}-\d{2}-\d{1,2}$/,message:" example A-01-03-5"}},
-                magasin: {readOnly:true},
-                epi: {readOnly:true},
-                travee: {readOnly:true},
-                tablette: {readOnly:true},
+                coordonnees: {mandatory: true, format: {regex: /^[A-Z]-\d{2}-\d{2}-\d{1,2}$/, message: " example A-01-03-5"}},
+                magasin: {readOnly: true},
+                epi: {readOnly: true},
+                travee: {readOnly: true},
+                tablette: {readOnly: true},
             },
-           onAfterDisplay: Tablette.setNewTabletteCoordonnees,
+            onAfterDisplay: Tablette.setNewTabletteCoordonnees,
             onAfterSave: Tablette.onAfterSave
         },
         "article": {
@@ -176,18 +183,16 @@ var config = (function () {
             },
             tabs: [],
             fieldConstraints: {
-                id_versement: {hidden:true},
-                sortieDate:{mandatory:true},
-                sortieArchiviste:{mandatory:true},
-
-
+                id_versement: {hidden: true},
+                sortieDate: {mandatory: true},
+                sortieArchiviste: {mandatory: true},
 
 
             },
             fieldTools: {
                 numVersement: {
                     title: "selectionner boites",
-                    toolFn:"Sortie.sortiesShowBoitesCbx"
+                    toolFn: "Sortie.sortiesShowBoitesCbx"
                 }
 
 
@@ -206,13 +211,13 @@ var config = (function () {
     self.tools = {
 
 
-      //  "ChercherTablettesDisponibles ": {htmlPage: "magasinD3dialog.html"},
+        //  "ChercherTablettesDisponibles ": {htmlPage: "magasinD3dialog.html"},
 
-    //    "DéplacerBoitesVersement ": {htmlPage: "deplacerBoitesDialog.html"},
+        //    "DéplacerBoitesVersement ": {htmlPage: "deplacerBoitesDialog.html"},
 
         "GererLesListes ": {htmlPage: "gererListes.html"},
 
-     //   "carte de magasin ": {loadMagasinD3: true}
+        //   "carte de magasin ": {loadMagasinD3: true}
 
 
     }
@@ -226,8 +231,6 @@ var config = (function () {
 
 
     }
-
-
 
 
     return self;

@@ -39,10 +39,8 @@ var magasinD3 = (function () {
         "travee": "#e8e6e8",
         "tablette": "#fff0f0",
         "tabletteIndisponible": "#666",
-        "tabletteavecVersementSanscotes": "#8EE889"
-
-        //  "tablette": "#e8c8b3",
-
+        "tabletteavecVersementSanscotes": "#8EE889",
+        "tabletteavecCotesSansVersement": "#E820C9"
     }
 
     var palette = [
@@ -162,7 +160,6 @@ var magasinD3 = (function () {
 
 
     self.shouldDrawObject = function (options, type, obj) {
-
         if (options.filter) {
             if (!options.filter[type])
                 return false;
@@ -170,11 +167,10 @@ var magasinD3 = (function () {
             if (index < 0)
                 return false;
             return true;
-
-
         }
         return true;
     }
+
 
     self.drawMagasins = function (options, callback) {
         if (!options)
@@ -197,7 +193,7 @@ var magasinD3 = (function () {
 
             var magX = 10;
             var magY = 10;
-
+            var drawObject = true;
             data.children.forEach(function (magasin, indexMagasin) {
                     if (options.magasinsToDraw != null && options.magasinsToDraw.indexOf(magasin.name) < 0)
                         return;
@@ -211,8 +207,13 @@ var magasinD3 = (function () {
                     magasin.h = magH;
                     magasin.w = magW;
 
-                    var gMag = self.drawMagasin(magasin, svg, options);
-
+                    drawObject = self.shouldDrawObject(options, "magasins", magasin);
+                    var gMag;
+                    if (!drawObject)
+                        gMag = d3.selectAll("#" + magasin.name);
+                    else {
+                        gMag = self.drawMagasin(magasin, svg, options);
+                    }
 
                     // draw epi
                     if (drawEpis) {
@@ -231,7 +232,14 @@ var magasinD3 = (function () {
                                 epi.y = epiY;
                                 epi.w = epiW;
                                 epi.h = epiH;
-                                var gEpi = self.drawEpi(epi, gMag, options);
+
+                                drawObject = drawObject | self.shouldDrawObject(options, "epis", epi);
+                                var gEpi;
+                                if (!drawObject)
+                                    gEpi = d3.selectAll("#" + epi.name);
+                                else {
+                                    gEpi = self.drawEpi(epi, gMag, options);
+                                }
 
 
                                 if (drawTravees) {
@@ -252,7 +260,13 @@ var magasinD3 = (function () {
                                         if (indexTravee == epi.children.length - 1)
                                             travee.w -= 30;
 
-                                        var gTravee = self.drawTravee(travee, gEpi, options);
+                                        drawObject = drawObject | self.shouldDrawObject(options, "travees", travee);
+                                        var gTravee;
+                                        if (!drawObject)
+                                            gTravee = d3.selectAll("#" + epi.name);
+                                        else {
+                                            gTravee = self.drawTravee(travee, gEpi, options);
+                                        }
 
 
                                         // draw tablettes
@@ -269,7 +283,14 @@ var magasinD3 = (function () {
                                                 tab.h = tabH;
                                                 tab.w = tabW;
                                                 tab.index = indexTab;
-                                                var gTablette = self.drawTablette(tab, gTravee, options)
+                                                drawObject = drawObject | self.shouldDrawObject(options, "tablettes", tab);
+                                                var gTablette;
+                                                if (!drawObject)
+                                                    gTablette = d3.selectAll("#" + tab.name);
+                                                else {
+                                                    gTablette = self.drawTablette(tab, gTravee, options);
+                                                }
+
 
                                                 // draw boites
                                                 var bteW = (tabW - tabletteTextSpacing) / nBoitesTablette
@@ -340,14 +361,7 @@ var magasinD3 = (function () {
 
     self.drawMagasin = function (magasin, parentG, options) {
 
-
-        var shouldDraw = self.shouldDrawObject(options, "magasins", magasin);
-        if (!shouldDraw)
-            return d3.selectAll("#" + magasin.name);
-        else
-            d3.selectAll("#" + magasin.name).remove();
-
-
+        d3.selectAll("#" + magasin.name).remove();
         var gMag = parentG.append("g").attr("class", "magasin").attr("id", magasin.name);
 
 
@@ -382,13 +396,7 @@ var magasinD3 = (function () {
 
 
     self.drawEpi = function (epi, parentG, options) {
-
-        var shouldDraw = self.shouldDrawObject(options, "epis", epi);
-        if (!shouldDraw)
-            return d3.selectAll("#" + epi.name);
-        else
-            d3.selectAll("#" + epi.name).remove();
-
+        d3.selectAll("#" + epi.name);
 
         var gEpi = parentG.append("g").attr("class", "epis").attr("id", epi.name);
 
@@ -420,12 +428,7 @@ var magasinD3 = (function () {
     }
 
     self.drawTravee = function (travee, parentG, options) {
-
-        var shouldDraw = self.shouldDrawObject(options, "travees", travee);
-        if (!shouldDraw)
-            return d3.selectAll("#" + travee.name);
-        else
-            d3.selectAll("#" + travee.name).remove();
+        d3.selectAll("#" + travee.name).remove();
 
 
         var gTravee = parentG.append("g").attr("class", "travee").attr("id", travee.name);
@@ -460,22 +463,17 @@ var magasinD3 = (function () {
 
     self.drawTablette = function (tablette, parentG, options) {
 
-        var shouldDraw = self.shouldDrawObject(options, "tablettes", tablette);
-        if (!shouldDraw)
-            return d3.selectAll("#" + tablette.name);
-        else
-        //    d3.selectAll("#" + tablette.name).remove();
+        d3.selectAll("#" + tablette.name);
 
 
-
-
-
-        var gTablette = parentG.append("g").attr("class", "tablette").attr("id", tablette.name).attr("longueurM", tablette.longueurM);
+        var gTablette = parentG.append("g").attr("class", "tablette").attr("id", tablette.name).attr("name", tablette.name).attr("longueurM", tablette.longueurM);
         var color = magasinD3.colors["tablette"];
         if (tablette.indisponible)
             color = magasinD3.colors["tabletteIndisponible"];
         if (tablette.avecVersementSanscotes)
             color = magasinD3.colors["tabletteavecVersementSanscotes"];
+        if(tablette.avecCotesSansVersement)
+            color = magasinD3.colors["tabletteavecCotesSansVersement"];
         if (drawTabletteNumber) {
             gTablette.append("text")
                 .attr("x", tablette.x - 1)
@@ -525,15 +523,36 @@ var magasinD3 = (function () {
 
             var html = "";
 
-            if (obj.avecVersementSanscotes)
+            if (obj.avecVersementSanscotes) {
                 html = "tablette " + obj.name + "<br>avec versement sans boites cotées : " + obj.avecVersementSanscotes;
-            else if (obj.indisponible)
+                html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
+                    " <option></option>" +
+                    "<option value='releaseTablette'> liberer tablette</option>" +
+                    "</select>";
+
+            }
+            else if ( tablette.avecCotesSansVersement) {
+
+                html = "tablette " + obj.name + "<br> sans versement mais avec des boites cotées : " ;
+                html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
+                    " <option></option>" +
+                    "<option value='releaseTablette'> liberer tablette</option>" +
+                 //   "<option value='entrerVersementExistant'> entrer versement existant</option>" +
+                    "</select>";
+
+
+            }else if (obj.indisponible) {
                 html = "tablette  " + obj.name + "indisponible : " + obj.indisponible;
+                html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
+                " <option></option>" +
+                "<option value='releaseTablette'> liberer tablette</option>" +
+                "</select>";
+            }
             else {
                 html += "tablette " + tablette.name + "<br>"
-                html += "operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
+                html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
                     " <option></option>" +
-                    "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
+                    //   "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
                     "<option value='entrerVersementExistant'> entrer versement existant</option>" +
                     "<option value='setUnavailable'> rendre indisponible</option>" +
                     "<option value='createUnder'> creer nouvelle</option>" +
@@ -608,8 +627,8 @@ var magasinD3 = (function () {
                     + " <option></option>" +
 
                     "<option value='voirVersement'> voir versement</option>" +
-                    "<option value='decalerBoite'> décaler</option>" +
-                    "<option value='supprimerBoite'> supprimer  </option>" +
+                   // "<option value='decalerBoite'> décaler</option>" +
+                 //   "<option value='supprimerBoite'> supprimer  </option>" +
                     "</select>";
                 html += "<div id='popupD3DivOperationDiv'></div>"
                 html += "</table>"
@@ -718,37 +737,6 @@ var magasinD3 = (function () {
 
     }
 
-    self.modifyDrawing = function (operation, coordonnees, newObj) {
-
-        var d3Obj = svg.select("#" + coordonnees);
-        var parentCoords = coordonnees.substring(0, coordonnees.lastIndexOf("-"));
-        var parentObj = svg.select("#" + parentCoords);
-        var siblings = parentObj.select(function () {
-            return this.childNodes;
-        })
-        if (operation == "delete") {
-
-            siblings.each(function (sibling) {
-                var xx = d3.select(this);
-            })
-            svg.select("#" + coordonnees).remove();
-        }
-
-
-        var d3Obj = svg.select("#" + coordonnees)
-        var xxx = d3Obj.attr('class');
-        if (d3Obj.length > 0) {
-            d3Obj = d3Obj[0]
-
-            var type = d3Obj.attr("id")
-            var classed = d3Obj.classed()
-
-
-        }
-
-        //  svg.selectAll("#" + coordonnees).remove()
-
-    }
 
     self.findElementInDataTree = function (coordonnees) {
         var indexArray = [];
@@ -823,7 +811,7 @@ var magasinD3 = (function () {
             var stop = false;
             d3.selectAll("g .tablette").each(function (d, i) {
                 if (stop == false) {
-                    var name = d3.select(this).attr("id");
+                    var name = d3.select(this).attr("name");
                     var longueurM = parseInt(d3.select(this).attr("longueurM"));
                     longueurM = longueurM - (config.coefRemplissageTablette * tailleMoyBoite)
                     if (name == tabletteDepart.name) {
@@ -945,7 +933,7 @@ var magasinD3 = (function () {
     }
 
     self.isTabletteLastInTravee = function (tablette) {
-        var ok=false;
+        var ok = false;
         var tabletteElts = Tablette.getCoordonneesElements(tablette.name)
         magasinData.children.forEach(function (magasin) {
             if (magasin.name == tabletteElts.magasin) {
@@ -953,10 +941,10 @@ var magasinD3 = (function () {
                     if (epi.name == tabletteElts.epi) {
                         epi.children.forEach(function (travee) {
                             if (travee.name == tabletteElts.travee) {
-                                travee.children.forEach(function (tablette,index) {
+                                travee.children.forEach(function (tablette, index) {
                                     if (tablette.name == tabletteElts.tablette) {
-                                        if(index>=travee.children.length-1)
-                                            ok= true;
+                                        if (index >= travee.children.length - 1)
+                                            ok = true;
 
                                     }
                                 })

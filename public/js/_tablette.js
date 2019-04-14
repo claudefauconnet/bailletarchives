@@ -5,8 +5,8 @@ var Tablette = (function () {
         self.onTabletteOperationSelect = function (select) {
             var operation = $(select).val();
 
-          /*  $("#popupD3Div").css("visibility","hidden");
-            $("#select").val("");*/
+            /*  $("#popupD3Div").css("visibility","hidden");
+              $("#select").val("");*/
 
 
             if (operation == "createUnder") {
@@ -17,24 +17,39 @@ var Tablette = (function () {
                     context.currentTable = "magasin";
                     mainController.showNewRecordDialog();
                 }
+                $("#popupD3Div").css("visibility", "hidden");
             }
             else if (operation == "split") {
-                return alert("en construction");
-                var html = "<br>Pourcentage restant sur l'ancienne tablette : <input size='3' id=tablette_percentageRemainingOnTopTablette value='50'> %";
-                html += "<button onclick='Tablette.split();'>OK</button>";
-                $("#popupD3DivOperationDiv").html(html);
-
+                var coordonnees = magasinD3.currentTablette.name
+               self.splitTablette(coordonnees)
             }
+
+
             else if (operation == "delete") {
-                return alert("en construction");
-                html = "<button onclick='Tablette.delete();'>OK</button>";
-                $("#popupD3DivOperationDiv").html(html);
+                var message = "Voulez vous supprimer la tablette " + magasinD3.currentTablette.name + "";
+                /*if (tablette.isEmpty == false) {
+                    message+=" bien qu'elle ne soit pas vide"
+                }*/
+                message += " ?"
+                if (confirm(message)) {
+                    var sql = "delete from magasin where coordonnees='" + magasinD3.currentTablette.name + "'"
+                    mainController.execSql(sql, function (err, result) {
+                        if (err)
+                            return mainController.setErrorMessage(err);
+                        var coordonneesObj = self.getCoordonneesElements(magasinD3.currentTablette.name);
+                        var options = {filter: {travees: [coordonneesObj.travee]}}
+                        magasinD3.drawMagasins(options);
+                        $("#popupD3Div").css("visibility", "hidden");
+
+                    })
+                }
 
             }
             else if (operation == "setUnavailable") {
-                var coordonnees=magasinD3.currentTablette.name
-                var sql="select * from magasin where coordonnees='"+coordonnees+"'"
-                mainController.execSql(sql, function(err, result) {
+                var coordonnees = magasinD3.currentTablette.name;
+                var coordonneesObj = Tablette.getCoordonneesElements(coordonnees)
+                var sql = "select * from magasin where coordonnees='" + coordonnees + "'"
+                mainController.execSql(sql, function (err, result) {
                     if (err)
                         return mainController.setErrorMessage(err);
                     if (result.length > 0) {
@@ -46,16 +61,29 @@ var Tablette = (function () {
                         if (err)
                             return mainController.setErrorMessage(err);
 
-                        var options = {filter: {tablettes: [magasinD3.currentTablette.name]}}
+                        var options = {filter: {travees: [coordonneesObj.travee]}}
                         magasinD3.drawMagasins(options);
+                        $("#popupD3Div").css("visibility", "hidden");
 
                     })
                 })
 
             }
+            else if (operation == "releaseTablette") {
+                if (confirm("Confirmez la libereration de  la tablette")) {
+                    self.releaseTablette(magasinD3.currentTablette.name, function (err) {
+                            if (err)
+                                mainController.setErrorMessage(err);
+                            var coordonneesObj = Tablette.getCoordonneesElements(magasinD3.currentTablette.name);
+                            var options = {filter: {travees: [coordonneesObj.travee]}}
+                            magasinD3.drawMagasins(options);
+                            $("#popupD3Div").css("visibility", "hidden");
+                        }
+                    )
+                }
+            }
 
-
-            if (operation == "entrerVersementExistant") {
+            else if (operation == "entrerVersementExistant") {
 
 
                 var html = self.getEnterVersementExistantDialogHtml();
@@ -96,7 +124,7 @@ var Tablette = (function () {
         }
 
         self.getIntegrerVersementDialogParams = function () {
-            var metrageFromDialog = $("#popupD3DivOperationDiv_metrage").val();
+            var metrageFromDialog = $("#popupD3DivOperationDiv_metrage").val().replace(",", ".");
             var nbBoitesFromDialog = $("#popupD3DivOperationDiv_nbBoites").val();
             var coteDebutFromDialog = $("#popupD3DivOperationDiv_coteDebut").val();
             var error = ""
@@ -231,18 +259,18 @@ var Tablette = (function () {
 
 
         }
-    self.setNewTabletteCoordonnees = function () {
-        if (!context.currentRecord.id && ($("#attr_coordonnees").val() == null || $("#attr_coordonnees").val() == "")) {
-        if (magasinD3.currentTablette) {
-            var newCoordonnees = self.getCoordonneesElements(magasinD3.currentTablette.name, 1).tablette;
+        self.setNewTabletteCoordonnees = function () {
+            if (!context.currentRecord.id && ($("#attr_coordonnees").val() == null || $("#attr_coordonnees").val() == "")) {
+                if (magasinD3.currentTablette) {
+                    var newCoordonnees = self.getCoordonneesElements(magasinD3.currentTablette.name, 1).tablette;
 
-            $("#attr_coordonnees").val(newCoordonnees);
-            recordController.incrementChanges(attr_coordonnees);
-            $("#attr_DimTabletteMLineaire").val(magasinD3.currentTablette.longueurM);
-            recordController.incrementChanges(attr_DimTabletteMLineaire);
-              }
+                    $("#attr_coordonnees").val(newCoordonnees);
+                    recordController.incrementChanges(attr_coordonnees);
+                    $("#attr_DimTabletteMLineaire").val(magasinD3.currentTablette.longueurM);
+                    recordController.incrementChanges(attr_DimTabletteMLineaire);
+                }
+            }
         }
-    }
 
 
         self.updateCotesParTablette = function (cotes, idMagasin, callback) {
@@ -268,30 +296,23 @@ var Tablette = (function () {
 
             var idMagasin = options.currentRecord.id;
             var coordonnees = options.changes.coordonnees || options.currentRecord.coordonnees;
-            var elts = self.getCoordonneesElements(coordonnees);
-            options.currentRecord.magasin = elts.magasin;
-            options.currentRecord.epi = elts.epi;
-            options.currentRecord.travee = elts.travee;
-            options.currentRecord.tablette = elts.tablette;
-            var sql = "update magasin set magasin='" + elts.magasin + "',epi='" + elts.epi + "',travee='" + elts.travee + "',tablette='" + elts.tablette + "' where id=" + idMagasin;
-            mainController.execSql(sql);
-
-
-            var options = {filter: {tablettes: [options.currentRecord.tablette]}}
-            magasinD3.drawMagasins(options);
-
-
-        }
-
-        self.testRedraw = function () {
-            var name = prompt("tablette", "A-02-11-5");
-            if (name != null) {
-                var options = {filter: {tablettes: [name]}}
+            var coordonneesObj = self.getCoordonneesElements(coordonnees);
+            options.currentRecord.magasin = coordonneesObj.magasin;
+            options.currentRecord.epi = coordonneesObj.epi;
+            options.currentRecord.travee = coordonneesObj.travee;
+            options.currentRecord.tablette = coordonneesObj.tablette;
+            var sql = "update magasin set magasin='" + coordonneesObj.magasin + "',epi='" + coordonneesObj.epi + "',travee='" + coordonneesObj.travee + "',tablette='" + coordonneesObj.tablette + "' where id=" + idMagasin;
+            mainController.execSql(sql, function (err, result) {
+                if (err)
+                    return mainController.setErrorMessage(err);
+                var options = {filter: {travees: [coordonneesObj.travee]}}
                 magasinD3.drawMagasins(options);
 
+            });
 
-            }
+
         }
+
 
         self.getCoordonneesElements = function (coordonnees, increment) {
 
@@ -308,6 +329,76 @@ var Tablette = (function () {
             obj.tablette = obj.travee + "-" + numTablette;
             return obj;
 
+        }
+        self.releaseTablette = function (tabletteCoordonnees, callback) {
+            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees='" + tabletteCoordonnees+"'";
+            mainController.execSql(sql, function (err, result) {
+                if (err)
+                    mainController.setErrorMessage(err);
+                if (callback)
+                    return callback(err);
+            })
+
+
+        }
+
+        self.onAfterEditTaletteTableCell = function (tablette, datatable, rowIndex, colIndex) {
+            function updateGraph() {
+                var coordonneesObj = Tablette.getCoordonneesElements(tablette.coordonnees);
+                var options = {filter: {travees: [coordonneesObj.travee]}}
+                magasinD3.drawMagasins(options);
+            }
+
+            if (tablette.cotesParTablette == "" && confirm("liberer la tablette (supprimer le lien avec le versement")) {
+                self.releaseTablette(tablette.name, function (err) {
+                        if (err)
+                            mainController.setErrorMessage(err);
+                        datatable.row(rowIndex).remove().draw();
+                        updateGraph();
+                    }
+                )
+
+
+            }
+            else {
+                updateGraph();
+            }
+        }
+
+        self.splitTablette=function(coordonnees,callback){
+
+            var sql = "select * from magasin where coordonnees='" + coordonnees + "'"
+            mainController.execSql(sql, function (err, result) {
+                if (err)
+                    return mainController.setErrorMessage(err);
+                if (result.length > 0) {
+                    var tablette = result[0];
+                    var coordonneesObj = self.getCoordonneesElements(coordonnees);
+                    var sql2 = "insert into magasin  (coordonnees,DimTabletteMLineaire,magasin,epi,travee,tablette)" +
+                        " values (" +
+                        "'" + tablette.coordonnees + "'," +
+                        "" + tablette.DimTabletteMLineaire + "," +
+                        "'" + coordonneesObj.magasin + "'," +
+                        "'" + coordonneesObj.epi + "'," +
+                        "'" + coordonneesObj.travee + "'," +
+                        "'" + coordonneesObj.tablette + "'" +
+                        ")"
+
+
+                    mainController.execSql(sql2, function (err, result) {
+                        if (err)
+                             mainController.setErrorMessage(err);
+                        if(callback)
+                            return callback(err,result.insertId);
+
+                    /*    var options = {filter: {travees: [coordonneesObj.travee]}}
+                        magasinD3.drawMagasins(options);*/
+                        $("#popupD3Div").css("visibility", "hidden");
+
+
+                    })
+                }
+            })
         }
 
 

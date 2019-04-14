@@ -106,8 +106,9 @@ var recordController = (function () {
 
 
     self.saveRecord = function () {
+        var isNewRecord=!context.currentRecord.id;
 
-        self.checkConstraints(function (err, errors) {
+        self.checkConstraints(isNewRecord,function (err, errors) {
             if (err)
                 return mainController.setRecordErrorMessage(err);
             if (errors.length > 0) {
@@ -119,7 +120,7 @@ var recordController = (function () {
             }
 
 
-            if (!context.currentRecord.id) {// new Record
+            if (isNewRecord) {// new Record
                 return self.saveNewRecord();
             }
 
@@ -410,7 +411,7 @@ var recordController = (function () {
 
     }
 
-    self.checkConstraints = function (callbackOuter) {
+    self.checkConstraints = function (isNewRecord,callbackOuter) {
         var constraintErrors = [];
         var constraintsArray = [];
         $(".objAttrInput").each(function () {
@@ -438,6 +439,13 @@ var recordController = (function () {
                         return callback2();
 
                     }
+                    if (key == "mandatoryOnNew" ||  isNewRecord) {
+                        if (field.value == null || field.value == "")
+                            constraintErrors.push(field.fieldName + " est obligatoire");
+                        return callback2();
+
+                    }
+
                     else if (key == "unique") { // async
                         self.isUnique(context.currentTable, field.fieldName, field.value, function (err, result) {
                             if (err)
@@ -646,6 +654,8 @@ var recordController = (function () {
             if (constraints) {
                 if (constraints.mandatory)
                     constraintsClassStr = "class='field-mandatory'"
+                if (constraints.mandatoryOnNew)
+                    constraintsClassStr = "class='field-mandatoryOnNew'"
             }
 
 

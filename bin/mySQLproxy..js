@@ -52,7 +52,7 @@ var mySQLproxy = {
         mySQLproxy.getConnection(connection, function (err, conn) {
             if (err)
                 return callback(err);
-            var sql="SELECT * FROM information_schema.columns where table_schema=\"bailletarchives\""
+            var sql="SELECT * FROM information_schema.columns where table_schema=\""+mySqlConnectionOptions.database+"\""
             conn.query(sql, function (err, result) {
                 if (err)
                     return callback(err);

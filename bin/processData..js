@@ -8,7 +8,7 @@ var processData = {
     getMagasinTree: function (callback) {
         var tailleMoyenneBoite = 0.09
 
-        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible from magasin"
+        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible from magasin order by coordonnees"
         mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
             var tree = {
                 name: "Baillet",
@@ -55,15 +55,20 @@ var processData = {
                 if (line.cotesParTablette != null && line.cotesParTablette.trim() != "") {
                     isEmpty = false;
                 }
-                var avecVersementSanscotes=null
+                var avecVersementSanscotes=null;
+                var avecCotesSansVersement=null;
                 // tablette avec un versement sans cotes
                 if(line.numVersement && (!line.cotesParTablette || line.cotesParTablette==""))
                     avecVersementSanscotes=line.numVersement;
 
-                if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette])
+                if(!line.numVersement && line.cotesParTablette && line.cotesParTablette!="")
+                    avecCotesSansVersement=true;
+
+
+                if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette]) {
                     tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette] = {
                         type: "tablette",
-                        id: line.id,
+                      //  id: line.id, ce qui compte c'est le name !!! voir magasinD3 drawTablette
                         name: line.tablette,
                         childrenObjs: {},
                         countBoites: 0,
@@ -72,9 +77,16 @@ var processData = {
                         longueurTotale: 0,
                         longueurOccupee: 0,
                         isEmpty: isEmpty,
-                        indisponible:(line.indisponible?(line.commentaires || "indisponible"):null),
-                        avecVersementSanscotes:avecVersementSanscotes
+                        indisponible: (line.indisponible ? (line.commentaires || "indisponible") : null),
+                        avecVersementSanscotes: avecVersementSanscotes,
+                        avecCotesSansVersement, avecCotesSansVersement,
+                        versements:[line.numVersement]
                     }
+                }else{
+                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].versements.push(line.numVersement);
+
+                }
+
 
 
 
