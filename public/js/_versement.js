@@ -413,7 +413,7 @@ var Versement = (function () {
                             callback();
                     },
                     function (callback) {//create tablettes
-                        if (coordonneesTablettes) {
+                        if (tablettes.length>0) {
                             self.AttachTablettesToVersement(versement, tablettes, params.nbBoites, tailleMoyBoite, function (err, result) {
                                 if (err)
                                     return callback(err);
@@ -441,7 +441,7 @@ var Versement = (function () {
 
                     },
                     function (callback) {// redraw tablettes
-                        if (coordonneesTablettes) {
+                        if (tablettes.length>0) {
 
                             var travees = [];
                             tablettes.forEach(function (tablette) {
@@ -458,7 +458,8 @@ var Versement = (function () {
                             }
                             var options = {filter: {travees: travees}}
                             magasinD3.drawMagasins(options);
-                            magasinD3.zoomOnMagasin(coordonneesTablettes[0].substring(0, 1))
+
+                         //   magasinD3.zoomOnMagasin(tablettes[0].substring(0, 1))
                         }
                         callback(null);
                     }
@@ -611,7 +612,9 @@ var Versement = (function () {
 
             async.eachSeries(tablettes, function (tablette, callbackSeries) {
 
-                var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + ",cotesParTablette='" + tablette.cotesParTablette + "' where magasin.coordonnees='" + tablette.coordonnees + "'";
+              //  var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + ",cotesParTablette='" + tablette.cotesParTablette + "' where magasin.coordonnees='" + tablette.coordonnees + "'";
+                var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + ",cotesParTablette='" + tablette.cotesParTablette + "' where magasin.id='" + tablette.id + "'";
+
                 console.log(sql)
                 mainController.execSql(sql, function (err, result) {
                     if (err)
