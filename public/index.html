@@ -370,7 +370,7 @@
                 height: mainController.totalDims.h - 100,
                 width: "100%",
                 modal: true,
-                buttons: {
+               /* buttons: {
                     Fermer: {
                       //  class: 'dialogButton',
                         text:" Fermer",
@@ -385,9 +385,9 @@
 
                         }
                     }
-                },
+                },*/
                 close: function () {
-                    $("#dialogD3").dialog("close");
+                    $("#dialogDiv").dialog("close");
                     if( context.redrawMagasinD3 ){
                         context.redrawMagasinD3=null;
                       //  magasinD3.drawMagasins()

@@ -85,3 +85,8 @@ SELECT v.id,"entré" , v.dateArrivee,v.deposePar FROM versment_old v
 update magasin set indisponible=1 where commentaires like '%auchar%'
 insert into tablette_occupee (coordonnees,id_magasin,typeOccupation,commentaire) select coordonnees,id,"stock",commentaires  from magasin where commentaires like '%auchar%'
 
+
+ALTER TABLE `versement`
+	ADD COLUMN `auteurVersement` VARCHAR(50) NULL DEFAULT NULL AFTER `commentaires`,
+	ADD COLUMN `dateVersement` DATE NULL DEFAULT NULL AFTER `auteurVersement`;
+

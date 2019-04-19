@@ -120,6 +120,9 @@ var config = (function () {
                 etatTraitementDate: {mandatory: true},
                 DimTabletteMLineaire: {mandatory: true},
             },
+            tableConstraints: {
+                cannotDelete: true
+            },
             onAfterDisplay: Versement.setNewRecordDefaultValues,
             onAfterSave: Versement.updateRecordHistoryAfterVersementSave
 

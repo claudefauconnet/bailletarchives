@@ -80,12 +80,17 @@ var recordController = (function () {
 
             if (obj && obj.id && (!config.tableDefs[context.currentTable].tableConstraints || config.tableDefs[context.currentTable].tableConstraints.cannotDelete !== true))
                 $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
-            $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'>Enregistrer</button>&nbsp;&nbsp;<span id='recordMessageSpan'></span>")
+            $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'" +
+                ">Enregister</button>&nbsp;&nbsp;" +
+                "<button id='closeDialogButton'  onclick='$(\"#dialogDiv\").dialog(\"close\");'>Fermer</button>"+
+                "<span id='recordMessageSpan'></span>")
+
 
 
             $("#recordDetailsDiv").prepend("<div id='recordMessageDiv' class='message'></div>")
         }
         $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
+
 
         if (obj && obj.id)
             listController.loadLinkedDivs()
@@ -156,7 +161,9 @@ var recordController = (function () {
                     return mainController.setRecordErrorMessage(err)
 
                 mainController.setRecordMessage("enregistrement sauvé");
-                //  dialog.dialog("close");
+
+                if(!isNewRecord)
+                 dialog.dialog("close");
 
 
                 var fn = config.tableDefs[context.currentTable].onAfterSave
@@ -440,20 +447,25 @@ var recordController = (function () {
 
                     }
                     if (key == "mandatoryOnNew" ||  isNewRecord) {
-                        if (field.value == null || field.value == "")
+                        if (!context.currentRecord.id && (field.value == null || field.value == ""))
                             constraintErrors.push(field.fieldName + " est obligatoire");
                         return callback2();
 
                     }
 
                     else if (key == "unique") { // async
-                        self.isUnique(context.currentTable, field.fieldName, field.value, function (err, result) {
-                            if (err)
-                                return callbackOuter(err)
-                            if (result != true)
-                                constraintErrors.push("la valeur de " + field.fieldName + " doit être unique (" + field.value + ")")
-                            return callback2();
-                        })
+                        // si la valeur a été modifiée
+                        if(self.currentRecordChanges[field.fieldName] && self.currentRecordChanges[field.fieldName]!=context.currentRecord[field.fieldName]) {
+                            self.isUnique(context.currentTable, field.fieldName, field.value, function (err, result) {
+                                if (err)
+                                    return callbackOuter(err)
+                                if (result != true)
+                                    constraintErrors.push("la valeur de " + field.fieldName + " doit être unique (" + field.value + ")")
+                                return callback2();
+                            })
+                        }
+                        else
+                           return callback2()
                     }
                     else if (key == "format") {
                         if (field.constraints[key].regex) {
@@ -487,6 +499,9 @@ var recordController = (function () {
 
     }
     self.isUnique = function (table, column, value, callback) {
+
+
+
         var type = mainController.getFieldType(table, column);
         if (type == "number")
             value = value;

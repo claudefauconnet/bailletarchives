@@ -293,7 +293,7 @@ var magasinD3 = (function () {
 
 
                                                 // draw boites
-                                                var bteW = (tabW - tabletteTextSpacing) // nBoitesTablette calcul de la taille des boites
+                                                var bteW = (tabW - tabletteTextSpacing) / nBoitesTablette // nBoitesTablette calcul de la taille des boites
                                                 var bteH = tabH - 1;
                                                 var bteX = tabX;
                                                 var bteY = tabY + 1;
