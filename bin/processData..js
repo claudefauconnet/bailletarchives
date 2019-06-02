@@ -8,7 +8,7 @@ var processData = {
     getMagasinTree: function (callback) {
         var tailleMoyenneBoite = 0.09
 
-        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible from magasin order by coordonnees"
+        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible,commentaires from magasin order by coordonnees"
         mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
             var tree = {
                 name: "Baillet",
@@ -16,7 +16,7 @@ var processData = {
                 children: [],
                 countBoites: 0,
                 longueurTotale: 0,
-                longueurOccupee: 0
+                longueurOccupee: 0,
             };
             result.forEach(function (line) {
                 if (!line.magasin || !line.magasin.match(/[A-Z]/))
@@ -72,6 +72,7 @@ var processData = {
                         name: line.tablette,
                         childrenObjs: {},
                         countBoites: 0,
+                        commentaires: line.commentaires,
                         longueurM: line.longueurTablette,
                         numVersement: line.numVersement,
                         longueurTotale: 0,

@@ -173,6 +173,7 @@ var magasinD3 = (function () {
 
 
     self.drawMagasins = function (options, callback) {
+        $("#waitImg").show();
         if (!options)
             options = {}
 
@@ -350,7 +351,7 @@ var magasinD3 = (function () {
 
                 }
             )
-
+            $("#waitImg").hide();
             if (callback)
                 callback();
 
@@ -466,7 +467,7 @@ var magasinD3 = (function () {
         d3.selectAll("#" + tablette.name);
 
 
-        var gTablette = parentG.append("g").attr("class", "tablette").attr("id", tablette.name).attr("name", tablette.name).attr("longueurM", tablette.longueurM);
+        var gTablette = parentG.append("g").attr("class", "tablette").attr("id", tablette.name).attr("name", tablette.name).attr("longueurM", tablette.longueurM).attr("commentaires", tablette.commentaires);
         var color = magasinD3.colors["tablette"];
         if (tablette.indisponible)
             color = magasinD3.colors["tabletteIndisponible"];
@@ -542,7 +543,8 @@ var magasinD3 = (function () {
 
 
             }else if (obj.indisponible) {
-                html = "tablette  " + obj.name + "indisponible : " + obj.indisponible;
+                html = "tablette  " + obj.name + "indisponible : ";
+                html += "<br>commentaires : "+obj.commentaires;
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
                 " <option></option>" +
                 "<option value='releaseTablette'> liberer tablette</option>" +

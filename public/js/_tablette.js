@@ -56,7 +56,13 @@ var Tablette = (function () {
                         if (result[0].numVersement != null && result[0].numVersement != "")
                             return alert("une tablette occupée par un versement ne peut être marquee indisponible")
                     }
-                    var sql = "update magasin set indisponible=1 where coordonnees='" + coordonnees + "'"
+
+                    var commentaire=prompt("Entrer un commentaire");
+                    var commentaireStr="";
+                    if(commentaire && commentaire !="")
+                        commentaireStr=", commentaires='"+commentaire+"'"
+
+                    var sql = "update magasin set indisponible=1"+commentaireStr+" where coordonnees='" + coordonnees + "'"
                     mainController.execSql(sql, function (err, result) {
                         if (err)
                             return mainController.setErrorMessage(err);
