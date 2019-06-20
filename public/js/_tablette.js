@@ -53,7 +53,7 @@ var Tablette = (function () {
                     if (err)
                         return mainController.setErrorMessage(err);
                     if (result.length > 0) {
-                        if (result[0].numVersement != null && result[0].numVersement != "")
+                        if (result[0].numVersement != null && result[0].numVersement != "" && result[0].numVersement != "0")
                             return alert("une tablette occupée par un versement ne peut être marquee indisponible")
                     }
 

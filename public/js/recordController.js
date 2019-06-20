@@ -14,6 +14,14 @@ var recordController = (function () {
     }
 
 
+    self.closeRecordDialog=function(){
+        if(Object.keys(self.currentRecordChanges).length>0){
+            if(!confirm("Quitter sans enregister les changements ?"))
+                return;
+        }
+
+        $("#dialogDiv").dialog("close");
+    }
     self.displayRecordData = function (obj, mode) {
 
         context.currentRecord = obj;
@@ -82,7 +90,7 @@ var recordController = (function () {
                 $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
             $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'" +
                 ">Enregister</button>&nbsp;&nbsp;" +
-                "<button id='closeDialogButton'  onclick='$(\"#dialogDiv\").dialog(\"close\");'>Fermer</button>"+
+                "<button id='closeDialogButton'  onclick='recordController.closeRecordDialog()'>Fermer</button>"+
                 "<span id='recordMessageSpan'></span>")
 
 
@@ -106,6 +114,38 @@ var recordController = (function () {
 
         //   mainController.setTabs();
 
+
+    }
+
+
+
+    self.escapeMySqlChars=function(str){
+
+            if (typeof str != 'string')
+                return str;
+
+            return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+                switch (char) {
+                    case "\0":
+                        return "\\0";
+                    case "\x08":
+                        return "\\b";
+                    case "\x09":
+                        return "\\t";
+                    case "\x1a":
+                        return "\\z";
+                    case "\n":
+                        return "\\n";
+                    case "\r":
+                        return "\\r";
+                    case "\"":
+                    case "'":
+                    case "\\":
+                    case "%":
+                        return "\\"+char; // prepends a backslash to backslash, percent,
+                                          // and double/single quotes
+                }
+            });
 
     }
 
@@ -145,8 +185,10 @@ var recordController = (function () {
 
                 }
 
-                else if (type == "string")
-                    sql += key + "='" + self.currentRecordChanges[key] + "'";
+                else if (type == "string") {
+                    var str = self.escapeMySqlChars(self.currentRecordChanges[key]);
+                    sql += key + "='" + str+ "'";
+                }
                 else if (type == "date") {
                     var str = self.currentRecordChanges[key].replace(/\//g, "-");// date mysql  2018-09-21
                     sql += key + "='" + str + "'";
@@ -174,16 +216,19 @@ var recordController = (function () {
 
                     }
 
-                    self.currentRecordChanges = {};
+
 
 
                     fn(options)
+                }else{
+
                 }
 
 
                 ///*******************************A finir*******************************************************************************
                 if (context.dataTables[context.currentTable])
                     context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
+                self.currentRecordChanges = {};
 
 
             })
@@ -211,14 +256,18 @@ var recordController = (function () {
                     changes: self.currentRecordChanges
 
                 }
-                self.currentRecordChanges = {};
+
                 fn(options)
+
+            }
+            else{
+
 
             }
 
 
             mainController.setRecordMessage("enregistrement sauvé");
-
+            self.currentRecordChanges = {};
 
         })
 
@@ -242,8 +291,10 @@ var recordController = (function () {
                 var type = mainController.getFieldType(table, key)
                 if (type == "number")
                     sql2 += ("" + record[key]).replace(",", ".");
-                else if (type == "string")
-                    sql2 += "'" + record[key] + "'";
+                else if (type == "string") {
+                    var str = self.escapeMySqlChars(record[key]);
+                    sql2 += "'" + str+ "'";
+                }
                 else if (type == "date") {
                     var str = ("" + record[key]).replace(/\//g, "-");// date mysql  2018-09-21
                     sql2 += "'" + str + "'";
@@ -475,6 +526,8 @@ var recordController = (function () {
                         }
 
                     }
+                    else
+                        return callback2();
                 }, function (err) {//callback2
                     if (err) {
                         return callback(err)

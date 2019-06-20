@@ -95,6 +95,8 @@ var config = (function () {
                     editableColumns: {commentaire: {}},
 
 
+
+
                 }
                 /* "article": {
                      type: "1-n",
@@ -115,6 +117,7 @@ var config = (function () {
                 auteurVersement:{mandatoryOnNew:true},
                 dateVersement:{mandatoryOnNew:true},
                 nature: {mandatory: true},
+                centreArchive: {mandatory: true},
                 etatTraitement: {mandatory: true},
                 etatTraitementAuteur: {mandatory: true},
                 etatTraitementDate: {mandatory: true},
@@ -192,14 +195,20 @@ var config = (function () {
 
 
             },
-            fieldTools: {
-                numVersement: {
-                    title: "selectionner boites",
-                    toolFn: "Sortie.sortiesShowBoitesCbx"
+
+            recordTools: [
+
+                {
+                    title: "Localiser...",
+                    id: "sortieLocaliserButton",
+                    toolFn: "Sortie.locateCurrentSortie"
+                },
+                {
+                    id: "sortieSelectionnerBoites",
+                        title: "selectionner boites",
+                        toolFn: "Sortie.sortiesShowBoitesCbx"
                 }
-
-
-            },
+            ],
             onAfterDisplay: Sortie.setNewRecordDefaultValues,
         },
         "versement_historique": {

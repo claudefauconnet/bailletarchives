@@ -428,7 +428,6 @@ var magasinD3 = (function () {
 
     }
 
-
     self.drawTravee = function (travee, parentG, options) {
         d3.selectAll("#" + travee.name).remove();
 
@@ -504,8 +503,7 @@ var magasinD3 = (function () {
                 fill: color,
                 stroke: "blue",
                 "stroke-width": "1"
-            });
-        gTablette.on("click", function (e) {
+            }).on("click", function (e) {
             d3.event.stopPropagation();
             var coords = d3.event;
             self.currentTablette = tablette;
@@ -684,7 +682,6 @@ var magasinD3 = (function () {
         var coordonnees = "";
 
         $("#popupD3Div").css("visibility", "hidden")
-        d3.selectAll(".tablette rect").classed("unselected", true)
         d3.selectAll("." + classe + " rect").classed("unselected", true).each(function (d, i) {
             var ok = false;
             var firstbox = true;
@@ -694,8 +691,7 @@ var magasinD3 = (function () {
 
                 if (array.indexOf(d3Prop) > -1) {
                     d3.select(this).classed("unselected", false);
-                   var parent= d3.select(this.parentNode.parentNode)
-                    parent.classed("unselected", false);
+
 
                     ok = true;
                     found += 1
@@ -709,8 +705,8 @@ var magasinD3 = (function () {
             }
         })
 
-      //
 
+        var xxx = d3.selectAll(".unselected");
         d3.selectAll(".unselected").style("opacity", 0.1)
         return;
 
@@ -720,7 +716,7 @@ var magasinD3 = (function () {
 
     self.clearHighlights = function () {
         $("#popupD3Div").css("visibility", "hidden")
-     //   d3.selectAll(".tablette rect").style("opacity", 1)
+
         d3.selectAll(".unselected").style("opacity", 1)
         d3.selectAll(".unselected").classed("unselected", false);
     }

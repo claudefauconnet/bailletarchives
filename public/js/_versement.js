@@ -758,6 +758,8 @@ var Versement = (function () {
                 $("#attr_etatTraitementAuteur").val(authentication.currentUser);
                 recordController.incrementChanges(attr_etatTraitementAuteur);
             }
+            if(!versement.centreArchive)
+                $("#attr_centreArchive").val("Baillet");
         }
 
         self.getNewNumVersement = function (callback) {

@@ -15,4 +15,20 @@ var globalParams={
 
 
 }
+
+/*var globalParams={
+
+    mysqlConnection:{
+        host: "localhost",
+        port:7202,
+        user: "bailletarchives",
+        password: "nodeApp55",
+        database: 'bailletarchives_test'
+
+    }
+
+
+
+
+}*/
 module.exports=globalParams;

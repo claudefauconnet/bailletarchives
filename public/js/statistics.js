@@ -27,6 +27,7 @@ var statistics = (function () {
 
 
     self.displayStat = function (statName) {
+        mainController.showInMainDiv("list")
         var stat = self.stats[statName];
         if (!stat)
             return mainController.setErrorMessage(statName + " does not exist")
