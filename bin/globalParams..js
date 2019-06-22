@@ -7,7 +7,8 @@ var globalParams={
             host: "localhost",
             user: "root",
             password: "vi0lon",
-            database: 'bailletarchives_test'
+            database: 'bailletarchives',
+       // database: 'bailletarchives_test'
 
     }
 
