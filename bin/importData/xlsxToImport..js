@@ -272,6 +272,18 @@ var xlsxToImport = {
 
             sql += " INSERT INTO `" + table + "` (" + fieldsStr + ") values \n" + valuesStr + ";"
 
+var str="";
+            rejectedLines.forEach(function(obj,index){
+                json.header.forEach(function(column,index2){
+                    if (index2 == 0)
+                        str +="\\t"
+                    if(index==0) {
+                        str+=column;
+                    }
+                    str+=obj[column];
+                })
+                str+="\\n"
+            })
 
             response.rejectedLines = rejectedLines;
             response.sql = sql;
@@ -361,9 +373,9 @@ if (true) {
                     "insert into versement  (dateVersement,numVersement,ancienNumVersement,nature,cotesExtremesBoites,metrage,nbBoites,volumeGO,nbreElements,intitule,auteurVersement,commentaires) select dateVersement,numVersement,ancienNumVersement,nature,cotesExtremesBoites,metrage,nbBoites,volumeGO,nbreElements,intitule,auteurVersement,commentaires from import_versement;"
 
                 sql += "delete from magasin;\n" +
-                    "insert into magasin  (coordonnees,commentaires,numVersement,cotesParTablette,metrage,DimTabletteCm,DimTabletteMLineaire) select coordonnees,commentaires,numVersement,cotesParTablette,metrage,DimTabletteCm,DimTabletteMLineaire from import_magasin;"
+                    "insert into magasin  (coordonnees,commentaires,numVersement,cotesParTablette,metrage,DimTabletteCm,DimTabletteMLineaire,indisponible) select coordonnees,commentaires,numVersement,cotesParTablette,metrage,DimTabletteCm,DimTabletteMLineaire,indisponible from import_magasin;"
 
-
+//***********************magasin**********************************************************
                 //magasins eclatement des coordonnées
                 sql += " update magasin set magasin =SUBSTRING_INDEX(magasin.coordonnees,'-',1);\n"
                 sql += " update magasin set epi =SUBSTRING_INDEX(magasin.coordonnees,'-',2);\n"
@@ -372,17 +384,54 @@ if (true) {
 
                 //magasin idVersement
 
+                sql+="update magasin m JOIN versement v ON v.numVersement=m.numVersement set m.id_versement=v.id;\n";
+
+//***********************versement_historique**************************************************************************
+                sql+="delete from versement_historique;\n";
+
+                // report des id automatique de versement dans import_versement
+                sql+="update import_versement m JOIN versement v ON v.numVersement=m.numVersement set m.id=v.id;\n";
+
+                sql+="insert into versement_historique (id_versement,etat,etatDate,etatAuteur,dateModification) SELECT v.id,'référencement' , v.dateVersement,v.receptionnePar,now() FROM import_versement v;\n";
 
 
-                sql+="update magasin m JOIN versement v ON v.numVersement=m.numVersement set m.id_versement=v.id"
+
+//***********************sortie_boite**************************************************************************
+                sql+="delete from sortie_boite;\n";
+                sql+="insert into sortie_boite (numVersement,commentaire) select numVersement,pretsSorties from import_magasin where pretsSorties is not null;\n";
+                sql+="update sortie_boite m JOIN versement v ON v.numVersement=m.numVersement set m.id_versement=v.id;\n";
+
+//***********************versement**************************************************************************
+                sql += "update versement set centreArchive='Baillet';\n";
+                sql+="update versement m JOIN import_versement v ON v.numVersement=m.numVersement set m.etatTraitement='référencement',m.etatTraitementAuteur=v.receptionnePar,m.etatTraitementDate=v.dateVersement;\n";
 
 
-// nature Versement
-                sql += "update versement set nature='analogique'  where (versement.cotesExtremesBoites!='' or  versement.cotesExtremesBoites is not  null) and (volumeGO=0 and versement.nbreElements=0)"
-                sql += "update versement set nature='numerique'  where (versement.cotesExtremesBoites='' or  versement.cotesExtremesBoites is   null) and (volumeGO>0 and versement.nbreElements>0)"
-                sql += "update versement set nature='hybride'  where (versement.cotesExtremesBoites!='' and versement.cotesExtremesBoites is  not null) and (volumeGO>0 and versement.nbreElements>0)"
-                sql += " update versement set nature=null where (versement.cotesExtremesBoites='' or versement.cotesExtremesBoites is   null) and (volumeGO=0 and versement.nbreElements=0)"
+                // nature Versement
+                sql += "update versement set nature='analogique'  where (versement.cotesExtremesBoites!='' or  versement.cotesExtremesBoites is not  null) and (volumeGO=0 and versement.nbreElements=0);\n"
+                sql += "update versement set nature='numerique'  where (versement.cotesExtremesBoites='' or  versement.cotesExtremesBoites is   null) and (volumeGO>0 and versement.nbreElements>0);\n"
+                sql += "update versement set nature='hybride'  where (versement.cotesExtremesBoites!='' and versement.cotesExtremesBoites is  not null) and (volumeGO>0 and versement.nbreElements>0);\n"
+                sql += " update versement set nature=null where (versement.cotesExtremesBoites='' or versement.cotesExtremesBoites is   null) and (volumeGO=0 and versement.nbreElements=0);\n"
 
+
+
+
+
+
+//***********************listes**************************************************************************
+
+                sql+="DELETE FROM `listes`;\n" +
+                    "/*!40000 ALTER TABLE `listes` DISABLE KEYS */;\n" +
+                    "INSERT INTO `listes` (`liste`, `valeur`, `ordreNum`, `id`) VALUES\n" +
+                    "\t('versement.etatTraitement\\r\\n', 'référencement', 1, 19),\n" +
+                    "\t('versement.etatTraitement\\r\\n', 'création IR/BV', 2, 20),\n" +
+                    "\t('versement.etatTraitement\\r\\n', 'retraitement/reconditionnement', 3, 21),\n" +
+                    "\t('versement.etatTraitement\\r\\n', 'instrument de recherche normé', 4, 22),\n" +
+                    "\t('versement.etatTraitement\\r\\n', 'suppression cote', 5, 23),\n" +
+                    "\t('versement.nature', 'analogique', 1, 24),\n" +
+                    "\t('versement.nature', 'numerique', 2, 25),\n" +
+                    "\t('versement.nature', 'hybride', 3, 26);\n"
+
+                fs.writeFileSync("D:\\ATD_Baillet\\applicationTemporaire\\import_traitementPostImport.sql",sql);
 
                 callback();
             }
