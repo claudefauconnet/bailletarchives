@@ -121,7 +121,8 @@ var xlsxToImport = {
 
             }
         }
-        var dataArray = [];
+       var dataArray = [];
+        var xx=Object.keys(data)
         for (var key in data) {
             dataArray.push(data[key]);
         }
@@ -160,12 +161,14 @@ var xlsxToImport = {
 
             })
 
-            json.data.forEach(function (row, index) {
+            json.data.forEach(function (row, index0) {
 
-                if (index == 1071)
+                if (index0 == 1071)
                     var x = 3
-                if (index > 0)
+                if (index0 > 0)
                     valuesStr += ",";
+
+
                 valuesStr += "(";
 
                 json.header.forEach(function (column, index2) {
@@ -189,6 +192,15 @@ var xlsxToImport = {
                                 //  if (value == "X")
                                 value = 1;
                             }
+                            if (column == "numVersement") {
+                                //  if (value == "X")
+                                value = "" + value;
+                                while (value.length < 4) {
+                                    value = "0" + value;
+                                }
+
+                            }
+
 
                             if (column == "cotesParTablette") {
 
@@ -205,20 +217,24 @@ var xlsxToImport = {
                             }
                         }
 
+                        if (table == "import_versement") {
+                            if (column == "numVersement") {
+                                //  if (value == "X")
+                                value = "" + value;
+                                while (value.length < 4) {
+                                    value = "0" + value;
+                                }
+
+                            }
+                        }
 
                     }
-
 
                     if (!value)
                         valuesStr += "null";
 
-
                     else if (type == "int" || type == "decimal") {
-                        /*  if (("" + value).indexOf("\r") > -1)
-                              valuesStr += "null";
-                          else if (value = " ")
-                              valuesStr += "null";
-                          else{*/
+
 
                         if (typeof value == "string") {
                             if (value.indexOf(".") > -1)
@@ -227,10 +243,11 @@ var xlsxToImport = {
                                 value = parseInt(value);
 
                         }
-                        if (isNaN(value))
-                            xx = 3
+                      else  if (isNaN(value))
+                        value= "null";
 
-                        valuesStr += value
+
+                        valuesStr += value;
 
                         //  }
 
@@ -265,6 +282,10 @@ var xlsxToImport = {
 
                 })
                 valuesStr += ")\n";
+
+
+
+
             })
 
 
@@ -288,8 +309,8 @@ var str="";
             response.rejectedLines = rejectedLines;
             response.sql = sql;
             /*   console.log(JSON.stringify(rejectedLines))
-               console.log(types.toString())
-               console.log(sql);*/
+               console.log(types.toString())*/
+            //   console.log(sql);
 
             callback(null, response);
 
@@ -327,6 +348,26 @@ var str="";
 
     }
 
+
+}
+
+
+
+if(false){
+    var sourcexlsxFile = 'D:\\Total\\graphNLP\\export_mec_question.xlsx';
+    xlsxToImport.extractWorkSheets(sourcexlsxFile, null, function (err, result) {
+        var onglets = Object.keys(result);
+        async.eachSeries(onglets, function (onglet, callbackEach) {
+
+            var sheet = result[onglet];
+
+            xlsxToImport.worksheetJsonToSouslesensJson(sheet, function (err, result2) {
+                console.log(JSON.stringify(result2, null,2))
+
+            })
+
+        })
+    })
 
 }
 
@@ -404,15 +445,15 @@ if (true) {
 //***********************versement**************************************************************************
                 sql += "update versement set centreArchive='Baillet';\n";
                 sql+="update versement m JOIN import_versement v ON v.numVersement=m.numVersement set m.etatTraitement='référencement',m.etatTraitementAuteur=v.receptionnePar,m.etatTraitementDate=v.dateVersement;\n";
-
+                sql+="update versement set nature =lower(nature);\n";
 
                 // nature Versement
-                sql += "update versement set nature='analogique'  where (versement.cotesExtremesBoites!='' or  versement.cotesExtremesBoites is not  null) and (volumeGO=0 and versement.nbreElements=0);\n"
+            /*    sql += "update versement set nature='analogique'  where (versement.cotesExtremesBoites!='' or  versement.cotesExtremesBoites is not  null) and (volumeGO=0 and versement.nbreElements=0);\n"
                 sql += "update versement set nature='numerique'  where (versement.cotesExtremesBoites='' or  versement.cotesExtremesBoites is   null) and (volumeGO>0 and versement.nbreElements>0);\n"
                 sql += "update versement set nature='hybride'  where (versement.cotesExtremesBoites!='' and versement.cotesExtremesBoites is  not null) and (volumeGO>0 and versement.nbreElements>0);\n"
                 sql += " update versement set nature=null where (versement.cotesExtremesBoites='' or versement.cotesExtremesBoites is   null) and (volumeGO=0 and versement.nbreElements=0);\n"
 
-
+*/
 
 
 
@@ -422,11 +463,11 @@ if (true) {
                 sql+="DELETE FROM `listes`;\n" +
                     "/*!40000 ALTER TABLE `listes` DISABLE KEYS */;\n" +
                     "INSERT INTO `listes` (`liste`, `valeur`, `ordreNum`, `id`) VALUES\n" +
-                    "\t('versement.etatTraitement\\r\\n', 'référencement', 1, 19),\n" +
-                    "\t('versement.etatTraitement\\r\\n', 'création IR/BV', 2, 20),\n" +
-                    "\t('versement.etatTraitement\\r\\n', 'retraitement/reconditionnement', 3, 21),\n" +
-                    "\t('versement.etatTraitement\\r\\n', 'instrument de recherche normé', 4, 22),\n" +
-                    "\t('versement.etatTraitement\\r\\n', 'suppression cote', 5, 23),\n" +
+                    "\t('versement.etatTraitement', 'référencement', 1, 19),\n" +
+                    "\t('versement.etatTraitement', 'création IR/BV', 2, 20),\n" +
+                    "\t('versement.etatTraitement', 'retraitement/reconditionnement', 3, 21),\n" +
+                    "\t('versement.etatTraitement', 'instrument de recherche normé', 4, 22),\n" +
+                    "\t('versement.etatTraitement', 'suppression cote', 5, 23),\n" +
                     "\t('versement.nature', 'analogique', 1, 24),\n" +
                     "\t('versement.nature', 'numerique', 2, 25),\n" +
                     "\t('versement.nature', 'hybride', 3, 26);\n"
@@ -448,3 +489,60 @@ if (true) {
 
 
 module.exports = xlsxToImport;
+
+/*
+
+
+DROP TABLE IF EXISTS `import_magasin`;
+CREATE TABLE IF NOT EXISTS `import_magasin` (
+  `coordonnees` varchar(50) DEFAULT NULL,
+  `cotesParTablette` varchar(250) DEFAULT NULL,
+  `commentaires` text DEFAULT NULL,
+  `numVersement` varchar(50) DEFAULT NULL,
+  `metrage` decimal(10,2) DEFAULT NULL,
+  `id_versement` int(11) DEFAULT NULL,
+  `pretsSorties` varchar(250) DEFAULT NULL,
+  `DimTabletteCm` varchar(250) DEFAULT NULL,
+  `DimTabletteMLineaire` decimal(10,2) DEFAULT NULL,
+  `id` int(11) NOT NULL DEFAULT 0,
+  `magasin` varchar(20) DEFAULT NULL,
+  `epi` varchar(20) DEFAULT NULL,
+  `travee` varchar(20) DEFAULT NULL,
+  `tablette` varchar(20) DEFAULT NULL,
+  `indisponible` int(11) DEFAULT NULL,
+  `etatTraitement` varchar(50) DEFAULT NULL,
+  `intitule` varchar(250) DEFAULT NULL
+) ;
+
+
+
+
+DROP TABLE IF EXISTS `import_versement`;
+CREATE TABLE IF NOT EXISTS `import_versement` (
+  `numVersement` varchar(50) DEFAULT NULL,
+  `intitule` text DEFAULT NULL,
+  `centreArchive` varchar(50) DEFAULT NULL,
+  `commentaires` text DEFAULT NULL,
+  `auteurVersement` varchar(50) DEFAULT NULL,
+  `dateVersement` date DEFAULT NULL,
+  `ancienNumVersement` varchar(50) DEFAULT NULL,
+  `etatTraitement` varchar(50) DEFAULT NULL,
+  `etatTraitementAuteur` varchar(50) DEFAULT NULL,
+  `etatTraitementDate` date DEFAULT NULL,
+  `nature` varchar(50) DEFAULT NULL,
+  `cotesExtremesBoites` varchar(100) DEFAULT NULL,
+  `cotesExtremesDossiersNiveauUn` varchar(100) DEFAULT NULL,
+  `nbBoites` int(11) DEFAULT NULL,
+  `metrage` decimal(10,2) DEFAULT NULL,
+  `volumeGO` decimal(10,3) DEFAULT NULL,
+  `nbreElements` int(11) DEFAULT NULL,
+  `id` int(11) unsigned NOT NULL DEFAULT 0,
+  `dateFinRecolement` date DEFAULT NULL,
+  `recolePar` varchar(100) DEFAULT NULL,
+  `receptionnePar` varchar(50) DEFAULT NULL
+)
+
+
+
+
+ */
