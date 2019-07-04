@@ -2,7 +2,7 @@ var authentication = (function () {
 
     var self = {}
 
-    self.authenticationUrl = "../authentication";
+    self.authenticationUrl = "../bailletarchives-authentication";
     self.userIndexes = [];
     self.currentUser="admin";
 

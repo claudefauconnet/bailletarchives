@@ -7,7 +7,17 @@ var Tablette = (function () {
 
             /*  $("#popupD3Div").css("visibility","hidden");
               $("#select").val("");*/
-
+            if (operation == "commentaire") {
+            var commentaire=prompt("entrer un commentaire pour la  tablette "+magasinD3.currentTablette.name);
+            if( commentaire != null && commentaire!=""){
+                var sql = "update magasin set commentaires='"+commentaire+"' where coordonnees='" + magasinD3.currentTablette.name + "'";
+                mainController.execSql(sql, function (err, result) {
+                    if (err)
+                         mainController.setErrorMessage(err);
+                    $("#popupD3Div").css("visibility", "hidden");
+                })
+            }
+            }
 
             if (operation == "createUnder") {
                 //   return alert("en construction");
@@ -294,6 +304,8 @@ var Tablette = (function () {
             var coordonnees = prompt("coordonnees :")
             if (coordonnees && coordonnees != "") {
                 magasinD3.locate("tablette", "id", [coordonnees], 1);
+                mainController.showInMainDiv('graph');
+
             }
             // return alert("en construction");
         }

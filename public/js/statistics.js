@@ -4,7 +4,8 @@ var statistics = (function () {
     self.stats = {
 
         "prochain numero de versement": {
-           sql: "select concat('0',MAX( CONVERT(numVersement, SIGNED INTEGER)+1)) as prochainNumeroVersement from versement"
+           sql: "select MAX( numVersement+1) as prochainNumeroVersement from versement"
+        //   sql: "select concat('0',MAX( CONVERT(numVersement, SIGNED INTEGER)+1)) as prochainNumeroVersement from versement"
           //  sql: "select concat('',MAX( CONVERT(numVersement, SIGNED INTEGER)+1)) as prochainNumeroVersement from versement"
         },
         "versements par année et etatTraitement": {

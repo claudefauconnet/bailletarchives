@@ -130,12 +130,16 @@ var Sortie = (function () {
 
         } else {
             var str = $('#attr_cotesBoites').val();
-            str = str.replace(/\s*/g, " ");
+            str = str.replace(/\s+/g, " ");
             var cote = $(cbxId).attr('id');
-            if (str.indexOf(cote) < 0)
-                $('#attr_cotesBoites').append(" " + cote)
+            str=str +(" " + cote);
+//console.log(str);
+            $('#attr_cotesBoites').val(str)
+
 
         }
+
+        recordController.currentRecordChanges["cotesBoites"] = $('#attr_cotesBoites').val();
 
 
     }

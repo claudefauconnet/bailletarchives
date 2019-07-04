@@ -45,7 +45,7 @@ router.post('/modifytravee', function (req, res, next) {
 
 });
 
-router.post( '/authentication', function (req, response) {
+router.post( '/bailletarchives-authentication', function (req, response) {
     if (req.body.authentify)
         authentication.authentify(req.body.login, req.body.password, function (error, result) {
             processResponse(response, error, result)

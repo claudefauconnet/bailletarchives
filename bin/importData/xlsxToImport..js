@@ -273,6 +273,7 @@ var xlsxToImport = {
                         str = str.replace(/\)/g, "\)");
                         if (value.length > typeObj.maxLength) {
                             rejectedLines.push(row)
+
                             valuesStr += "'****trop long******'";
                         }
                         else

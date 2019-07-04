@@ -14,6 +14,21 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 app.use(logger('dev'));
+
+app.use(function(req, res, next) {
+    if( true && req.headers.origin) {
+        var origin = req.headers.origin.toLowerCase();
+        var isLocal=origin.indexOf("localhost")>-1  || origin.indexOf("127.0.0.1")>-1
+        var isNotHttps=origin.indexOf("https")<0
+        if( !isLocal && isNotHttps){
+            //   var err = new Error("HTTP protocol ins not allowed , use secure HTTPS  protocol");
+            //   err.status = 403;
+            return res.sendStatus(403);
+            next(err);
+        }
+    }
+    next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
