@@ -63,6 +63,7 @@ var listController = (function () {
             else if (operator == "NOT LIKE") {
                 value = "'%" + value + "%'"
             }
+
             else {
                 var type = mainController.getFieldType(table, column);
                 if (type == "string")
@@ -91,6 +92,13 @@ var listController = (function () {
 
 
         }
+        if (operator == "EMPTY") {
+            whereStr=  column+" is null or "+column+" =''"
+        }
+        else  if (operator == "NOT EMPTY") {
+            whereStr=  column+" is not null and "+column+" !=''"
+        }
+
         if (whereStr != "") {
             var criteriaAllreadyExist = false;
             context.currentCriteria.forEach(function (criteria, indice) {

@@ -9,7 +9,7 @@ var mainController = (function () {
     var numberTypes = ["float", "double", "decimal", "int"];
     var stringTypes = ["char", "varchar", "text",];
     var operators = {
-        string: ["LIKE", "NOT LIKE", "=", "!="],
+        string: ["LIKE", "NOT LIKE", "=", "!=","EMPTY","NOT EMPTY"],
         number: ["=", "<", "<=", ">", ">=", "!="],
         date: ["=", "<", "<=", ">", ">=", "!="],
 

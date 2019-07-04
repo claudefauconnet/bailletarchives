@@ -3,6 +3,7 @@ var magasinD3 = (function () {
     self.currentVersement = {}
     self.currentTablette = {}
     self.currentBoite = {}
+    self.currentVersementSansBoites = {}
     var cachedHtml = null;
 
 
@@ -509,6 +510,8 @@ var magasinD3 = (function () {
             d3.event.stopPropagation();
             var coords = d3.event;
             self.currentTablette = tablette;
+            self.currentTablette.d3Id=$(this).attr("id");
+            var xxx=this;
             onTabletteClick(tablette, coords.x, coords.y);
             return false;
 
@@ -527,11 +530,13 @@ var magasinD3 = (function () {
             var html = "";
 
             if (obj.avecVersementSanscotes) {
+                self.currentVersementSansBoites=obj.versements[0];
                 html = "tablette " + obj.name + "<br>avec versement sans boites cotées : " + obj.avecVersementSanscotes;
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
                     " <option></option>" +
                     "<option value='releaseTablette'> liberer tablette</option>" +
                     "<option value='commentaire'> commentaire...</option>" +
+                    "<option value='voirVersement'> voir versement</option>" +
                     "</select>";
 
             }

@@ -753,7 +753,7 @@ var Versement = (function () {
                     recordController.incrementChanges(attr_numVersement);
                 })
             }
-            if (!versement.etatTraitementAuteur) {
+            if (true || !versement.etatTraitementAuteur) {
 
                 $("#attr_etatTraitementAuteur").val(authentication.currentUser);
                 recordController.incrementChanges(attr_etatTraitementAuteur);

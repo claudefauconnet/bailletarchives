@@ -8,13 +8,18 @@ var Tablette = (function () {
             /*  $("#popupD3Div").css("visibility","hidden");
               $("#select").val("");*/
             if (operation == "commentaire") {
-            var commentaire=prompt("entrer un commentaire pour la  tablette "+magasinD3.currentTablette.name);
+                var oldCommentaires=magasinD3.currentTablette.commentaires
+            var commentaire=prompt("entrer un commentaire pour la  tablette "+magasinD3.currentTablette.name,oldCommentaires);
             if( commentaire != null && commentaire!=""){
                 var sql = "update magasin set commentaires='"+commentaire+"' where coordonnees='" + magasinD3.currentTablette.name + "'";
                 mainController.execSql(sql, function (err, result) {
                     if (err)
                          mainController.setErrorMessage(err);
                     $("#popupD3Div").css("visibility", "hidden");
+                    var d3Id=magasinD3.currentTablette.d3Id;
+                    var options = {filter: {tablettes: [magasinD3.currentTablette.d3Id]}}
+                    magasinD3.drawMagasins(options);
+
                 })
             }
             }
@@ -111,8 +116,10 @@ var Tablette = (function () {
                 $("#popupD3DivOperationDiv_numVersement").focus();
 
 
-            }
+            }    else if (operation == "voirVersement") {
+                Boite.onBoiteOperationSelect(select)
 
+            }
             if (operation == "entrerNouveauVersement") {
                 var html = "metrage <input style='width:30px' id='popupD3DivOperationDiv_metrage'><br>";
                 html += "nombre de boites<input style='width:30px' id='popupD3DivOperationDiv_nbBoites'><br>";
