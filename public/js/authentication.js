@@ -60,6 +60,7 @@ var authentication = (function () {
                 $("#loginDiv").css("visibility", "hidden");
                   $("#main").css("visibility", "visible");
                 self.currentUser=login;
+                self.currentUserGroups=data;
                   mainController.init0();
                // $("#panels").css("display", "block")
 

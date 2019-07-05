@@ -115,6 +115,7 @@ var config = (function () {
 
                 numVersement: {mandatory: true, unique: true, format: {regex: /^[0-9]\d{3}$/, message: "4 chiffres"}},
                 auteurVersement:{mandatoryOnNew:true},
+                receptionnePar:{mandatory:true},
                 dateVersement:{mandatoryOnNew:true},
                 nature: {mandatory: true},
                 centreArchive: {mandatory: true},
@@ -124,10 +125,11 @@ var config = (function () {
                 DimTabletteMLineaire: {mandatory: true},
             },
             tableConstraints: {
-                cannotDelete: true
+                cannotDelete: false
             },
             onAfterDisplay: Versement.setNewRecordDefaultValues,
-            onAfterSave: Versement.updateRecordHistoryAfterVersementSave
+            onAfterSave: Versement.updateRecordHistoryAfterVersementSave,
+            onAfterDelete: Versement.onAfterDelete
 
 
         },
@@ -159,6 +161,7 @@ var config = (function () {
             },
             onAfterDisplay: Tablette.setNewTabletteCoordonnees,
             onAfterSave: Tablette.onAfterSave
+
         },
         "article": {
 

@@ -202,7 +202,7 @@ var Versement = (function () {
                     if (confirm("Tablette  déjà occupée, confirmez l'entree de ce nouveau versement sur cette tablette")) {
                         Tablette.splitTablette(tablette.name, function (err, newTabletteId) {
 
-                            Versement.entrerVersement({useTabletteId:newTabletteId});
+                            Versement.entrerVersement({useTabletteId: newTabletteId});
 
 
                         })
@@ -241,8 +241,8 @@ var Versement = (function () {
 
 
         self.entrerVersement = function (options) {
-            if(!options)
-                options={};
+            if (!options)
+                options = {};
             context.currentTable = "versement";
             // cas versement existant
             var numVersement = $("#popupD3DivOperationDiv_numVersement").val();
@@ -364,31 +364,31 @@ var Versement = (function () {
 
                     function (callback) {// get taille tablettes and set cotesParTablette
 
-                        if(options.useTabletteId){// quand on divise une tablette(useTabletteId )  pour mettre un petit versement sur une tablette deja occupee
+                        if (options.useTabletteId) {// quand on divise une tablette(useTabletteId )  pour mettre un petit versement sur une tablette deja occupee
 
-                            var sql="select * from magasin where id="+options.useTabletteId;
-                            mainController.execSql(sql, function(err,result){
+                            var sql = "select * from magasin where id=" + options.useTabletteId;
+                            mainController.execSql(sql, function (err, result) {
                                 if (err)
                                     return callback(err);
-                                var tablette=result[0];
-                                var  cotesParTablette="";
-                                var coteIndex= params.coteDebutIndex
+                                var tablette = result[0];
+                                var cotesParTablette = "";
+                                var coteIndex = params.coteDebutIndex
                                 for (var i = 0; i < params.nbBoites; i++) {
                                     var cote = versement.numVersement + "/" + util.integerToStringWithFixedLength(params.coteDebutIndex, config.coteBoiteNbDigits);
-                                    params.coteDebutIndex+=1
+                                    params.coteDebutIndex += 1
                                     if (i > 0)
                                         cotesParTablette += " ";
                                     cotesParTablette += cote;
 
                                 }
-                                tablette.cotesParTablette=cotesParTablette
-                                tablettes=[tablette]
+                                tablette.cotesParTablette = cotesParTablette
+                                tablettes = [tablette]
                                 versement.cotesExtremesBoites = self.getTablettesCotesExtremes(tablettes);
                                 callback();
                             })
 
-                    }
-                       else if (coordonneesTablettes) {
+                        }
+                        else if (coordonneesTablettes) {
                             var tablettesStr = ""
                             coordonneesTablettes.forEach(function (coordonnee, index) {
                                 if (index > 0)
@@ -413,7 +413,7 @@ var Versement = (function () {
                             callback();
                     },
                     function (callback) {//create tablettes
-                        if (tablettes.length>0) {
+                        if (tablettes.length > 0) {
                             self.AttachTablettesToVersement(versement, tablettes, params.nbBoites, tailleMoyBoite, function (err, result) {
                                 if (err)
                                     return callback(err);
@@ -441,7 +441,7 @@ var Versement = (function () {
 
                     },
                     function (callback) {// redraw tablettes
-                        if (tablettes.length>0) {
+                        if (tablettes.length > 0) {
 
                             var travees = [];
                             tablettes.forEach(function (tablette) {
@@ -449,7 +449,7 @@ var Versement = (function () {
                                 if (travees.indexOf(coordonneesObj.travee) < 0)
                                     travees.push(coordonneesObj.travee);
                             })
-                            if(tablettesaRefouler) {
+                            if (tablettesaRefouler) {
                                 tablettesaRefouler.forEach(function (tablette) {
                                     var coordonneesObj = Tablette.getCoordonneesElements(tablette.coordonnees);
                                     if (travees.indexOf(coordonneesObj.travee) < 0)
@@ -459,7 +459,7 @@ var Versement = (function () {
                             var options = {filter: {travees: travees}}
                             magasinD3.drawMagasins(options);
 
-                         //   magasinD3.zoomOnMagasin(tablettes[0].substring(0, 1))
+                            //   magasinD3.zoomOnMagasin(tablettes[0].substring(0, 1))
                         }
                         callback(null);
                     }
@@ -612,7 +612,7 @@ var Versement = (function () {
 
             async.eachSeries(tablettes, function (tablette, callbackSeries) {
 
-              //  var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + ",cotesParTablette='" + tablette.cotesParTablette + "' where magasin.coordonnees='" + tablette.coordonnees + "'";
+                //  var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + ",cotesParTablette='" + tablette.cotesParTablette + "' where magasin.coordonnees='" + tablette.coordonnees + "'";
                 var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + ",cotesParTablette='" + tablette.cotesParTablette + "' where magasin.id='" + tablette.id + "'";
 
                 console.log(sql)
@@ -745,6 +745,13 @@ var Versement = (function () {
         }
 
         self.setNewRecordDefaultValues = function (versement) {
+
+            var userGroups=authentication.currentUserGroups;
+            if(userGroups.indexOf("ADMIN")<0){
+                $("#deleteRecordButton").css("display","none")
+            }
+
+
             if (!versement.id) {
                 self.getNewNumVersement(function (err, numVersement) {
                     if (err)
@@ -753,12 +760,15 @@ var Versement = (function () {
                     recordController.incrementChanges(attr_numVersement);
                 })
             }
+            if (versement.id) {
+                $("#attr_numVersement").prop('readonly', true);
+            }
             if (true || !versement.etatTraitementAuteur) {
 
                 $("#attr_etatTraitementAuteur").val(authentication.currentUser);
                 recordController.incrementChanges(attr_etatTraitementAuteur);
             }
-            if(!versement.centreArchive)
+            if (!versement.centreArchive)
                 $("#attr_centreArchive").val("Baillet");
         }
 
@@ -871,6 +881,16 @@ var Versement = (function () {
                 $(input).val(infos.tablettes.coteBoites.length);
                 recordController.incrementChanges(input);
             })
+        }
+
+        self.onAfterDelete = function (record, callback) {
+            if (confirm("Supprimer aussi l'historique du versement " + record.numVersement + "?")) {
+                if (confirm("Confirmer la suppression de l'historique du versement" + record.numVersement + "?")) {
+                    var sql = "delete from versement_historique where id_versement=" + record.numVersement;
+                    mainController.execSql(sql, callback);
+                }
+            }
+
         }
 
 

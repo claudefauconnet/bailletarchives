@@ -8,7 +8,6 @@ var recordController = (function () {
 
     }
 
-
     self.displayDataReadOnly = function (obj) {
         self.displayRecordData(obj, "readOnly")
     }
@@ -322,8 +321,8 @@ var recordController = (function () {
         if (config.tableDefs[context.currentTable].relations)
             relations = Object.keys(config.tableDefs[context.currentTable].relations);
 
-        var canBeDeleted = 0
-        relations.forEach(function (relation) {
+        var canBeDeleted = 0;
+    /* relations.forEach(function (relation) {
 
             var dataTableDivName = "linkedRecordsDiv_" + relation;
 
@@ -332,7 +331,7 @@ var recordController = (function () {
 
 
             }
-        })
+        })*/
         if (canBeDeleted > 0)
             return alert("vous devez au préalable supprimer les  liens");
 
@@ -348,6 +347,13 @@ var recordController = (function () {
             mainController.setRecordMessage(result);
             dialog.dialog("close");
             listController.listRecords(context.currentListQueries[context.currentTable]);
+            if (config.tableDefs[context.currentTable].onAfterDelete){
+                config.tableDefs[context.currentTable].onAfterDelete( context.currentRecord,function(err, result){
+
+                });
+            }
+
+
         })
 
     }

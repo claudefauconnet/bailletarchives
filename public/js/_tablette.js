@@ -24,6 +24,7 @@ var Tablette = (function () {
             }
             }
 
+
             if (operation == "createUnder") {
                 //   return alert("en construction");
                 if (!magasinD3.isTabletteLastInTravee(magasinD3.currentTablette)) {
