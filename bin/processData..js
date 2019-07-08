@@ -651,7 +651,7 @@ if (false) {
 
 }
 
-if( true){
+if( false){
     mySQLproxy.exec(mySqlConnectionOptions, " select coordonnees , id,cotesParTablette from magasin where cotesParTablette is not null and cotesParTablette<>'' ", function(err, result){
 
         var regex=/\d*\/\d* */
