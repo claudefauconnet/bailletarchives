@@ -651,3 +651,27 @@ if (false) {
 
 }
 
+if( true){
+    mySQLproxy.exec(mySqlConnectionOptions, " select coordonnees , id,cotesParTablette from magasin where cotesParTablette is not null and cotesParTablette<>'' ", function(err, result){
+
+        var regex=/\d*\/\d* */
+        result.forEach(function(line){
+
+
+
+            if(regex.test(line.cotesParTablette)===false){
+           //  var xx=   regex.test(line.cotesParTablette)
+               console.log (line.coordonnees +"\t"+line.cotesParTablette+"\t"+ line.id)
+            }
+            else{
+                var line;
+            }
+
+
+
+        })
+    })
+
+
+}
+

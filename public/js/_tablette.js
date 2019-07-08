@@ -24,8 +24,16 @@ var Tablette = (function () {
             }
             }
 
+            if (operation == "voirTablette") {
+               var sql= "select * from magasin where coordonnees='"+ magasinD3.currentTablette.name+"'";
+                mainController.execSql(sql, function (err, result) {
+                    if (err)
+                        mainController.setErrorMessage(err);
+                    context.currentTable="magasin"
+                    recordController.displayRecordData(result[0])
+                })
 
-            if (operation == "createUnder") {
+            } if (operation == "createUnder") {
                 //   return alert("en construction");
                 if (!magasinD3.isTabletteLastInTravee(magasinD3.currentTablette)) {
                     return (alert("on ne peut creer de nouvelle tablette que sous la dernièer d'une travee"))

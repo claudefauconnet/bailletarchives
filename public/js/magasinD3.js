@@ -546,6 +546,7 @@ var magasinD3 = (function () {
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
                     " <option></option>" +
                     "<option value='releaseTablette'> liberer tablette</option>" +
+                    "<option value='voirTablette'> voir tablette...</option>" +
                     "<option value='commentaire'> commentaire...</option>" +
                     //   "<option value='entrerVersementExistant'> entrer versement existant</option>" +
                     "</select>";
@@ -556,6 +557,7 @@ var magasinD3 = (function () {
                 html += "<br>commentaires : " + obj.commentaires;
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
                     " <option></option>" +
+                    "<option value='voirTablette'> voir tablette...</option>" +
                     "<option value='releaseTablette'> liberer tablette</option>" +
                     "<option value='commentaire'> commentaire...</option>" +
 
@@ -567,6 +569,7 @@ var magasinD3 = (function () {
                     " <option></option>" +
                     //   "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
                     "<option value='entrerVersementExistant'> entrer versement existant</option>" +
+                    "<option value='voirTablette'> voir tablette...</option>" +
                     "<option value='setUnavailable'> rendre indisponible</option>" +
                     "<option value='createUnder'> creer nouvelle</option>" +
                     "<option value='split'> diviser </option>" +

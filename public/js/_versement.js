@@ -58,7 +58,32 @@ var Versement = (function () {
 
 
         }
+        self.ajouterTablette = function () {
+            var tablette = prompt("coordonnées de la tablette")
+            if (!tablette || tablette == "")
+                return;
+            var sql = "select * from magasin where coordonnees='" + tablette + "'";
+            mainController.execSql(sql, function (err, result) {
+                if (err) {
+                    return mainController.setErrorMessage(err)
+                }
+                if (result.length == 0)
+                    return mainController.setErrorMessage("la tablette " + tablette + " n'existe pas");
+                if (result[0].numVersement && result[0].numVersement != "")
+                    return mainController.setErrorMessage("la tablette " + tablette + " est déjà attribuée au versement " + result[0].numVersement);
+                if (result[0].id_versement)
+                    return mainController.setErrorMessage("la tablette " + tablette + " est déjà attribuée au versement avec l'id" + result[0].id_versement);
 
+                var sql = "update magasin set id_versement=" + context.currentRecord.id + ",numVersement= '" + context.currentRecord.numVersement + "' where id=" + result[0].id;
+                mainController.execSql(sql, function (err, result) {
+                    if (err) {
+                        return mainController.setErrorMessage(err)
+                    }
+                    recordController.displayRecordData(context.currentRecord)
+                })
+            })
+
+        }
 
         self.locateCurrentVersement = function () {
             $("#dialogDiv").dialog("close");
@@ -746,9 +771,9 @@ var Versement = (function () {
 
         self.setNewRecordDefaultValues = function (versement) {
 
-            var userGroups=authentication.currentUserGroups;
-            if(userGroups.indexOf("ADMIN")<0){
-                $("#deleteRecordButton").css("display","none")
+            var userGroups = authentication.currentUserGroups;
+            if (userGroups.indexOf("ADMIN") < 0) {
+                $("#deleteRecordButton").css("display", "none")
             }
 
 

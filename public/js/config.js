@@ -29,7 +29,13 @@ var config = (function () {
                     title: "Refouler...",
                     id: "versementRefoulerButton",
                     toolFn: "Versement.showDialogEntrerVersement"
+                },
+                {
+                    title: "Ajouter Tablette...",
+                    id: "versementAjouterTabletteButton",
+                    toolFn: "Versement.ajouterTablette"
                 }
+
 
             ],
             fieldTools: {
