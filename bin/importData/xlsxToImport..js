@@ -173,6 +173,8 @@ var xlsxToImport = {
 
                 json.header.forEach(function (column, index2) {
                     var typeObj = tables[table][column];
+                    if(!typeObj)
+                        return;
                     var type = typeObj.dataType;
 
                     if (types.indexOf(type) < 0)
@@ -225,6 +227,9 @@ var xlsxToImport = {
                                     value = "0" + value;
                                 }
 
+                            }
+                            if(column=="dateVersement"){
+                                xx= value;
                             }
                         }
 
@@ -415,7 +420,7 @@ if (true) {
                     "insert into versement  (dateVersement,numVersement,ancienNumVersement,nature,cotesExtremesBoites,metrage,nbBoites,volumeGO,nbreElements,intitule,auteurVersement,commentaires) select dateVersement,numVersement,ancienNumVersement,nature,cotesExtremesBoites,metrage,nbBoites,volumeGO,nbreElements,intitule,auteurVersement,commentaires from import_versement;"
 
                 sql += "delete from magasin;\n" +
-                    "insert into magasin  (coordonnees,commentaires,numVersement,cotesParTablette,metrage,DimTabletteCm,DimTabletteMLineaire,indisponible) select coordonnees,commentaires,numVersement,cotesParTablette,metrage,DimTabletteCm,DimTabletteMLineaire,indisponible from import_magasin;"
+                    "insert into magasin  (coordonnees,commentaires,numVersement,cotesParTablette,metrage,DimTabletteMLineaire,indisponible) select coordonnees,commentaires,numVersement,cotesParTablette,metrage,DimTabletteMLineaire,indisponible from import_magasin;"
 
 //***********************magasin**********************************************************
                 //magasins eclatement des coordonnées

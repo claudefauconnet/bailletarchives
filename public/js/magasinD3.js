@@ -3,7 +3,8 @@ var magasinD3 = (function () {
     self.currentVersement = {}
     self.currentTablette = {}
     self.currentBoite = {}
-    self.currentVersementSansBoites = {}
+    self.currentVersementSansBoites =null;
+    self.data = {};
     var cachedHtml = null;
 
 
@@ -64,6 +65,37 @@ var magasinD3 = (function () {
     ]
     var tabletteFillColor = "#d5d7cc"
 
+
+    self.getTabletteObject = function (coordonnees) {
+        if (!magasinData)
+            return "data non chargées";
+        var array = coordonnees.split("-");
+        if (array.length != 4)
+            return "coordonnees invalides";
+        var tabletteOK = null;
+
+        magasinData.children.forEach(function (magasin,) {
+            if (array[0] == magasin.name)
+                magasin.children.forEach(function (epi) {
+                    if (array[0] + "-" + array[1] == epi.name)
+                        epi.children.forEach(function (travee) {
+                            if (array[0] + "-" + array[1] + "-" + array[2] == travee.name)
+                                travee.children.forEach(function (tablette) {
+                                    if (coordonnees == tablette.name){
+
+                                        self.currentTablette = tablette;
+                                        self.currentVersement = null;
+                                        self.currentBoite = null;
+                                        return tabletteOK = tablette;
+                                    }
+
+                                })
+                        })
+                })
+        })
+        return tabletteOK;
+
+    }
 
     self.init = function (_containerDiv, callback) {
         // return;
@@ -188,6 +220,7 @@ var magasinD3 = (function () {
         d3.json(mainController.urlPrefix + "/magasinD3Tree", function (data) {
             var nMag = data.children.length;
             magasinData = data;
+            self.data = data;
 
 
             var magW = totalWidth / 2;
@@ -278,6 +311,20 @@ var magasinD3 = (function () {
                                         var tabY = traveeY;
 
                                         if (drawTablettes) {
+                                            // sort tablette 10>9 for alpha
+                                            travee.children.sort(function (a, b) {
+                                                if (!a.name.split || !b.name.split)
+                                                    return 0;
+                                                var aNum = parseInt(a.name.split("-")[3])
+                                                var bNum = parseInt(b.name.split("-")[3])
+                                                if (aNum > bNum)
+                                                    return 1;
+                                                if (aNum < bNum)
+                                                    return -1;
+                                                return 0;
+
+                                            })
+
                                             travee.children.forEach(function (tab, indexTab) {
 
                                                 tab.x = tabX;
@@ -510,8 +557,8 @@ var magasinD3 = (function () {
             d3.event.stopPropagation();
             var coords = d3.event;
             self.currentTablette = tablette;
-            self.currentTablette.d3Id=$(this).attr("id");
-            var xxx=this;
+            self.currentTablette.d3Id = $(this).attr("id");
+            var xxx = this;
             onTabletteClick(tablette, coords.x, coords.y);
             return false;
 
@@ -530,13 +577,15 @@ var magasinD3 = (function () {
             var html = "";
 
             if (obj.avecVersementSanscotes) {
-                self.currentVersementSansBoites=obj.versements[0];
+                self.currentVersementSansBoites = obj.versements[0];
                 html = "tablette " + obj.name + "<br>avec versement sans boites cotées : " + obj.avecVersementSanscotes;
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
-                    " <option></option>" +
-                    "<option value='releaseTablette'> liberer tablette</option>" +
-                    "<option value='commentaire'> commentaire...</option>" +
-                    "<option value='voirVersement'> voir versement</option>" +
+                    Tablette.getOperationSelectOptions(obj) +
+
+                    /*     " <option></option>" +
+                         "<option value='releaseTablette'> liberer tablette</option>" +
+                         "<option value='commentaire'> commentaire...</option>" +
+                         "<option value='voirVersement'> voir versement</option>" +*/
                     "</select>";
 
             }
@@ -544,11 +593,12 @@ var magasinD3 = (function () {
 
                 html = "tablette " + obj.name + "<br> sans versement mais avec des boites cotées : ";
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
-                    " <option></option>" +
-                    "<option value='releaseTablette'> liberer tablette</option>" +
-                    "<option value='voirTablette'> voir tablette...</option>" +
-                    "<option value='commentaire'> commentaire...</option>" +
-                    //   "<option value='entrerVersementExistant'> entrer versement existant</option>" +
+                    Tablette.getOperationSelectOptions(obj) +
+                    /*  " <option></option>" +
+                      "<option value='releaseTablette'> liberer tablette</option>" +
+                      "<option value='voirTablette'> voir tablette...</option>" +
+                      "<option value='commentaire'> commentaire...</option>" +
+                      //   "<option value='entrerVersementExistant'> entrer versement existant</option>" +*/
                     "</select>";
 
 
@@ -556,25 +606,27 @@ var magasinD3 = (function () {
                 html = "tablette  " + obj.name + "indisponible : ";
                 html += "<br>commentaires : " + obj.commentaires;
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
-                    " <option></option>" +
-                    "<option value='voirTablette'> voir tablette...</option>" +
-                    "<option value='releaseTablette'> liberer tablette</option>" +
-                    "<option value='commentaire'> commentaire...</option>" +
-
+                    Tablette.getOperationSelectOptions(obj) +
+                    /*  " <option></option>" +
+                      "<option value='voirTablette'> voir tablette...</option>" +
+                      "<option value='releaseTablette'> liberer tablette</option>" +
+                      "<option value='commentaire'> commentaire...</option>" +*/
                     "</select>";
             }
             else {
                 html += "tablette " + tablette.name + "<br>"
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
-                    " <option></option>" +
-                    //   "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
-                    "<option value='entrerVersementExistant'> entrer versement existant</option>" +
-                    "<option value='voirTablette'> voir tablette...</option>" +
-                    "<option value='setUnavailable'> rendre indisponible</option>" +
-                    "<option value='createUnder'> creer nouvelle</option>" +
-                    "<option value='split'> diviser </option>" +
-                    "<option value='delete'> supprimer </option>"+
-                "<option value='commentaire'> commentaire...</option>"
+
+                    Tablette.getOperationSelectOptions({})
+                /*  " <option></option>" +
+                  //   "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
+                  "<option value='entrerVersementExistant'> entrer versement existant</option>" +
+                  "<option value='voirTablette'> voir tablette...</option>" +
+                  "<option value='setUnavailable'> rendre indisponible</option>" +
+                  "<option value='createUnder'> creer nouvelle</option>" +
+                  "<option value='split'> diviser </option>" +
+                  "<option value='delete'> supprimer </option>"+
+              "<option value='commentaire'> commentaire...</option>"*/
 
 
                 html += "</select>";
@@ -641,12 +693,13 @@ var magasinD3 = (function () {
                         html += "<tr><td>" + key + "</td><td>" + obj[key] + "</td>"
                 }
                 html += "operations boite:<select onchange='Boite.onBoiteOperationSelect(this)'>"
-                    + " <option></option>" +
 
-                    "<option value='voirVersement'> voir versement</option>" +
-                    // "<option value='decalerBoite'> décaler</option>" +
-                    //   "<option value='supprimerBoite'> supprimer  </option>" +
-                    "</select>";
+               // html += Boite.getOperationSelectOptions();
+                 + " <option></option>" +
+                   "<option value='voirVersement'> voir versement</option>" +
+                   // "<option value='decalerBoite'> décaler</option>" +
+                   //   "<option value='supprimerBoite'> supprimer  </option>" +
+                "</select>";
                 html += "<div id='popupD3DivOperationDiv'></div>"
                 html += "</table>"
                 $("#popupD3Div").html(html);
@@ -723,8 +776,8 @@ var magasinD3 = (function () {
         })
 
         //
-if(!ok)
-    return alert ("aucun element trouvé");
+        if (!ok)
+            return alert("aucun element trouvé");
         d3.selectAll(".unselected").style("opacity", 0.1)
         return;
 

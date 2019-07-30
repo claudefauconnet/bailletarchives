@@ -2,38 +2,93 @@ var Tablette = (function () {
         var self = {};
 
 
+        self.getOperationSelectOptions = function (obj) {
+            var html = ""
+
+            if (obj.prompt) {
+                var oldTablette=$("#currentMainMenuTabletteSpan").html();
+
+                var coordonneesTablette = prompt("coordonnées tablette :",oldTablette)
+                if (!coordonneesTablette || coordonneesTablette == "")
+                    return "";
+                var tabletteObj = magasinD3.getTabletteObject(coordonneesTablette);
+                if (typeof tabletteObj === "string")// error
+                    return alert(tabletteObj)
+                if (!tabletteObj)
+                    return alert("Tablette non trouvée :" + coordonneesTablette)
+                obj = tabletteObj;
+                $("#currentMainMenuTabletteSpan").html(coordonneesTablette)
+            }
+
+
+            if (obj.avecVersementSanscotes) {
+                html += " <option></option>" +
+                    "<option value='releaseTablette'> liberer tablette</option>" +
+                    "<option value='commentaire'> commentaire...</option>" +
+                    "<option value='voirVersement'> voir versement</option>"
+            }
+            else if (obj.avecCotesSansVersement) {
+                html += " <option></option>" +
+                    "<option value='releaseTablette'> liberer tablette</option>" +
+                    "<option value='voirTablette'> voir tablette...</option>" +
+                    "<option value='commentaire'> commentaire...</option>"
+                //   "<option value='entrerVersementExistant'> entrer versement existant</option>" +
+            } else if (obj.indisponible) {
+                html += " <option></option>" +
+                    "<option value='voirTablette'> voir tablette...</option>" +
+                    "<option value='releaseTablette'> liberer tablette</option>" +
+                    "<option value='commentaire'> commentaire...</option>"
+            }
+            else {
+                html += " <option></option>" +
+                    //   "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
+                    "<option value='entrerVersementExistant'> entrer versement existant</option>" +
+                    "<option value='voirTablette'> voir tablette...</option>" +
+                    "<option value='setUnavailable'> rendre indisponible</option>" +
+                    "<option value='createUnder'> creer nouvelle</option>" +
+                    "<option value='split'> diviser </option>" +
+                    "<option value='delete'> supprimer </option>" +
+                    "<option value='commentaire'> commentaire...</option>"
+            }
+            if (obj.prompt)
+                html += "<option value='locate'> localiser</option>"
+            return html;
+        }
+
+
         self.onTabletteOperationSelect = function (select) {
             var operation = $(select).val();
 
             /*  $("#popupD3Div").css("visibility","hidden");
               $("#select").val("");*/
             if (operation == "commentaire") {
-                var oldCommentaires=magasinD3.currentTablette.commentaires
-            var commentaire=prompt("entrer un commentaire pour la  tablette "+magasinD3.currentTablette.name,oldCommentaires);
-            if( commentaire != null && commentaire!=""){
-                var sql = "update magasin set commentaires='"+commentaire+"' where coordonnees='" + magasinD3.currentTablette.name + "'";
-                mainController.execSql(sql, function (err, result) {
-                    if (err)
-                         mainController.setErrorMessage(err);
-                    $("#popupD3Div").css("visibility", "hidden");
-                    var d3Id=magasinD3.currentTablette.d3Id;
-                    var options = {filter: {tablettes: [magasinD3.currentTablette.d3Id]}}
-                    magasinD3.drawMagasins(options);
+                var oldCommentaires = magasinD3.currentTablette.commentaires
+                var commentaire = prompt("entrer un commentaire pour la  tablette " + magasinD3.currentTablette.name, oldCommentaires);
+                if (commentaire != null && commentaire != "") {
+                    var sql = "update magasin set commentaires='" + commentaire + "' where coordonnees='" + magasinD3.currentTablette.name + "'";
+                    mainController.execSql(sql, function (err, result) {
+                        if (err)
+                            mainController.setErrorMessage(err);
+                        $("#popupD3Div").css("visibility", "hidden");
+                        var d3Id = magasinD3.currentTablette.d3Id;
+                        var options = {filter: {tablettes: [magasinD3.currentTablette.d3Id]}}
+                        magasinD3.drawMagasins(options);
 
-                })
-            }
+                    })
+                }
             }
 
             if (operation == "voirTablette") {
-               var sql= "select * from magasin where coordonnees='"+ magasinD3.currentTablette.name+"'";
+                var sql = "select * from magasin where coordonnees='" + magasinD3.currentTablette.name + "'";
                 mainController.execSql(sql, function (err, result) {
                     if (err)
                         mainController.setErrorMessage(err);
-                    context.currentTable="magasin"
+                    context.currentTable = "magasin"
                     recordController.displayRecordData(result[0])
                 })
 
-            } if (operation == "createUnder") {
+            }
+            if (operation == "createUnder") {
                 //   return alert("en construction");
                 if (!magasinD3.isTabletteLastInTravee(magasinD3.currentTablette)) {
                     return (alert("on ne peut creer de nouvelle tablette que sous la dernièer d'une travee"))
@@ -45,7 +100,7 @@ var Tablette = (function () {
             }
             else if (operation == "split") {
                 var coordonnees = magasinD3.currentTablette.name
-               self.splitTablette(coordonnees)
+                self.splitTablette(coordonnees)
             }
 
 
@@ -81,12 +136,12 @@ var Tablette = (function () {
                             return alert("une tablette occupée par un versement ne peut être marquee indisponible")
                     }
 
-                    var commentaire=prompt("Entrer un commentaire");
-                    var commentaireStr="";
-                    if(commentaire && commentaire !="")
-                        commentaireStr=", commentaires='"+commentaire+"'"
+                    var commentaire = prompt("Entrer un commentaire");
+                    var commentaireStr = "";
+                    if (commentaire && commentaire != "")
+                        commentaireStr = ", commentaires='" + commentaire + "'"
 
-                    var sql = "update magasin set indisponible=1"+commentaireStr+" where coordonnees='" + coordonnees + "'"
+                    var sql = "update magasin set indisponible=1" + commentaireStr + " where coordonnees='" + coordonnees + "'"
                     mainController.execSql(sql, function (err, result) {
                         if (err)
                             return mainController.setErrorMessage(err);
@@ -125,7 +180,7 @@ var Tablette = (function () {
                 $("#popupD3DivOperationDiv_numVersement").focus();
 
 
-            }    else if (operation == "voirVersement") {
+            } else if (operation == "voirVersement") {
                 Boite.onBoiteOperationSelect(select)
 
             }
@@ -139,6 +194,13 @@ var Tablette = (function () {
                 $("#popupD3DivOperationDiv_metrage").focus();
 
             }
+
+            if(operation=="locate"){
+                self.locate( magasinD3.currentTablette.name)
+            }
+
+            $('#operationTabletteSelect').find('option').remove().end()
+
 
 
         }
@@ -315,9 +377,10 @@ var Tablette = (function () {
 
         }
 
-        self.locate = function () {
+        self.locate = function (coordonnees) {
 
-            var coordonnees = prompt("coordonnees :")
+            if (!coordonnees)
+                coordonnees = prompt("coordonnees :")
             if (coordonnees && coordonnees != "") {
                 magasinD3.locate("tablette", "id", [coordonnees], 1);
                 mainController.showInMainDiv('graph');
@@ -365,7 +428,7 @@ var Tablette = (function () {
 
         }
         self.releaseTablette = function (tabletteCoordonnees, callback) {
-            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees='" + tabletteCoordonnees+"'";
+            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees='" + tabletteCoordonnees + "'";
             mainController.execSql(sql, function (err, result) {
                 if (err)
                     mainController.setErrorMessage(err);
@@ -399,7 +462,7 @@ var Tablette = (function () {
             }
         }
 
-        self.splitTablette=function(coordonnees,callback){
+        self.splitTablette = function (coordonnees, callback) {
 
             var sql = "select * from magasin where coordonnees='" + coordonnees + "'"
             mainController.execSql(sql, function (err, result) {
@@ -421,18 +484,50 @@ var Tablette = (function () {
 
                     mainController.execSql(sql2, function (err, result) {
                         if (err)
-                             mainController.setErrorMessage(err);
-                        if(callback)
-                            return callback(err,result.insertId);
+                            mainController.setErrorMessage(err);
+                        if (callback)
+                            return callback(err, result.insertId);
 
-                    /*    var options = {filter: {travees: [coordonneesObj.travee]}}
-                        magasinD3.drawMagasins(options);*/
+                        /*    var options = {filter: {travees: [coordonneesObj.travee]}}
+                            magasinD3.drawMagasins(options);*/
                         $("#popupD3Div").css("visibility", "hidden");
 
 
                     })
                 }
             })
+        }
+
+        ,self.updateCotesParTabletteZeros= function(){// check cotesParTablette and add zeros to box number if box number length <4
+
+
+            var sql="select id, cotesParTablette from magasin where cotesParTablette is not null and cotesParTablette!=''"
+            mainController.execSql(sql,function(err,result){
+                var newCotesParTablette=""
+                result.forEach(function(line, lineIndex){
+                    var regex=/[.*^\s]\s*/gm
+                    var boitesArray=line.cotesParTablette.trim().split(regex);
+                   boitesArray.forEach(function(boite,indexBoites){
+                       var p=boite.indexOf("/")
+                       if(p>0){
+                           var numVersement=boite.substring(0, p)
+                           while((boite.length-p-1)<3) {
+                               boite = boite.substring(0, p+1) + "0" + boite.substring(p+1)
+                           }
+                       }
+                       if(indexBoites>0)
+                           newCotesParTablette+=" ";
+                       newCotesParTablette+=boite;
+                   })
+                    result[lineIndex].cotesParTablette=newCotesParTablette;
+
+
+                })
+
+
+            })
+
+
         }
 
 

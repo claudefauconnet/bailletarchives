@@ -9,7 +9,7 @@ var mainController = (function () {
     var numberTypes = ["float", "double", "decimal", "int"];
     var stringTypes = ["char", "varchar", "text",];
     var operators = {
-        string: ["LIKE", "NOT LIKE", "=", "!=","EMPTY","NOT EMPTY"],
+        string: ["LIKE", "NOT LIKE", "=", "!=", "EMPTY", "NOT EMPTY"],
         number: ["=", "<", "<=", ">", ">=", "!="],
         date: ["=", "<", "<=", ">", ">=", "!="],
 
@@ -44,10 +44,10 @@ var mainController = (function () {
             mainController.initTablesSelects();
             mainController.loadLists();
             if (true) {
-                self.showInMainDiv("graph") ;
-                magasinD3.init("graphWrapperDiv",function() {
-              //  magasinD3.init("mainDiv",function() {
-                $("#dialogDiv").dialog("close");
+                self.showInMainDiv("graph");
+                magasinD3.init("graphWrapperDiv", function () {
+                    //  magasinD3.init("mainDiv",function() {
+                    $("#dialogDiv").dialog("close");
                 });
                 $("#dialogDiv").html(" <div style=\"height: 100%; display: flex;flex-direction: column; align-items: center; justify-content: center;\">" +
                     "   <div style='font:bold 18px sans-serif;color: #5f3f3f'>Bienvenue aux archives du centre Joseph Wrésinski</div>" +
@@ -218,6 +218,23 @@ var mainController = (function () {
 
 
     }
+    self.getFieldDataModelInfos = function (table, _field) {
+        var type = "";
+        if (!table || !context.dataModel[table])
+            return "string";
+
+        if (!table)
+            table = context.currentTable;
+
+        var infos=null;
+        context.dataModel[table].forEach(function (field) {
+            if (field.name == _field)
+                infos= field;
+        })
+        return infos;
+
+
+    }
 
     self.isTextField = function (table, _field) {
         if (!table || !context.dataModel[table])
@@ -341,10 +358,14 @@ var mainController = (function () {
             mainController.showSearchDiv("searchDiv-Versements");
         }
 
-        else if (tabName == "Tablettes") {
+        else if (tabName == "Magasins") {
 
             self.onchangeTable("magasin");
-            mainController.showSearchDiv("searchDiv-Tablettes");
+            mainController.showSearchDiv("searchDiv-Magasin");
+            //   $("#operationTabletteSelect").append(Tablette.getOperationSelectOptions({prompt:1}))
+
+            // $("#operationBoiteSelect").append(Boite.getOperationSelectOptions())
+
         }
         /*    else if (tabName == "Sorties") {
                 context.currentTable = "sortie_boite"
@@ -491,12 +512,12 @@ var mainController = (function () {
     self.showInMainDiv = function (type) {
 
         if (type == "graph") {
-            $("#graphWrapperDiv").css("display","block");
-            $("#listWrapperDiv").css("display","none");
+            $("#graphWrapperDiv").css("display", "block");
+            $("#listWrapperDiv").css("display", "none");
         }
         else if (type == "list") {
-            $("#graphWrapperDiv").css("display","none");
-            $("#listWrapperDiv").css("display","block");
+            $("#graphWrapperDiv").css("display", "none");
+            $("#listWrapperDiv").css("display", "block");
         }
 
         return;

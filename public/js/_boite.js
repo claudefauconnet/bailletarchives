@@ -1,6 +1,9 @@
 var Boite = (function () {
     var self = {}
 
+
+
+
     self.onBoiteOperationSelect = function (select) {
         var operation = $(select).val();
 
@@ -47,15 +50,15 @@ var Boite = (function () {
     }
 
 
-    self.locate = function () {
-        self.locate = function () {
-
-            var boite = prompt("boite :")
-            if (boite && boite != "") {
-                magasinD3.locate("boite", "id", [boite], 1);
-            }
-            // return alert("en construction");
+    self.locate = function (boite) {
+        if (!boite)
+            boite = prompt("boite :")
+        if (boite && boite != "") {
+            $("#currentMainMenuBoiteSpan").html(boite)
+            magasinD3.locate("boite", "id", [boite], 1);
+            mainController.showInMainDiv('graph');
         }
+
     }
 
 

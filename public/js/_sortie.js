@@ -8,9 +8,38 @@ var Sortie = (function () {
             recordController.incrementChanges(attr_sortieArchiviste);
 
         }
+     //   $("#attr_id_versement").prop('readonly', true);
         $("#recordLinkedDivs").html("");
     }
 
+
+
+    self.onBeforeSave=function(options,callback){
+        if( !options.currentRecord.id_versement){
+            var sql="select id from versement where numVersement='"+options.changes.numVersement+"'";
+            mainController.execSql(sql,function(err, result){
+                if(err){
+                    mainController.setErrorMessage(err)
+                   return  callback(err)
+                }
+               else if(result.length==0){
+                    return  callback("Ce versement n'existe pas")
+                }
+                else{
+                    var idVersement=result[0].id;
+                    recordController.currentRecordChanges.id_versement=idVersement;
+                    context.currentRecord.id_versement=idVersement;
+                    $("#attr_id_versement").val(idVersement)
+                    return callback(null);
+                }
+
+            })
+        }else
+            callback(null);
+
+
+
+    }
 
     self.locateCurrentSortie = function () {
 
@@ -85,8 +114,8 @@ var Sortie = (function () {
                 html = " pas de boites correspondantse";
             else {
 
-                $('#attr_id_versement').val(json[0].id_versement)
-                recordController.incrementChanges(document.getElementById("attr_id_versement"));
+             /*   $('#attr_id_versement').val(json[0].id_versement)
+                recordController.incrementChanges(document.getElementById("attr_id_versement"));*/
                 var allBoites = [];
                 json.forEach(function (tablette) {
                     var boitesStr = tablette.cotesParTablette;
@@ -128,6 +157,7 @@ var Sortie = (function () {
             })
             $('#attr_cotesBoites').val(str)
 
+
         } else {
             var str = $('#attr_cotesBoites').val();
             str = str.replace(/\s+/g, " ");
@@ -140,6 +170,7 @@ var Sortie = (function () {
         }
 
         recordController.currentRecordChanges["cotesBoites"] = $('#attr_cotesBoites').val();
+        $("#saveRecordButton").removeAttr("disabled");
 
 
     }

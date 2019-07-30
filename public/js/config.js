@@ -203,6 +203,7 @@ var config = (function () {
                 sortieArchiviste: {mandatory: true},
 
 
+
             },
 
             recordTools: [
@@ -219,6 +220,7 @@ var config = (function () {
                 }
             ],
             onAfterDisplay: Sortie.setNewRecordDefaultValues,
+            onBeforeSave: Sortie.onBeforeSave
         },
         "versement_historique": {
             tableConstraints: {

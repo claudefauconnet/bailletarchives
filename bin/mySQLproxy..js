@@ -72,7 +72,8 @@ var mySQLproxy = {
                             dataType: line.DATA_TYPE,
                             nullable: line.IS_NULLABLE,
                             defaultValue: line.COLUMN_DEFAULT,
-                            maxLength: line.CHARACTER_MAXIMUM_LENGTH
+                            maxLength: line.CHARACTER_MAXIMUM_LENGTH,
+                            numericScale:line.NUMERIC_SCALE
                         })
                     }
                 })

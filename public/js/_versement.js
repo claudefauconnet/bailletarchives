@@ -37,13 +37,26 @@ var Versement = (function () {
             if (etatTraitementCommentaire)
                 commentaireStr = "'" + etatTraitementCommentaire + "'";
 
-            var sql2 = " insert into versement_historique (etat,etatAuteur, etatDate,dateModification,commentaire,id_versement) values (" +
+            var sql="select numVersement from versement where id="+idVersement;
+            mainController.execSql(sql, function (err,result ) {
+                if (err) {
+                    if (callback)
+                        return callback(err)
+                    else
+                        return console.log(err);
+                }
+
+var numVersement=result[0].numVersement;
+
+
+            var sql2 = " insert into versement_historique (etat,etatAuteur, etatDate,dateModification,commentaire,id_versement,numVersement) values (" +
                 "'" + etatTraitement + "'," +
                 "'" + etatTraitementAuteur + "'," +
                 "'" + date + "'," +
                 "'" + util.dateToMariaDBString(new Date()) + "'," +
                 commentaireStr + "," +
-                "" + idVersement + ")"
+                idVersement+","+
+                numVersement+ ")"
             mainController.execSql(sql2, function (err, result) {
                 if (err) {
                     if (callback)
@@ -55,7 +68,7 @@ var Versement = (function () {
 
 
             })
-
+            })
 
         }
         self.ajouterTablette = function () {
@@ -367,6 +380,7 @@ var Versement = (function () {
 
                     },
 
+
                     function (callback) {// process refoulement : libere les tablettes du versement : numVersement et cotesParTablette vides
                         if (!tablettesaRefouler)
                             callback();
@@ -494,7 +508,7 @@ var Versement = (function () {
                         mainController.execSql(sql, function (err, result) {
                             if (err)
                                 return callback(err);
-
+                            dialogD3.dialog("close");
                             recordController.displayRecordData(result[0]);
                             callback(null);
                         })
@@ -563,6 +577,7 @@ var Versement = (function () {
                 if (err) {
                     return callback(err);
                 }
+                dialogD3.dialog("close");
                 callback(null, tablettesaRefouler);
 
 
@@ -795,6 +810,9 @@ var Versement = (function () {
             }
             if (!versement.centreArchive)
                 $("#attr_centreArchive").val("Baillet");
+
+            if (versement.etatTraitement)//reinitilaiser etat traitement lorsqu'on ouvre un versement (demande juillet 2019)
+                $("#attr_etatTraitement").val("");
         }
 
         self.getNewNumVersement = function (callback) {
@@ -851,13 +869,18 @@ var Versement = (function () {
                     if (err)
                         return callback(err);
 
+                    var cotesBoitesStr="";
+                    var regexSplitBoites=/[.*^\s]\s*/gm
                     json.forEach(function (tablette) {
                         infos.tablettes.metrage += tablette.metrage;
                         infos.tablettes.tailleTotaleTablettes += tablette.DimTabletteMLineaire
                         var tabletteBoites = [];
                         if (tablette.cotesParTablette) {
-                            tablette.cotesParTablette = tablette.cotesParTablette.replace(/\s+/g, " ");// si plusieurs blancs
-                            tabletteBoites = tablette.cotesParTablette.split(" ");
+                            cotesBoitesStr+=" "+ tablette.cotesParTablette;
+
+                            tablette.cotesParTablette = tablette.cotesParTablette.trim().replace(/\s+/g, " ");// si plusieurs blancs
+                          //  tabletteBoites = tablette.cotesParTablette.split(" ");
+                            tabletteBoites =cotesBoitesStr.trim().split(regex);
 
                         }
                         tabletteBoites.forEach(function (boite, index) {
@@ -867,10 +890,21 @@ var Versement = (function () {
 
                         })
                         infos.tablettes.coteBoites.push.apply(infos.tablettes.coteBoites, tabletteBoites);
-                        infos.tablettes.coteBoites.sort();
+
 
 
                     })
+                    infos.tablettes.coteBoites.sort();
+
+                    var regex=/[.*^\s]\s*/gm
+                    var boitesArray=cotesBoitesStr.trim().split(regex);
+                    var coteDebut=boitesArray[0];
+                    var coteFin=boitesArray[ boitesArray.length-1];
+
+                    infos.tablettes.cotesExtremes=coteDebut +"-"+ coteFin;
+                    infos.tablettes.nbreTotalBoites=boitesArray.length;
+
+
                     infos.tablettes.tailleTotaleTablettes = (Math.round(infos.tablettes.tailleTotaleTablettes * 100)) / 100
                     return callback(null, infos);
 
@@ -882,9 +916,22 @@ var Versement = (function () {
 
 
         self.getTablettesCotesExtremes = function (tablettes) {
-            var coteDebut = tablettes[0].cotesParTablette.substring(0, tablettes[0].cotesParTablette.indexOf(" "));
+
+           var cotesBoitesStr="";
+            tablettes.forEach(function(tablette){
+                cotesBoitesStr+=" "+ tablette.cotesParTablette;
+                })
+            var regex=/[.*^\s]\s*/gm
+            var boitesArray=cotesBoitesStr.trim().split(regex);
+            var coteDebut=boitesArray[0];
+            var coteFin=boitesArray[ boitesArray.length-1];
+            return coteDebut +"-"+ coteFin;
+
+
+
+         /*   var coteDebut = tablettes[0].cotesParTablette.substring(0, tablettes[0].cotesParTablette.indexOf(" "));
             var coteFin = tablettes[tablettes.length - 1].cotesParTablette.substring(tablettes[tablettes.length - 1].cotesParTablette.lastIndexOf(" "));
-            return coteDebut + coteFin;
+            return coteDebut + coteFin;*/
         }
 
 
@@ -901,9 +948,12 @@ var Versement = (function () {
         }
 
         self.SetVersementnbBoitesFromMagasin = function (versementId) {
+
+
+
             self.getVersementMagasinInfos({id: versementId}, function (err, infos) {
-                var input = $("#attr_nbBoites");
-                $(input).val(infos.tablettes.coteBoites.length);
+
+                $("#attr_nbBoites").val(infos.tablettes.nbreTotalBoites);
                 recordController.incrementChanges(input);
             })
         }

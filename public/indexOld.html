@@ -83,8 +83,7 @@
         input {
             width: 150px;
         }
-
-        input[type='checkbox'] {
+        input[type='checkbox']{
             width: 30px;
         }
 
@@ -113,10 +112,6 @@
 
         }
 
-        .ui-accordion-content {
-            padding: 3px  !important;
-        }
-
         #mainDiv, #linkedRecordsDiv {
 
             overflow: auto;
@@ -129,9 +124,9 @@
             border-style: solid;
         }
 
-        .myDatatableAA {
+        .myDatatableAA  {
             width: 600px;
-            height: 200px;
+          height: 200px;
 
         }
 
@@ -142,10 +137,12 @@
             border-left-style: solid;
             border-left-width: 1px;
             border-left-color: #93aeca;
-            width: 100px;
+           width: 100px ;
 
             height: 20px !important;
         }
+
+
 
         div.dataTables_wrapper {
             margin: 5px;
@@ -162,7 +159,7 @@
         }
 
         .datatable tr {
-            height: 20px;
+           height: 20px;
         }
 
         .message {
@@ -309,21 +306,22 @@
 
         }
 
-        .dialogButton {
+        .dialogButton
+        {
             margin-right: 400px !important;
         }
 
-        .field-mandatory {
+        .field-mandatory{
+            font-weight: bold;
+            background-color: #f1d3c7;
+
+        }
+        .field-mandatoryOnNew{
             font-weight: bold;
             background-color: #f1d3c7;
 
         }
 
-        .field-mandatoryOnNew {
-            font-weight: bold;
-            background-color: #f1d3c7;
-
-        }
 
 
     </style>
@@ -339,7 +337,7 @@
                     var content = ui;
                     var tabName = ui.newHeader.text()
                     mainController.onChangeMainAccordionTab(tabName);
-                    $("#popupD3Div").css("visibility", "hidden")
+                    $("#popupD3Div").css("visibility","hidden")
                     $("#dialogD3").dialog("close");
 
 
@@ -372,32 +370,28 @@
                 height: mainController.totalDims.h - 100,
                 width: "100%",
                 modal: true,
+               /* buttons: {
+                    Fermer: {
+                      //  class: 'dialogButton',
+                        text:" Fermer",
+                       click: function () {
 
+                            dialog.dialog("close");
+                            $("#dialogD3").dialog("close");
+                            if (context.redrawMagasinD3) {
+                                context.redrawMagasinD3 = null;
+                              //  magasinD3.drawMagasins()
+                            }
 
-                /* buttons: {
-                     Fermer: {
-                       //  class: 'dialogButton',
-                         text:" Fermer",
-                        click: function () {
-
-                             dialog.dialog("close");
-                             $("#dialogD3").dialog("close");
-                             if (context.redrawMagasinD3) {
-                                 context.redrawMagasinD3 = null;
-                               //  magasinD3.drawMagasins()
-                             }
-
-                         }
-                     }
-                 },*/
-                close: function () {
-
-                 //   $("#dialogDiv").dialog("close");
-                    if (context.redrawMagasinD3) {
-                        context.redrawMagasinD3 = null;
-                        //  magasinD3.drawMagasins()
+                        }
                     }
-                    recordController.closeRecordDialog()
+                },*/
+                close: function () {
+                    $("#dialogDiv").dialog("close");
+                    if( context.redrawMagasinD3 ){
+                        context.redrawMagasinD3=null;
+                      //  magasinD3.drawMagasins()
+                    }
 
                     // allFields.removeClass("ui-state-error");
                 }
@@ -519,22 +513,21 @@
 
             <h1>Magasins</h1>
 
-            <div id="magasinDiv" class="alignCenterFlex">
+            <div id="tablettesDiv" class="alignCenterFlex">
+                <div id="searchDiv-Tablettes"></div>
+                <button onclick="Tablette.locate()">Localiser</button>
 
-                <div>
 
-                    <button onclick=" $('#operationTabletteSelect').append(Tablette.getOperationSelectOptions({prompt:1}))"> Actions Tablette</button><span id="currentMainMenuTabletteSpan"></span>
-                    <br> <select id="operationTabletteSelect" onchange="Tablette.onTabletteOperationSelect(this)"></select>
-
-                </div>
-
-                <div id="searchDiv-Magasin"></div>
-
-                <div>
-                    <button onclick="Boite.locate()">Localiser Boite</button><span id="currentMainMenuBoiteSpan"></span>
-                </div>
             </div>
 
+
+            <h1>Boites</h1>
+            <div id="boitesDiv" class="alignCenterFlex">
+                <div id="searchDiv-Boites"></div>
+                <button onclick="Boite.locate()">Localiser</button>
+
+
+            </div>
             <h1>Gestion tables</h1>
             <div id=autresDiv" class="alignCenterFlex">
                 <table align="center">
@@ -582,6 +575,7 @@
     <div id="right">
         <!--   <button id="showHideLeftPanelButton"><< >></button>-->
         <div id="mainDiv" class="dataTableDiv">
+
 
 
         </div>
@@ -672,8 +666,6 @@
             password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
                         document.getElementById('loginButton').click()">
             <button id="loginButton" onclick="authentication.doLogin()">OK</button>
-            <button id="xxx" onclick="Tablette.updateCotesParTabletteZeros()">TEST boites</button>
-
             <div id="loginMessage"></div>
         </div>
     </div>
