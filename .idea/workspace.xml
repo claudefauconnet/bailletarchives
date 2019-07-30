@@ -3,17 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="6f79c96b-1e7e-4e88-9b09-aaa3d37d5521" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/bin/importData/xlsxToImport..js" afterPath="$PROJECT_DIR$/bin/importData/xlsxToImport..js" />
-      <change beforePath="$PROJECT_DIR$/bin/mySQLproxy..js" afterPath="$PROJECT_DIR$/bin/mySQLproxy..js" />
       <change beforePath="$PROJECT_DIR$/public/index.html" afterPath="$PROJECT_DIR$/public/index.html" />
-      <change beforePath="$PROJECT_DIR$/public/js/_boite.js" afterPath="$PROJECT_DIR$/public/js/_boite.js" />
-      <change beforePath="$PROJECT_DIR$/public/js/_sortie.js" afterPath="$PROJECT_DIR$/public/js/_sortie.js" />
-      <change beforePath="$PROJECT_DIR$/public/js/_tablette.js" afterPath="$PROJECT_DIR$/public/js/_tablette.js" />
-      <change beforePath="$PROJECT_DIR$/public/js/_versement.js" afterPath="$PROJECT_DIR$/public/js/_versement.js" />
-      <change beforePath="$PROJECT_DIR$/public/js/config.js" afterPath="$PROJECT_DIR$/public/js/config.js" />
-      <change beforePath="$PROJECT_DIR$/public/js/magasinD3.js" afterPath="$PROJECT_DIR$/public/js/magasinD3.js" />
-      <change beforePath="$PROJECT_DIR$/public/js/mainController.js" afterPath="$PROJECT_DIR$/public/js/mainController.js" />
-      <change beforePath="$PROJECT_DIR$/public/js/recordController.js" afterPath="$PROJECT_DIR$/public/js/recordController.js" />
+      <change beforePath="$PROJECT_DIR$/public/js/authentication.js" afterPath="$PROJECT_DIR$/public/js/authentification.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -27,19 +18,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="mainController.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/js/mainController.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="220">
-              <caret line="228" column="23" lean-forward="true" selection-start-line="228" selection-start-column="23" selection-end-line="228" selection-end-column="23" />
-              <folding>
-                <marker date="1564419528739" expanded="true" signature="1578:1675" ph="..." />
-                <marker date="1564419528739" expanded="true" signature="1718:1758" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="_versement.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/js/_versement.js">
           <provider selected="true" editor-type-id="text-editor">
@@ -57,8 +35,28 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="244">
-              <caret line="666" column="16" lean-forward="true" selection-start-line="666" selection-start-column="16" selection-end-line="666" selection-end-column="16" />
+            <state relative-caret-position="87">
+              <caret line="32" column="0" lean-forward="true" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="authentification.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/public/js/authentification.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="126">
+              <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/routes/index.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="126">
+              <caret line="31" column="3" lean-forward="true" selection-start-line="31" selection-start-column="3" selection-end-line="31" selection-end-column="3" />
               <folding />
             </state>
           </provider>
@@ -74,17 +72,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="processData..js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bin/processData..js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="569">
-              <caret line="196" column="34" lean-forward="true" selection-start-line="196" selection-start-column="34" selection-end-line="196" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="_tablette.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="_tablette.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/js/_tablette.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="217">
@@ -99,6 +87,16 @@
                 <marker date="1564465402267" expanded="true" signature="10808:10818" ph="..." />
                 <marker date="1564465402267" expanded="true" signature="12209:12237" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="globalParams..js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/bin/globalParams..js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -118,16 +116,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="306">
               <caret line="65" column="50" lean-forward="false" selection-start-line="65" selection-start-column="40" selection-end-line="65" selection-end-column="50" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="xlsxToImport..js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/bin/importData/xlsxToImport..js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="430" column="0" lean-forward="true" selection-start-line="430" selection-start-column="0" selection-end-line="430" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -207,8 +195,9 @@
         <option value="$PROJECT_DIR$/public/js/mainController.js" />
         <option value="$PROJECT_DIR$/public/js/recordController.js" />
         <option value="$PROJECT_DIR$/public/js/_versement.js" />
-        <option value="$PROJECT_DIR$/public/index.html" />
         <option value="$PROJECT_DIR$/public/js/_tablette.js" />
+        <option value="$PROJECT_DIR$/public/index.html" />
+        <option value="$PROJECT_DIR$/public/js/authentification.js" />
       </list>
     </option>
   </component>
@@ -275,6 +264,11 @@
               <item name="public" type="462c0819:PsiDirectoryNode" />
               <item name="js" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="bailletArchives" type="b2602c69:ProjectViewProjectNode" />
+              <item name="bailletArchives" type="462c0819:PsiDirectoryNode" />
+              <item name="routes" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -316,12 +310,12 @@
       <updated>1564220468569</updated>
       <workItem from="1564220472936" duration="153000" />
       <workItem from="1564220634801" duration="13103000" />
-      <workItem from="1564332984107" duration="20945000" />
+      <workItem from="1564332984107" duration="24866000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34201000" />
+    <option name="totallyTimeSpent" value="38122000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -618,14 +612,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="244">
-          <caret line="666" column="16" lean-forward="true" selection-start-line="666" selection-start-column="16" selection-end-line="666" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/public/js/_tablette.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="217">
@@ -640,6 +626,38 @@
             <marker date="1564465402267" expanded="true" signature="10808:10818" ph="..." />
             <marker date="1564465402267" expanded="true" signature="12209:12237" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bin/globalParams..js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/routes/index.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="31" column="3" lean-forward="true" selection-start-line="31" selection-start-column="3" selection-end-line="31" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="87">
+          <caret line="32" column="0" lean-forward="true" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/js/authentification.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>

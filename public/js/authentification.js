@@ -1,7 +1,7 @@
 var authentication = (function () {
 
     var self = {}
-
+// pb avec l'url sur serveur a cause d'nginx qui n'adment pas authentication ??? voir config version antérieure déployéee
     self.authenticationUrl = "../bailletarchives-authentication";
     self.userIndexes = [];
     self.currentUser="admin";
