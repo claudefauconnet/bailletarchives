@@ -48,7 +48,8 @@ var mySQLproxy = {
     },
 
     datamodel:function(connection,callback){
-        var excludedTables=["users","r_versement_magasin"]
+       // var excludedTables=["users","r_versement_magasin"];
+        var excludedTables=[];
         mySQLproxy.getConnection(connection, function (err, conn) {
             if (err)
                 return callback(err);

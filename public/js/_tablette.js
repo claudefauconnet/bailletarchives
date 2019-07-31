@@ -503,8 +503,9 @@ var Tablette = (function () {
 
             var sql="select id, cotesParTablette from magasin where cotesParTablette is not null and cotesParTablette!=''"
             mainController.execSql(sql,function(err,result){
-                var newCotesParTablette=""
+
                 result.forEach(function(line, lineIndex){
+                    var newCotesParTablette=""
                     var regex=/[.*^\s]\s*/gm
                     var boitesArray=line.cotesParTablette.trim().split(regex);
                    boitesArray.forEach(function(boite,indexBoites){
@@ -523,6 +524,27 @@ var Tablette = (function () {
 
 
                 })
+
+
+                var str=""
+
+                    var count=1
+                    async.eachSeries(result,function(line,callbackEach){
+                        var sql="update magasin set cotesParTablette='"+line.cotesParTablette+"' where id="+line.id+";";
+                        mainController.execSql(sql, function(err, result){
+                            if(err)
+                               return  callbackEach(err)
+                            console.log(""+(count++))
+                            callbackEach();
+                        })
+
+                    },function(err){
+                        console.log("done");
+                    })
+
+
+
+
 
 
             })

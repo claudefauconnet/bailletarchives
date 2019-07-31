@@ -385,7 +385,7 @@ var numVersement=result[0].numVersement;
                         if (!tablettesaRefouler)
                             callback();
                         else {
-                            versement.etatTraitementAuteur = authentication.currentUser;
+                            versement.etatTraitementAuteur = authentication.currentUser.nomComplet;
                             self.refoulerVersement(versement, tablettesaRefouler, function (err, result) {
 
                                 if (err) {
@@ -472,7 +472,7 @@ var numVersement=result[0].numVersement;
                     },
                     function (callback) {
 
-                        Versement.updateRecordHistory(versement.id, "en attente", authentication.currentUser, "", new Date(), function (err, result) {
+                        Versement.updateRecordHistory(versement.id, "en attente", authentication.currentUser.nomComplet, "", new Date(), function (err, result) {
                             if (err)
                                 return callback(err);
                             return callback();
@@ -570,7 +570,7 @@ var numVersement=result[0].numVersement;
 
                     })
                     var commentaire = "refoulement depuis les tablettes " + tablettesStr;
-                    Versement.updateRecordHistory(versement.id, "refoulement", authentication.currentUser, commentaire, new Date());
+                    Versement.updateRecordHistory(versement.id, "refoulement", authentication.currentUser.nomComplet, commentaire, new Date());
                     callbackSeries();
                 }
             ], function (err) {
@@ -786,7 +786,7 @@ var numVersement=result[0].numVersement;
 
         self.setNewRecordDefaultValues = function (versement) {
 
-            var userGroups = authentication.currentUserGroups;
+            var userGroups = authentication.currentUser.groupes;
             if (userGroups.indexOf("ADMIN") < 0) {
                 $("#deleteRecordButton").css("display", "none")
             }
@@ -805,7 +805,7 @@ var numVersement=result[0].numVersement;
             }
             if (true || !versement.etatTraitementAuteur) {
 
-                $("#attr_etatTraitementAuteur").val(authentication.currentUser);
+                $("#attr_etatTraitementAuteur").val(authentication.currentUser.nomComplet);
                 recordController.incrementChanges(attr_etatTraitementAuteur);
             }
             if (!versement.centreArchive)

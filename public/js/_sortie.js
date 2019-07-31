@@ -4,7 +4,7 @@ var Sortie = (function () {
 
     self.setNewRecordDefaultValues = function (sortie) {
         if (!sortie.sortieArchiviste) {
-            $("#attr_sortieArchiviste").val(authentication.currentUser);
+            $("#attr_sortieArchiviste").val(authentication.currentUser.nomComplet);
             recordController.incrementChanges(attr_sortieArchiviste);
 
         }

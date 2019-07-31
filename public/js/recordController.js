@@ -554,9 +554,12 @@ var recordController = (function () {
     self.checkConstraints = function (isNewRecord, callbackOuter) {
         var constraintErrors = [];
         var constraintsArray = [];
+        if(!config.tableDefs[context.currentTable].fieldConstraints)
+            return callbackOuter(null,constraintErrors)
         $(".objAttrInput").each(function () {
             var value = $(this).val();
             var fieldName = $(this).attr("id").substring(5);
+
             var constraints = config.tableDefs[context.currentTable].fieldConstraints[fieldName];
             if (constraints) {
 
@@ -799,13 +802,15 @@ var recordController = (function () {
 
 
             var constraintsClassStr = "";
-            var constraints = config.tableDefs[context.currentTable].fieldConstraints[key];
-            if (constraints) {
-                if (constraints.mandatory)
-                    constraintsClassStr = "class='field-mandatory'"
-                if (constraints.mandatoryOnNew)
-                    constraintsClassStr = "class='field-mandatoryOnNew'"
+            if(config.tableDefs[context.currentTable].fieldConstraints) {
+                var constraints = config.tableDefs[context.currentTable].fieldConstraints[key];
+                if (constraints) {
+                    if (constraints.mandatory)
+                        constraintsClassStr = "class='field-mandatory'"
+                    if (constraints.mandatoryOnNew)
+                        constraintsClassStr = "class='field-mandatoryOnNew'"
 
+                }
             }
 
 

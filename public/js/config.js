@@ -6,7 +6,8 @@ var config = (function () {
     self.LoadAllrecordsTables = false;
     self.maxVersementsToLocate = 5;
     self.coefRemplissageTablette = .7
-    self.coteBoiteNbDigits = 3
+    self.coteBoiteNbDigits = 3;
+    self.loginMode="database";  //json || database
 
     self.tableDefs = {
 
@@ -223,6 +224,12 @@ var config = (function () {
             onBeforeSave: Sortie.onBeforeSave
         },
         "versement_historique": {
+            tableConstraints: {
+                cannotDelete: true
+            },
+            tabs: [],
+        }
+        ,  "utilisateur": {
             tableConstraints: {
                 cannotDelete: true
             },
