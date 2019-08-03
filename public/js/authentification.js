@@ -29,9 +29,9 @@ var authentication = (function () {
         var password = $("#passwordInput").val();
         $("#main").css("visibility", "hidden");
 
-        if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)) {
+     /*   if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)) {
             $("#loginMessage").html("invalid  login : Minimum eight characters, at least one uppercase letter, one lowercase letter and one number");
-        }
+        }*/
         var user = null;
         async.series([
             function (callbackSeries) {
@@ -77,7 +77,38 @@ var authentication = (function () {
 
 
     self.doLoginDatabase = function (login, password,callback) {
-        var sql = "select * from utilisateur where identifiant='" + login + "' and motDepasse='" + password + "'";
+
+
+
+
+        var authenticationUrl = "../authDB";
+        var payload = {
+            tryLogin: 1,
+            login: login,
+           password: password,
+
+
+        }
+
+        $.ajax({
+            type: "POST",
+            url: authenticationUrl,
+            data: payload,
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+                return callback(null,data);
+
+
+            }, error: function (err) {
+                if(err.responseJSON && err.responseJSON.ERROR=="changePassword"){
+                    return callback("le mot de passe doit être changé (menu outils)")
+                }
+                return callback(err);
+
+
+            }
+        })
+       /* var sql = "select * from utilisateur where identifiant='" + login + "' and motDepasse='" + password + "'";
         mainController.execSql(sql, function (err, result) {
             if (err) {
                return callback(err);
@@ -86,7 +117,7 @@ var authentication = (function () {
                return callback();
             return callback(null,result[0]);
 
-        })
+        })*/
 
 
     }

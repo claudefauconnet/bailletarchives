@@ -134,9 +134,19 @@ var config = (function () {
             tableConstraints: {
                 cannotDelete: false
             },
+            fieldLabels:{
+               FR:{
+                   intitule:"intitulé",
+                   cotesExtremesDossiersNiveauUn:"cotesExtr.Dossiers"
+               }
+
+
+
+            },
             onAfterDisplay: Versement.setNewRecordDefaultValues,
             onAfterSave: Versement.updateRecordHistoryAfterVersementSave,
-            onAfterDelete: Versement.onAfterDelete
+            onAfterDelete: Versement.onAfterDelete,
+            onBeforeSave: Versement.onBeforeSave
 
 
         },
@@ -246,6 +256,7 @@ var config = (function () {
         //    "DéplacerBoitesVersement ": {htmlPage: "deplacerBoitesDialog.html"},
 
         "GererLesListes ": {htmlPage: "gererListes.html"},
+        "chngerMotDePasse ": {htmlPage: "gererListes.html"},
 
         //   "carte de magasin ": {loadMagasinD3: true}
 
@@ -255,9 +266,11 @@ var config = (function () {
 
     self.default = {
         textArea: {
-            cols: 50,
+          //  cols: 50,
+            cols: 30,
             rows: 4
-        }
+        },
+        fieldInputWith:200,
 
 
     }

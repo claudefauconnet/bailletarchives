@@ -15,16 +15,22 @@ var recordController = (function () {
 
     self.closeRecordDialog = function () {
         if (Object.keys(self.currentRecordChanges).length > 0) {
-            if (confirm("Quitter sans enregister les changements ?"))
+            var ok = confirm("Quitter sans enregister les changements ?")
+            if (ok === true) {
+
+                $("#dialogDiv").dialog("close");
+                return true;
+            } else {
                 return false;
-            else if (confirm("enregistrer les changements ?"))
-                self.saveRecord();
+            }
 
         }
-
-        $("#dialogDiv").dialog("close");
-        return true;
+        else{
+            $("#dialogDiv").dialog("close");
+            return true;
+        }
     }
+
     self.displayRecordData = function (obj, mode) {
 
         context.currentRecord = obj;
@@ -32,20 +38,24 @@ var recordController = (function () {
         self.canSave = 0;
 
 
-        var targetObj = {}
+        var targetObj = {};
+        var tableConfig=config.tableDefs[table];
         context.dataModel[table].forEach(function (field) {
             targetObj[field.name] = {
                 type: mainController.getFieldType(table, field.name)
             }
 
+            if( tableConfig.fieldLabels && tableConfig.fieldLabels[config.locale] )
+                targetObj[field.name].label= tableConfig.fieldLabels[config.locale][field.name]
+
             if (targetObj.type == "number")
-                targetObj[field.name].cols = 10;
+                targetObj[field.name].cols = config.default.textArea.rows;//10;
             if ((field.maxLength && field.maxLength > 100) || field.dataType == "text") {
                 targetObj[field.name].cols = config.default.textArea.cols;
                 targetObj[field.name].rows = config.default.textArea.rows
             }
             else if (field.maxLength && field.maxLength <= 50)
-                targetObj[field.name].cols = field.maxLength;
+                targetObj[field.name].cols =config.default.textArea.rows;// field.maxLength;
 
             if (mode == "readOnly")
                 targetObj[field.name].type = "readOnly"
@@ -108,7 +118,7 @@ var recordController = (function () {
         if (obj && obj.id)
             listController.loadLinkedDivs()
 
-
+$(".objAttrInput").width(config.default.fieldInputWith)
         $("#saveRecordButton").attr("disabled", true);
         $("#dialogDiv").dialog("open");
 
@@ -128,7 +138,7 @@ var recordController = (function () {
         if (typeof str != 'string')
             return str;
 
-        return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+        str= str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
             switch (char) {
                 case "\0":
                     return "\\0";
@@ -150,6 +160,12 @@ var recordController = (function () {
                                         // and double/single quotes
             }
         });
+
+        str=str.replace(/[«»<=>]/g,function(char){
+           return "\\" + char;
+        })
+
+        return str;
 
     }
 
@@ -226,7 +242,7 @@ var recordController = (function () {
                             //update list datatable
                             if (context.dataTables[context.currentTable])
                                 context.dataTables[context.currentTable].updateSelectedRow(self.currentRecordChanges)
-                            self.currentRecordChanges = {};
+
 
                             return callbackSeries();
 
@@ -266,7 +282,7 @@ var recordController = (function () {
 
             // at the end
             function (err) {
-
+                self.currentRecordChanges = {};
                 if (err) {
                     if (err != "stop")
                         return mainController.setRecordErrorMessage(err);
@@ -497,8 +513,7 @@ var recordController = (function () {
 
                 }
                 else if (type == 'number') {
-                    if (key == "nbBoites")
-                        var xxx = 3
+
 
                     if (value) {
                         var decimalSeparator = ".";
@@ -534,13 +549,13 @@ var recordController = (function () {
                 var strCols = ""
 
                 if (rows) {// textarea
-                    if (cols)
+                    if (false && cols)
                         strCols = " cols='" + cols + "' ";
                     rows = " rows='" + rows + "' ";
                     value = "<textArea  onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + type + "' " + strCols + rows
                         + "id='attr_" + key + "' > " + value + "</textarea>";
                 } else {
-                    if (cols)
+                    if (false && cols)
                         strCols = " size='" + cols + "' ";
                     value = "<input onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput " + type + "' " + strCols + "id='attr_"
                         + key + "' value='" + value + "'>";
@@ -798,7 +813,10 @@ var recordController = (function () {
             }
 
 
-            var fieldTitle = targetObj[key].title;
+            //var fieldTitle = targetObj[key].title;
+            var fieldLabel = targetObj[key].label;
+            if (!fieldLabel)
+                fieldLabel = key;
 
 
             var constraintsClassStr = "";
@@ -825,12 +843,13 @@ var recordController = (function () {
                 strHidden += "<input type='hidden' id='attr_" + key + "' value='" + strVal + ">"
             } else {
                 className = 'mandatoryFieldLabel';
-                if (!fieldTitle)
-                    fieldTitle = key;
+              /*  if (!fieldTitle)
+                    fieldTitle = key;*/
+
                 var className = 'fieldLabel';
 
 
-                str += "<tr " + constraintsClassStr + "><td align='right'><span class=" + className + ">" + fieldTitle + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal + fieldToolStr + "</span></td></tr>";
+                str += "<tr " + constraintsClassStr + "><td align='right'><span class=" + className + ">" + fieldLabel + "</span></td><td>" + desc + "</td><td align='left' ><span class='fieldvalue'>" + strVal + fieldToolStr + "</span></td></tr>";
             }
         }
         str += "</table>" + strHidden;

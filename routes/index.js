@@ -20,6 +20,7 @@ router.post('/mysql', function (req, res, next) {
 
     }
 
+
     if (req.body.datamodel && isRequestLocalHost(req, res)) {
         mysql.datamodel(req.body.connection, function (err, result) {
             processResponse(res, err, result)
@@ -30,6 +31,34 @@ router.post('/mysql', function (req, res, next) {
 
 
 });
+router.post('/authDB', function (req, res, next) {
+    console.log(JSON.stringify(req.body))
+    if (req.body.tryLogin) {
+        authentication.loginInDB(req.body.login, req.body.password, function (err, result) {
+            processResponse(res, err, result)
+
+        })
+
+    }
+    if (req.body.enrole) {
+        if (req.body.enrole) {
+            if (typeof req.body.users === "string")
+                req.body.users = JSON.parse(req.body.user)
+            authentication.enrole(req.body.users, function (err, result) {
+                processResponse(res, err, result)
+
+            })
+        }
+    }
+    if (req.body.changePassword) {
+        if (req.body.changePassword) {
+            authentication.changePassword(req.body.login, req.body.oldPassword, req.body.newPassword, function (err, result) {
+                processResponse(res, err, result)
+
+            })
+        }
+    }
+})
 router.post('/versementBoitesToTablettes', function (req, res, next) {
 
     processData.versementBoitesToTablettes(JSON.parse(req.body.data), function (err, result) {
@@ -39,13 +68,13 @@ router.post('/versementBoitesToTablettes', function (req, res, next) {
 });
 
 router.post('/modifytravee', function (req, res, next) {
-    processData.modifytravee (req.body.operation,JSON.parse( req.body.tablette), JSON.parse(req.body.options),  function (err, result) {
+    processData.modifytravee(req.body.operation, JSON.parse(req.body.tablette), JSON.parse(req.body.options), function (err, result) {
         processResponse(res, err, result)
     })
 
 });
 
-router.post( '/bailletarchives-authentication', function (req, response) {
+router.post('/bailletarchives-authentication', function (req, response) {
     if (req.body.authentify)
         authentication.authentify(req.body.login, req.body.password, function (error, result) {
             processResponse(response, error, result)
@@ -96,8 +125,7 @@ function processResponse(response, error, result) {
 
             response.status(404).send({ERROR: error});
 
-        }
-        else if (!result) {
+        } else if (!result) {
             response.send({done: true});
         } else {
 
@@ -105,16 +133,14 @@ function processResponse(response, error, result) {
                 resultObj = {result: result};
 
                 response.send(JSON.stringify(resultObj));
-            }
-            else {
+            } else {
                 if (result.contentType && result.data) {
                     response.setHeader('Content-type', result.contentType);
                     if (typeof result.data == "object")
                         response.send(JSON.stringify(result.data));
                     else
                         response.send(result.data);
-                }
-                else {
+                } else {
                     var resultObj = result;
                     // response.send(JSON.stringify(resultObj));
                     response.send(resultObj);

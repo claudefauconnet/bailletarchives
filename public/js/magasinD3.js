@@ -573,12 +573,14 @@ var magasinD3 = (function () {
             self.currentTablette = obj;
             self.currentVersement = null;
             self.currentBoite = null;
-
+if(!obj.commentaires)
+    obj.commentaires="";
             var html = "";
 
             if (obj.avecVersementSanscotes) {
                 self.currentVersementSansBoites = obj.versements[0];
                 html = "tablette " + obj.name + "<br>avec versement sans boites cotées : " + obj.avecVersementSanscotes;
+                html += "<br>commentaires : " + obj.commentaires;
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
                     Tablette.getOperationSelectOptions(obj) +
 
@@ -592,6 +594,7 @@ var magasinD3 = (function () {
             else if (tablette.avecCotesSansVersement) {
 
                 html = "tablette " + obj.name + "<br> sans versement mais avec des boites cotées : ";
+                html += "<br>commentaires : " + obj.commentaires;
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
                     Tablette.getOperationSelectOptions(obj) +
                     /*  " <option></option>" +
@@ -615,6 +618,8 @@ var magasinD3 = (function () {
             }
             else {
                 html += "tablette " + tablette.name + "<br>"
+
+                html += "<br>commentaires : " + obj.commentaires;
                 html += "<br>operations tablette :<select onchange='Tablette.onTabletteOperationSelect(this)'>" +
 
                     Tablette.getOperationSelectOptions({})

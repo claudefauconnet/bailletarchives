@@ -65,6 +65,7 @@ var Tablette = (function () {
                 var oldCommentaires = magasinD3.currentTablette.commentaires
                 var commentaire = prompt("entrer un commentaire pour la  tablette " + magasinD3.currentTablette.name, oldCommentaires);
                 if (commentaire != null && commentaire != "") {
+                    commentaire=recordController.escapeMySqlChars(commentaire);
                     var sql = "update magasin set commentaires='" + commentaire + "' where coordonnees='" + magasinD3.currentTablette.name + "'";
                     mainController.execSql(sql, function (err, result) {
                         if (err)
@@ -137,9 +138,12 @@ var Tablette = (function () {
                     }
 
                     var commentaire = prompt("Entrer un commentaire");
+                    commentaire=recordController.escapeMySqlChars(commentaire);
                     var commentaireStr = "";
                     if (commentaire && commentaire != "")
                         commentaireStr = ", commentaires='" + commentaire + "'"
+
+
 
                     var sql = "update magasin set indisponible=1" + commentaireStr + " where coordonnees='" + coordonnees + "'"
                     mainController.execSql(sql, function (err, result) {
@@ -372,6 +376,7 @@ var Tablette = (function () {
             mainController.execSql(sql, callback);
         }
         self.updateCommentaireParTablette = function (commentaires, idMagasin, callback) {
+            commentaires=recordController.escapeMySqlChars(commentaires);
             var sql = "update  magasin set commentaires='" + commentaires + "' where id=" + idMagasin;
             mainController.execSql(sql, callback);
 

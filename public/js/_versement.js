@@ -196,8 +196,6 @@ var numVersement=result[0].numVersement;
                         versement = result[0];
                         context.currentRecord = versement;
 
-                        if (false && (versement.etatTraitement != "en attente" && versement.etatTraitement != "décrit"))
-                            callback("l'état du versement ne permet pas de l'enter en magasin")
 
                         callback();
                     })
@@ -472,7 +470,7 @@ var numVersement=result[0].numVersement;
                     },
                     function (callback) {
 
-                        Versement.updateRecordHistory(versement.id, "en attente", authentication.currentUser.nomComplet, "", new Date(), function (err, result) {
+                        Versement.updateRecordHistory(versement.id, "référencement", authentication.currentUser.nomComplet, "", new Date(), function (err, result) {
                             if (err)
                                 return callback(err);
                             return callback();
@@ -554,7 +552,7 @@ var numVersement=result[0].numVersement;
 
                 function (callbackSeries) {
 
-                    var sql = "update versement set etatTraitement='en attente',etatTraitementAuteur='" + versement.etatTraitementAuteur + "', etatTraitementDate='" + util.dateToMariaDBString(new Date()) + "' where id=" + versement.id;
+                    var sql = "update versement set etatTraitement='référencement',etatTraitementAuteur='" + versement.etatTraitementAuteur + "', etatTraitementDate='" + util.dateToMariaDBString(new Date()) + "' where id=" + versement.id;
                     mainController.execSql(sql, function (err, result) {
                         if (err)
                             return callbackSeries(err);
@@ -787,6 +785,8 @@ var numVersement=result[0].numVersement;
         self.setNewRecordDefaultValues = function (versement) {
 
             var userGroups = authentication.currentUser.groupes;
+            if(!userGroups)
+                userGroups="NONE";
             if (userGroups.indexOf("ADMIN") < 0) {
                 $("#deleteRecordButton").css("display", "none")
             }
@@ -806,13 +806,16 @@ var numVersement=result[0].numVersement;
             if (true || !versement.etatTraitementAuteur) {
 
                 $("#attr_etatTraitementAuteur").val(authentication.currentUser.nomComplet);
-                recordController.incrementChanges(attr_etatTraitementAuteur);
+             //   recordController.incrementChanges(attr_etatTraitementAuteur);
             }
             if (!versement.centreArchive)
                 $("#attr_centreArchive").val("Baillet");
 
             if (versement.etatTraitement)//reinitilaiser etat traitement lorsqu'on ouvre un versement (demande juillet 2019)
                 $("#attr_etatTraitement").val("");
+
+            if (versement.etatTraitementDate)//reinitilaiser etat traitement lorsqu'on ouvre un versement (demande juillet 2019)
+                $("#attr_etatTraitementDate").val("");
         }
 
         self.getNewNumVersement = function (callback) {
@@ -968,6 +971,10 @@ var numVersement=result[0].numVersement;
 
         }
 
+            self.onBeforeSave=function(options,callback){
+                recordController.incrementChanges(attr_etatTraitementAuteur);
+                return callback();
+            }
 
         return self;
 

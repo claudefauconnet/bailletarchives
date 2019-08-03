@@ -379,12 +379,13 @@ var listController = (function () {
 
 
             var data = prompt(colName, line[colName]);
+
             if (data != null && data != line[colName] && confirm("modifier " + colName + " : " + colName)) {
 
                     line[colName] =  data.trim()
 
 
-
+                data=recordController.escapeMySqlChars(data);
                 var sql = "update  " + linkedTable + " set " + colName + "='" + data + "' where id=" + line.id;
                 mainController.execSql(sql, function (err, result) {
                     if (err)
