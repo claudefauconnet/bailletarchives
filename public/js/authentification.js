@@ -3,6 +3,7 @@ var authentication = (function () {
     var self = {}
 // pb avec l'url sur serveur a cause d'nginx qui n'adment pas authentication ??? voir config version antérieure déployéee
     self.authenticationUrl = "../bailletarchives-authentication";
+    var authenticationDBUrl = "../authDB";
     self.userIndexes = [];
     self.currentUser={};
 
@@ -59,8 +60,26 @@ var authentication = (function () {
 
 
         ], function (err) {
-            if (err)
-                return $("#loginMessage").html(err);
+            if (err && err.responseJSON) {
+                if ( err.responseJSON.ERROR == "changePassword") {
+                  //    $("#loginMessage").html("le mot de passe doit être changé (<a href='htmlSnippets/changerMotDePasse.html'>cliquer ici</a>)");
+                    $("#loginMessage").html("le mot de passe doit être changé <button onclick=tools.execTool('changerMotDePasse')>OK</button>");
+                   self.currentUser=user;
+                    mainController.init0();
+
+                    return
+                }
+                else if ( err.responseJSON.ERROR == "invalidLogin") {
+                    return $("#loginMessage").html("identifiant et/ou mot de passe invalide");
+
+
+                }
+                else{
+                    return $("#loginMessage").html(err);
+                }
+
+
+            }
             if(!user)
                 return $("#loginMessage").html("invalid  login or password");
 
@@ -81,7 +100,7 @@ var authentication = (function () {
 
 
 
-        var authenticationUrl = "../authDB";
+
         var payload = {
             tryLogin: 1,
             login: login,
@@ -92,7 +111,7 @@ var authentication = (function () {
 
         $.ajax({
             type: "POST",
-            url: authenticationUrl,
+            url: authenticationDBUrl,
             data: payload,
             dataType: "json",
             success: function (data, textStatus, jqXHR) {
@@ -100,9 +119,7 @@ var authentication = (function () {
 
 
             }, error: function (err) {
-                if(err.responseJSON && err.responseJSON.ERROR=="changePassword"){
-                    return callback("le mot de passe doit être changé (menu outils)")
-                }
+
                 return callback(err);
 
 
@@ -156,6 +173,81 @@ var authentication = (function () {
 
 
             }, error: function (err) {
+                return callback(err);
+
+
+            }
+        })
+
+    }
+
+    self.changePassword=function() {//page htmlSnippets/ changerMotDePasse.html
+        $("#changePassword_message").html("");
+        var login = $("#changePassword_identifiant").val();
+        var password = $("#changePassword_ancienMotDePasse").val();
+        var newPassword = $("#changePassword_nouveauMotDePasse").val();
+        var newPassword2 = $("#changePassword_nouveauMotDePasseConfirm").val();
+        if (newPassword != newPassword2)
+            return $("#changePassword_message").html("le nouveau mot de passe n'est pas le même");
+        if (!newPassword.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/))
+            return $("#changePassword_message").html("invalid  login : Minimum eight characters, at least one uppercase letter, one lowercase letter and one number");
+
+        var authenticationUrl = "../authDB";
+        var payload = {
+            changePassword: 1,
+            login: login,
+            oldPassword: password,
+            newPassword:newPassword,
+
+        }
+
+        $.ajax({
+            type: "POST",
+            url: authenticationUrl,
+            data: payload,
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+                $("#dialogD3").dialog("close");
+                $("#loginMessage").html("le nouveau mot de passe a été changé, identifiez vous a nouveau");
+                $("#changePassword_message").html("le nouveau mot de passe a été changé");
+
+
+            }, error: function (err) {
+                $("#changePassword_message").html(err.responseText);
+
+
+            }
+        })
+
+
+    }
+
+    //save record for authentication : call special method to encrypt password on server
+    self.onBeforeSave=function(options,callback){
+        for (var key in options.changes){
+            options.currentRecord[key]=options.changes[key];
+        }
+
+        var authenticationUrl = "../authDB";
+        var payload = {
+            enrole: 1,
+           users:JSON.stringify(options.currentRecord)
+
+
+        }
+
+        $.ajax({
+            type: "POST",
+            url: authenticationDBUrl,
+            data: payload,
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+                mainController.setRecordMessage("enregistrement sauvé");
+                return callback("stop");
+
+
+            }, error: function (err) {
+
                 return callback(err);
 
 

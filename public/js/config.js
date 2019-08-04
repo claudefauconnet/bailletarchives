@@ -243,22 +243,19 @@ var config = (function () {
             tableConstraints: {
                 cannotDelete: true
             },
+            fieldConstraints: {
+                motDePasse: {hidden: true},
+            },
             tabs: [],
+            onBeforeSave: authentication.onBeforeSave
         }
     }
     self.lists = {};
 
     self.tools = {
-
-
-        //  "ChercherTablettesDisponibles ": {htmlPage: "magasinD3dialog.html"},
-
-        //    "DéplacerBoitesVersement ": {htmlPage: "deplacerBoitesDialog.html"},
-
         "GererLesListes ": {htmlPage: "gererListes.html"},
-        "chngerMotDePasse ": {htmlPage: "gererListes.html"},
+        "changerMotDePasse": {htmlPage: "changerMotDePasse.html"},
 
-        //   "carte de magasin ": {loadMagasinD3: true}
 
 
     }

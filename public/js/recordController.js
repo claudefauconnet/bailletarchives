@@ -286,6 +286,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                 if (err) {
                     if (err != "stop")
                         return mainController.setRecordErrorMessage(err);
+
                 }
                 else {
                     mainController.setRecordMessage("enregistrement sauvé");

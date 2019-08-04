@@ -43,7 +43,7 @@ router.post('/authDB', function (req, res, next) {
     if (req.body.enrole) {
         if (req.body.enrole) {
             if (typeof req.body.users === "string")
-                req.body.users = JSON.parse(req.body.user)
+                req.body.users = JSON.parse(req.body.users)
             authentication.enrole(req.body.users, function (err, result) {
                 processResponse(res, err, result)
 
@@ -126,7 +126,8 @@ function processResponse(response, error, result) {
             response.status(404).send({ERROR: error});
 
         } else if (!result) {
-            response.send({done: true});
+            response.send(null);
+           response.send({done: true});
         } else {
 
             if (typeof result == "string") {

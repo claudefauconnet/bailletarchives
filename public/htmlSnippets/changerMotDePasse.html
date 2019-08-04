@@ -7,60 +7,24 @@
     </tr>
     <tr>
         <td>ancien mot de passe</td>
-        <td><input id="changePassword_ancienMotDePasse"></td>
+        <td><input  type='password' id="changePassword_ancienMotDePasse"></td>
     </tr>
     <tr>
         <td>nouveau mot de passe</td>
-        <td><input id="changePassword_nouveauMotDePasse"></td>
+        <td><input type='password' id="changePassword_nouveauMotDePasse"></td>
     </tr>
     <tr>
         <td>confirmer nouveau mot de passe</td>
-        <td><input id="changePassword_nouveauMotDePasseConfirm"></td>
+        <td><input type='password' id="changePassword_nouveauMotDePasseConfirm"></td>
     </tr>
     <tr>
-        <td colspan="2"><button onclick="changePassword"> OK</button></td>
+        <td colspan="2"><button onclick="authentication.changePassword()"> OK</button></td>
     </tr>
 
 </table>
 <div id="changePassword_message"></div>
 <script>
-    function changePassword() {
-        $("#changePassword_message").html("");
-        var login = $("#changePassword_identifiant").val();
-        var password = $("#changePassword_ancienMotDePasse").val();
-        var newPassword = $("#changePassword_nouveauMotDePasse").val();
-        var newPassword2 = $("#changePassword_nouveauMotDePasseConfirm").val();
-        if (newPassword != newPassword2)
-            return $("#changePassword_message").html("le nouveau mot de passe n'est pas le même");
-        if (!newPassword.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/))
-            return $("#changePassword_message").html("invalid  login : Minimum eight characters, at least one uppercase letter, one lowercase letter and one number");
 
-        var authenticationUrl = "../authDB";
-        var payload = {
-            changePassword: 1,
-            login: login,
-            oldPassword: password,
-            newPassword:newPassword,
-
-        }
-
-        $.ajax({
-            type: "POST",
-            url: authenticationUrl,
-            data: payload,
-            dataType: "json",
-            success: function (data, textStatus, jqXHR) {
-                $("#changePassword_message").html("le nouveau mot de passe n'est pas le même");
-
-            }, error: function (err) {
-                $("#changePassword_message").html(err);
-
-
-            }
-        })
-
-
-    }
 
 
 </script>
