@@ -328,6 +328,7 @@
         }
 
 
+
     </style>
 
     <script>
@@ -368,6 +369,14 @@
 
                 }
             });
+            $( "#dialog-confirm" ).dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                autoOpen: false,
+
+            });
 
             dialog = $("#dialogDiv").dialog({
                 autoOpen: false,
@@ -392,18 +401,28 @@
                          }
                      }
                  },*/
-                close: function () {
+                open:function(){
+                    $(".ui-dialog .ui-dialog-titlebar").css("display","none")
+                },
+              close: function () {
 
                  //   $("#dialogDiv").dialog("close");
                     if (context.redrawMagasinD3) {
                         context.redrawMagasinD3 = null;
                         //  magasinD3.drawMagasins()
                     }
-                    recordController.closeRecordDialog()
+                    if(Object.keys(recordController.currentRecordChanges).length>0)
+                        recordController.closeRecordDialog()
+                        else
+                    $("#dialogDiv").dialog("close");
+                        return false;
+
 
                     // allFields.removeClass("ui-state-error");
                 }
             });
+
+
             dialog2 = $("#dialog2Div").dialog({
                 autoOpen: false,
                 height: mainController.totalDims.h * 1.0,
@@ -679,5 +698,9 @@
             <div id="loginMessage"></div>
         </div>
     </div>
+</div>
+
+
+<div id="dialog-confirm"></div>
 </body>
 </html>

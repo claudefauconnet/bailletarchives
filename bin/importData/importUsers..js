@@ -1,6 +1,6 @@
+var bcrypt=require('bcrypt');
+var mysql=require('../mySQLproxy..js')
 
-
-console.log("zzz")
 var imporUsers= {
     data: {
         "Lopes": {
@@ -189,7 +189,38 @@ var imporUsers= {
 
         console.log(str)
 
+    },
+
+    encryptPassword:function(){
+        var sql="select * from utilisateur where id>12"
+      mysql.exec(null,sql,function(err, result){
+          result.forEach(function(line){
+              bcrypt.hash(line.motDePasse, 10, function (err, hash) {
+                xxx = hash;
+                  var sql2 = "update utilisateur set motDePasse='" + hash + "' where id=" + line.id
+                  mysql.exec(null, sql2, function (err, result) {
+                  })
+              })
+
+
+          })
+
+      })
+
+
+
+
+
+
     }
 }
+
+
+
+
+
+
 module.exports=imporUsers;
-imporUsers.import()
+//imporUsers.import()
+
+//imporUsers.encryptPassword()

@@ -153,6 +153,6 @@ var authentication = {
 })*/
 
 
-authentication.testEncrypt();
+//authentication.testEncrypt();
 
 module.exports = authentication;

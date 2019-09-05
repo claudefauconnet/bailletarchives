@@ -7,7 +7,7 @@ var config = (function () {
     self.maxVersementsToLocate = 5;
     self.coefRemplissageTablette = .7
     self.coteBoiteNbDigits = 3;
-    self.loginMode="json";  //json || database
+    self.loginMode="database";  //json || database
 
     self.tableDefs = {
 
@@ -17,15 +17,16 @@ var config = (function () {
             sortFields: ["numVersement desc"],
             recordTools: [
                 {
-                    title: "Entrer en magasin...",
-                    id: "versementEntrerEnMagasinButton",
-                    toolFn: "Versement.showDialogEntrerVersement"
-                },
-                {
                     title: "Localiser...",
                     id: "versementLocaliserButton",
                     toolFn: "Versement.locateCurrentVersement"
                 },
+                {
+                    title: "Entrer en magasin...",
+                    id: "versementEntrerEnMagasinButton",
+                    toolFn: "Versement.showDialogEntrerVersement"
+                },
+
                 {
                     title: "Refouler...",
                     id: "versementRefoulerButton",
@@ -57,6 +58,7 @@ var config = (function () {
                     joinObj: {
                         tables: "versement,versement_historique",
                         where: " versement_historique.id_versement=versement.id",
+                        orderBy: ["versement_historique.id desc"],
 
                     },
                     createRelSql: "update versement_historique set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
@@ -65,7 +67,7 @@ var config = (function () {
                     //  onRowClickedFn:Versement.onDataTableRowClicked,
                     editableColumns: {commentaire: {}},
                     columns: ["etat", "etatAuteur", "etatDate", "commentaire", "dateModification"],
-                    order: [[2, 'desc']]
+                   // order: [[2, 'desc']]
 
                 },
                 "magasin": {
@@ -96,6 +98,7 @@ var config = (function () {
                         tables: "versement,sortie_boite",
                         where: " sortie_boite.id_versement=versement.id "
                     },
+                    sortFields: ["sortieDate desc"],
                     createRelSql: "update sortie_boite set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
                     deleteRelSql: "update sortie_boite set id_versement=null where id=<%data.id%>",
                     columns: ["numVersement", "sortieDate", "sortieArchiviste", "retourDate", "retourArchiviste", "cotesBoite", "commentaire"],
@@ -144,7 +147,8 @@ var config = (function () {
 
             },
             onAfterDisplay: Versement.setNewRecordDefaultValues,
-            onAfterSave: Versement.updateRecordHistoryAfterVersementSave,
+            onAfterSave: Versement.onfAfterSave,
+            onBeforeDelete: Versement.onBeforeDelete,
             onAfterDelete: Versement.onAfterDelete,
             onBeforeSave: Versement.onBeforeSave
 
@@ -207,6 +211,7 @@ var config = (function () {
             tableConstraints: {
                 cannotDelete: true
             },
+            sortFields: ["sortieDate desc"],
             tabs: [],
             fieldConstraints: {
                 id_versement: {hidden: true},
@@ -238,14 +243,18 @@ var config = (function () {
                 cannotDelete: true
             },
             tabs: [],
-        }
-        ,  "utilisateur": {
+            sortFields: ["dateModification desc"],
+        },
+
+         "utilisateur": {
             tableConstraints: {
-                cannotDelete: true
+                cannotDelete: false
             },
             fieldConstraints: {
                 motDePasse: {hidden: true},
             },
+
+
             tabs: [],
             onBeforeSave: authentication.onBeforeSave
         }

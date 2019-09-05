@@ -5,10 +5,12 @@ var async = require('async');
 
 
 var processData = {
-    getMagasinTree: function (callback) {
+    getMagasinTree: function (where,callback) {
         var tailleMoyenneBoite = 0.09
-
-        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible,commentaires from magasin order by coordonnees"
+var whereStr="";
+        if(where && where!="")
+            whereStr=where;
+        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible,commentaires from magasin "+whereStr+" order by coordonnees"
         mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
             var tree = {
                 name: "Baillet",
@@ -603,7 +605,7 @@ var processData = {
 
 module.exports = processData;
 if (false) {
-    processData.getMagasinTree(function (err, result) {
+    processData.getMagasinTree(null,function (err, result) {
         fs.writeFileSync("D:\\GitHub\\bailletArchives\\bailletarchives\\public\\js\\d3\\magasin.json", JSON.stringify(result, null, 2))
 
     });

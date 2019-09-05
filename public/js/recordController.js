@@ -15,19 +15,37 @@ var recordController = (function () {
 
     self.closeRecordDialog = function () {
         if (Object.keys(self.currentRecordChanges).length > 0) {
-            var ok = confirm("Quitter sans enregister les changements ?")
-            if (ok === true) {
+            $("#dialog-confirm").html("Des données ont été modifiées");
 
-                $("#dialogDiv").dialog("close");
-                return true;
-            } else {
-                return false;
-            }
+            $("#dialog-confirm").dialog("option", "buttons", [
+                {
+                    text: "Quitter sans enregistrer",
+                    click: function () {
+                        self.currentRecordChanges = {};
+                        $("#dialog-confirm").dialog("close");
+                        $("#dialogDiv").dialog("close");
 
-        }
-        else{
+                    }
+                }, {
+                    text: "Enregister avant de fermer",
+                    click: function () {
+                        $("#dialog-confirm").dialog("close");
+
+                        recordController.saveRecord(function (err) {
+                            if (err) {
+                                return;
+                            }
+                            $("#dialogDiv").dialog("close");
+                        })
+
+                    },
+
+                }
+            ])
+            $("#dialog-confirm").dialog("open");
+
+        } else {
             $("#dialogDiv").dialog("close");
-            return true;
         }
     }
 
@@ -39,23 +57,22 @@ var recordController = (function () {
 
 
         var targetObj = {};
-        var tableConfig=config.tableDefs[table];
+        var tableConfig = config.tableDefs[table];
         context.dataModel[table].forEach(function (field) {
             targetObj[field.name] = {
                 type: mainController.getFieldType(table, field.name)
             }
 
-            if( tableConfig.fieldLabels && tableConfig.fieldLabels[config.locale] )
-                targetObj[field.name].label= tableConfig.fieldLabels[config.locale][field.name]
+            if (tableConfig.fieldLabels && tableConfig.fieldLabels[config.locale])
+                targetObj[field.name].label = tableConfig.fieldLabels[config.locale][field.name]
 
             if (targetObj.type == "number")
                 targetObj[field.name].cols = config.default.textArea.rows;//10;
             if ((field.maxLength && field.maxLength > 100) || field.dataType == "text") {
                 targetObj[field.name].cols = config.default.textArea.cols;
                 targetObj[field.name].rows = config.default.textArea.rows
-            }
-            else if (field.maxLength && field.maxLength <= 50)
-                targetObj[field.name].cols =config.default.textArea.rows;// field.maxLength;
+            } else if (field.maxLength && field.maxLength <= 50)
+                targetObj[field.name].cols = config.default.textArea.rows;// field.maxLength;
 
             if (mode == "readOnly")
                 targetObj[field.name].type = "readOnly"
@@ -99,17 +116,25 @@ var recordController = (function () {
 
         recordController.drawAttributes(targetObj, "recordDetailsDiv");
         if (mode != "readOnly") {
-            if (recordToolsHtml != "")
-                $("#recordDetailsDiv").prepend(recordToolsHtml);
+            var toolsHtml=""
 
-            if (obj && obj.id && (!config.tableDefs[context.currentTable].tableConstraints || config.tableDefs[context.currentTable].tableConstraints.cannotDelete !== true))
-                $("#recordDetailsDiv").prepend("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>&nbsp;&nbsp;")
-            $("#recordDetailsDiv").prepend("<button id='saveRecordButton'  onclick='recordController.saveRecord()'" +
+
+
+            toolsHtml+=("<button id='saveRecordButton'  onclick='recordController.saveRecord()'" +
                 ">Enregister</button>&nbsp;&nbsp;" +
                 "<button id='closeDialogButton'  onclick='recordController.closeRecordDialog()'>Fermer</button>" +
                 "<span id='recordMessageSpan'></span>")
 
 
+            if (obj && obj.id && (!config.tableDefs[context.currentTable].tableConstraints || config.tableDefs[context.currentTable].tableConstraints.cannotDelete !== true)) {
+                if(authentication.currentUser.groupes.indexOf("admin")>-1)
+                    toolsHtml+=("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>")
+            }
+
+            if (recordToolsHtml != "")
+                toolsHtml+=recordToolsHtml;
+
+            $("#recordDetailsDiv").prepend(toolsHtml);
             $("#recordDetailsDiv").prepend("<div id='recordMessageDiv' class='message'></div>")
         }
         $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
@@ -118,9 +143,11 @@ var recordController = (function () {
         if (obj && obj.id)
             listController.loadLinkedDivs()
 
-$(".objAttrInput").width(config.default.fieldInputWith)
+        $(".objAttrInput").width(config.default.fieldInputWith)
+        $(".objAttrInput.TA").width(config.default.fieldInputWith + 10)
         $("#saveRecordButton").attr("disabled", true);
         $("#dialogDiv").dialog("open");
+
 
         var afterDisplayFn = config.tableDefs[context.currentTable].onAfterDisplay
         if (afterDisplayFn)
@@ -138,7 +165,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
         if (typeof str != 'string')
             return str;
 
-        str= str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+        str = str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
             switch (char) {
                 case "\0":
                     return "\\0";
@@ -161,8 +188,8 @@ $(".objAttrInput").width(config.default.fieldInputWith)
             }
         });
 
-        str=str.replace(/[«»<=>]/g,function(char){
-           return "\\" + char;
+        str = str.replace(/[«»<=>]/g, function (char) {
+            return "\\" + char;
         })
 
         return str;
@@ -170,7 +197,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
     }
 
 
-    self.saveRecord = function () {
+    self.saveRecord = function (callback) {
         var isNewRecord = !context.currentRecord.id;
         async.series([
 
@@ -190,8 +217,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                             return callbackSeries();
                         })
 
-                    }
-                    else {
+                    } else {
                         return callbackSeries();
                     }
                 },
@@ -210,8 +236,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                             })
                             mainController.setRecordErrorMessage(message);
                             return callbackSeries("stop");
-                        }
-                        else {
+                        } else {
                             $("#recordMessageDiv").html("")
                             return callbackSeries();
                         }
@@ -229,6 +254,9 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                             if (err) {
                                 return callbackSeries(err);
                             }
+                            context.currentRecord=self.currentRecordChanges
+                            context.currentRecord.id=newId;
+                            $("#attr_id").html(newId);
                             return callbackSeries();
 
 
@@ -271,8 +299,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                             callbackSeries();
 
                         })
-                    }
-                    else {
+                    } else {
                         callbackSeries();
                     }
                 },
@@ -282,15 +309,20 @@ $(".objAttrInput").width(config.default.fieldInputWith)
 
             // at the end
             function (err) {
-                self.currentRecordChanges = {};
-                if (err) {
-                    if (err != "stop")
-                        return mainController.setRecordErrorMessage(err);
 
-                }
-                else {
+                if (err) {
+                    if (err != "stop") {
+                        mainController.setRecordErrorMessage(err);
+
+                        if (callback)
+                            return callback(err);
+                    }
+
+                } else {
                     mainController.setRecordMessage("enregistrement sauvé");
                     self.currentRecordChanges = {};
+                    if (callback)
+                        return callback();
                     if (!isNewRecord)
                         ;// dialog.dialog("close");
                 }
@@ -314,13 +346,10 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                 else
                     sql += key + "=" + record[key].replace(",", ".");
 
-            }
-
-            else if (type == "string") {
+            } else if (type == "string") {
                 var str = self.escapeMySqlChars(record[key]);
                 sql += key + "='" + str + "'";
-            }
-            else if (type == "date") {
+            } else if (type == "date") {
                 var str = record[key].replace(/\//g, "-");// date mysql  2018-09-21
                 sql += key + "='" + str + "'";
             }
@@ -359,8 +388,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                 else if (type == "string") {
                     var str = self.escapeMySqlChars(record[key]);
                     sql2 += "'" + str + "'";
-                }
-                else if (type == "date") {
+                } else if (type == "date") {
                     var str = ("" + record[key]).replace(/\//g, "-");// date mysql  2018-09-21
                     sql2 += "'" + str + "'";
                 }
@@ -387,7 +415,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
         if (config.tableDefs[context.currentTable].relations)
             relations = Object.keys(config.tableDefs[context.currentTable].relations);
 
-        var canBeDeleted = 0;
+       /* var canBeDeleted = 0;
         /* relations.forEach(function (relation) {
 
                 var dataTableDivName = "linkedRecordsDiv_" + relation;
@@ -398,29 +426,39 @@ $(".objAttrInput").width(config.default.fieldInputWith)
 
                 }
             })*/
-        if (canBeDeleted > 0)
+       /* if (canBeDeleted > 0)
             return alert("vous devez au préalable supprimer les  liens");
 
-        canBeDeleted = confirm("supprimer cet enregistrement de la table " + context.currentTable + " ?");
 
         if (!canBeDeleted)
-            return;
+            return;*/
+        if (config.tableDefs[context.currentTable].onBeforeDelete) {
+            config.tableDefs[context.currentTable].onBeforeDelete(context.currentRecord, function (err, result) {
+                if(err)
+                    return mainController.setRecordErrorMessage(err);
 
-        self.execSQLDeleteRecord(context.currentTable, context.currentRecord.id, function (err, result) {
-            if (err) {
-                return mainController.setRecordErrorMessage(err)
-            }
-            mainController.setRecordMessage(result);
-            dialog.dialog("close");
-            listController.listRecords(context.currentListQueries[context.currentTable]);
-            if (config.tableDefs[context.currentTable].onAfterDelete) {
-                config.tableDefs[context.currentTable].onAfterDelete(context.currentRecord, function (err, result) {
+               var canBeDeleted = confirm("supprimer cet enregistrement de la table " + context.currentTable + " ?");
+                if (canBeDeleted) {
 
-                });
-            }
+                    self.execSQLDeleteRecord(context.currentTable, context.currentRecord.id, function (err, result) {
+                        if (err) {
+                            return mainController.setRecordErrorMessage(err)
+                        }
+                        mainController.setRecordMessage(result);
+                        dialog.dialog("close");
+                        listController.listRecords(context.currentListQueries[context.currentTable]);
+                        if (config.tableDefs[context.currentTable].onAfterDelete) {
+                            config.tableDefs[context.currentTable].onAfterDelete(context.currentRecord, function (err, result) {
+
+                            });
+                        }
 
 
-        })
+                    })
+                }
+            });
+        }
+
 
     }
 
@@ -455,7 +493,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
 
             if (type && type == 'readOnly' || _userRole == "read") {
                 //   value = util.convertHyperlinks(value);
-                targetObj[key].value = "&nbsp;:&nbsp;<b>" + value + "</b>";
+                targetObj[key].value = "&nbsp;:&nbsp;<b><span id='attr_"+key+"'>" + value + "</span></b>";
                 continue;
             }
 
@@ -492,8 +530,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
 
                 str += "</select>";
                 value = str;
-            }
-            else if (type == 'hidden') {
+            } else if (type == 'hidden') {
                 value = "<input type='hidden'  id='attr_" + key + "'value='" + value + "'>";
             } else if (type == 'password') {
                 value = "<input type='password' onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + strCols + "id='attr_"
@@ -512,8 +549,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                     var date = new Date(value);
                     value = util.dateToStringFR(date);
 
-                }
-                else if (type == 'number') {
+                } else if (type == 'number') {
 
 
                     if (value) {
@@ -531,19 +567,22 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                         if (fieldInfos && fieldInfos.numericScale && fieldInfos.numericScale > 0) {
                             var valueStr = "" + value;
                             var p = valueStr.indexOf(decimalSeparator);
-                            var xx = valueStr.length - p - 1;
-                            while ((valueStr.length - p - 1) < fieldInfos.numericScale) {
-                                valueStr += "0";
+                            if(p>-1){
+                                var xx = valueStr.length - p - 1;
+                                while ((valueStr.length - p - 1) < fieldInfos.numericScale) {
+                                    valueStr += "0";
+                                }
+                                value = valueStr;
                             }
                             value = valueStr;
                         }
 
-                    }
-                    else
+                    } else
                         value = "";
 
+                } else if (type == 'string') {
+                    value = ("" + value).replace(/\\/g, "");
                 }
-
 
                 var cols = targetObj[key].cols;
                 var rows = targetObj[key].rows;
@@ -553,7 +592,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                     if (false && cols)
                         strCols = " cols='" + cols + "' ";
                     rows = " rows='" + rows + "' ";
-                    value = "<textArea  onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput' " + type + "' " + strCols + rows
+                    value = "<textArea  onkeyup='recordController.incrementChanges(this,\"" + changeType + "\");' class='objAttrInput TA' " + type + "' " + strCols + rows
                         + "id='attr_" + key + "' > " + value + "</textarea>";
                 } else {
                     if (false && cols)
@@ -570,8 +609,8 @@ $(".objAttrInput").width(config.default.fieldInputWith)
     self.checkConstraints = function (isNewRecord, callbackOuter) {
         var constraintErrors = [];
         var constraintsArray = [];
-        if(!config.tableDefs[context.currentTable].fieldConstraints)
-            return callbackOuter(null,constraintErrors)
+        if (!config.tableDefs[context.currentTable].fieldConstraints)
+            return callbackOuter(null, constraintErrors)
         $(".objAttrInput").each(function () {
             var value = $(this).val();
             var fieldName = $(this).attr("id").substring(5);
@@ -603,9 +642,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                             constraintErrors.push(field.fieldName + " est obligatoire");
                         return callback2();
 
-                    }
-
-                    else if (key == "unique") { // async
+                    } else if (key == "unique") { // async
                         // si la valeur a été modifiée
                         if (self.currentRecordChanges[field.fieldName] && self.currentRecordChanges[field.fieldName] != context.currentRecord[field.fieldName]) {
                             self.isUnique(context.currentTable, field.fieldName, field.value, function (err, result) {
@@ -615,19 +652,16 @@ $(".objAttrInput").width(config.default.fieldInputWith)
                                     constraintErrors.push("la valeur de " + field.fieldName + " doit être unique (" + field.value + ")")
                                 return callback2();
                             })
-                        }
-                        else
+                        } else
                             return callback2()
-                    }
-                    else if (key == "format") {
+                    } else if (key == "format") {
                         if (field.constraints[key].regex) {
                             if (field.value == null || !field.value.match(field.constraints[key].regex))
                                 constraintErrors.push(field.fieldName + " doit avoir le format " + field.constraints[key].message);
                             return callback2();
                         }
 
-                    }
-                    else
+                    } else
                         return callback2();
                 }, function (err) {//callback2
                     if (err) {
@@ -709,8 +743,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
             $(input).focus();
 
             //  self.canSave += 1;
-        }
-        else {
+        } else {
 
             self.canSave -= 1;
             self.canSave = Math.max(self.canSave, 0);
@@ -821,7 +854,7 @@ $(".objAttrInput").width(config.default.fieldInputWith)
 
 
             var constraintsClassStr = "";
-            if(config.tableDefs[context.currentTable].fieldConstraints) {
+            if (config.tableDefs[context.currentTable].fieldConstraints) {
                 var constraints = config.tableDefs[context.currentTable].fieldConstraints[key];
                 if (constraints) {
                     if (constraints.mandatory)
@@ -836,16 +869,15 @@ $(".objAttrInput").width(config.default.fieldInputWith)
             var desc = targetObj[key].desc;
             if (desc) {
                 desc = "<img src='/toutlesens/icons/questionMark.png' width=" + self.iconSize + " title='" + desc + "'>";
-            }
-            else
+            } else
                 desc = "";
 
             if (targetObj[key].type == 'hidden') {
                 strHidden += "<input type='hidden' id='attr_" + key + "' value='" + strVal + ">"
             } else {
                 className = 'mandatoryFieldLabel';
-              /*  if (!fieldTitle)
-                    fieldTitle = key;*/
+                /*  if (!fieldTitle)
+                      fieldTitle = key;*/
 
                 var className = 'fieldLabel';
 

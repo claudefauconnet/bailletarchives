@@ -85,7 +85,7 @@ router.post('/bailletarchives-authentication', function (req, response) {
 
 router.get('/magasinD3Tree', function (req, res, next) {
 
-    processData.getMagasinTree(function (err, result) {
+    processData.getMagasinTree(req.body.where,function (err, result) {
         processResponse(res, err, result)
     })
 

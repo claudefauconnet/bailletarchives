@@ -3,7 +3,7 @@ var magasinD3 = (function () {
     self.currentVersement = {}
     self.currentTablette = {}
     self.currentBoite = {}
-    self.currentVersementSansBoites =null;
+    self.currentVersementSansBoites = null;
     self.data = {};
     var cachedHtml = null;
 
@@ -81,7 +81,7 @@ var magasinD3 = (function () {
                         epi.children.forEach(function (travee) {
                             if (array[0] + "-" + array[1] + "-" + array[2] == travee.name)
                                 travee.children.forEach(function (tablette) {
-                                    if (coordonnees == tablette.name){
+                                    if (coordonnees == tablette.name) {
 
                                         self.currentTablette = tablette;
                                         self.currentVersement = null;
@@ -141,9 +141,10 @@ var magasinD3 = (function () {
 
         var strMagasins = " Magasin :<span style='display: flex;flex-direction: row'>";
         strMagasins += "</span>";
-
         if (!options.magasinsToDraw)
             options.magasinsToDraw = self.magasinsToDraw;
+
+
         options.magasinsToDraw.forEach(function (magasin) {
             strMagasins += "<span style='font-size: 18px;font-weight: bold;margin: 3px;padding:3px;border-style: solid ; border-width: 1px' onclick=magasinD3.zoomOnMagasin('" + magasin + "')>" + magasin + "</span>"
         })
@@ -215,6 +216,8 @@ var magasinD3 = (function () {
             self.initDrawMagasins(options);
 
         }
+        if (!options.magasinsToDraw)
+            options.magasinsToDraw = self.magasinsToDraw;
 
 
         d3.json(mainController.urlPrefix + "/magasinD3Tree", function (data) {
@@ -391,8 +394,7 @@ var magasinD3 = (function () {
                         magX = 50;
                         magY += magH + 50;
 
-                    }
-                    else {
+                    } else {
                         magX += magW + 50;
                     }
 
@@ -573,8 +575,8 @@ var magasinD3 = (function () {
             self.currentTablette = obj;
             self.currentVersement = null;
             self.currentBoite = null;
-if(!obj.commentaires)
-    obj.commentaires="";
+            if (!obj.commentaires)
+                obj.commentaires = "";
             var html = "";
 
             if (obj.avecVersementSanscotes) {
@@ -590,8 +592,7 @@ if(!obj.commentaires)
                          "<option value='voirVersement'> voir versement</option>" +*/
                     "</select>";
 
-            }
-            else if (tablette.avecCotesSansVersement) {
+            } else if (tablette.avecCotesSansVersement) {
 
                 html = "tablette " + obj.name + "<br> sans versement mais avec des boites cotées : ";
                 html += "<br>commentaires : " + obj.commentaires;
@@ -615,8 +616,7 @@ if(!obj.commentaires)
                       "<option value='releaseTablette'> liberer tablette</option>" +
                       "<option value='commentaire'> commentaire...</option>" +*/
                     "</select>";
-            }
-            else {
+            } else {
                 html += "tablette " + tablette.name + "<br>"
 
                 html += "<br>commentaires : " + obj.commentaires;
@@ -699,12 +699,12 @@ if(!obj.commentaires)
                 }
                 html += "operations boite:<select onchange='Boite.onBoiteOperationSelect(this)'>"
 
-               // html += Boite.getOperationSelectOptions();
-                 + " <option></option>" +
-                   "<option value='voirVersement'> voir versement</option>" +
-                   // "<option value='decalerBoite'> décaler</option>" +
-                   //   "<option value='supprimerBoite'> supprimer  </option>" +
-                "</select>";
+                    // html += Boite.getOperationSelectOptions();
+                    + " <option></option>" +
+                    "<option value='voirVersement'> voir versement</option>" +
+                    // "<option value='decalerBoite'> décaler</option>" +
+                    //   "<option value='supprimerBoite'> supprimer  </option>" +
+                    "</select>";
                 html += "<div id='popupD3DivOperationDiv'></div>"
                 html += "</table>"
                 $("#popupD3Div").html(html);
@@ -877,49 +877,6 @@ if(!obj.commentaires)
         $("#magasind3MouseInfo").html(str)
     }
 
-
-    self.getTablettesContigues = function (tabletteDepart, metrage, tailleMoyBoite, callback) {
-        var tablettesContigues = [];
-
-
-        if (tabletteDepart.longueurM < metrage) {
-
-            var sumLength = 0;
-            var started = false;
-            var stop = false;
-            d3.selectAll("g .tablette").each(function (d, i) {
-                if (stop == false) {
-                    var name = d3.select(this).attr("name");
-                    var longueurM = parseInt(d3.select(this).attr("longueurM"));
-                    longueurM = longueurM - (config.coefRemplissageTablette * tailleMoyBoite)
-                    if (name == tabletteDepart.name) {
-                        started = true;
-                        sumLength += longueurM;
-                        tablettesContigues.push(name)
-
-                    }
-                    else if (started && longueurM && sumLength < metrage) {
-                        var isEmpty = d3.select(this).attr("isEmpty");
-                        if (isEmpty == false) {
-                            stop = true;
-                            return alert("la tablette n'est pas vide");
-
-                        }
-                        sumLength += longueurM;
-                        tablettesContigues.push(name)
-                    }
-                }
-
-            })
-        } else
-            tablettesContigues.push(tabletteDepart.name);
-
-        if (stop)
-            return callback("pas de tablettes contigues  vides a partir de la tablette " + tabletteDepart.name + " et la longueur " + metrage);
-        return callback(null, tablettesContigues);
-
-        return
-    }
     /**
      *
      * si tabletteDepartCoordonnees on ne commence que lorsqu'on la trouve
@@ -966,8 +923,7 @@ if(!obj.commentaires)
                                             tablettesOK.push(tablette.name)
                                             if (longueurCumulee >= obj.metrage)
                                                 done = true;
-                                        }
-                                        else {
+                                        } else {
                                             tablettesOK = []// on recommence si uen tablette est occuppée
                                             longueurCumulee = 0;
                                         }
@@ -1034,6 +990,19 @@ if(!obj.commentaires)
             }
         })
         return ok;
+    }
+
+    self.reDrawTravees = function (travees) {
+        if (!Array.isArray(travees))
+            travees = [travees]
+
+            travees.forEach(function (travee) {
+                d3.selectAll("#" + travee).each(function (d, i) {
+                    var xx = $(this);
+                })
+            })
+
+
     }
 
 

@@ -51,6 +51,7 @@ var Boite = (function () {
 
 
     self.locate = function (boite) {
+
         if (!boite)
             boite = prompt("boite :")
         if (boite && boite != "") {

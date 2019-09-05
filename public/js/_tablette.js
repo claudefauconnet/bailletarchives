@@ -4,7 +4,7 @@ var Tablette = (function () {
 
         self.getOperationSelectOptions = function (obj) {
             var html = ""
-
+            context.currentTable = "magasin";
             if (obj.prompt) {
                 var oldTablette=$("#currentMainMenuTabletteSpan").html();
 
@@ -42,13 +42,14 @@ var Tablette = (function () {
             else {
                 html += " <option></option>" +
                     //   "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
-                    "<option value='entrerVersementExistant'> entrer versement existant</option>" +
+                    "<option value='entrerVersementExistant'> entrer/refouler versement existant</option>" +
                     "<option value='voirTablette'> voir tablette...</option>" +
                     "<option value='setUnavailable'> rendre indisponible</option>" +
                     "<option value='createUnder'> creer nouvelle</option>" +
                     "<option value='split'> diviser </option>" +
                     "<option value='delete'> supprimer </option>" +
-                    "<option value='commentaire'> commentaire...</option>"
+                    "<option value='commentaire'> commentaire...</option>"+
+                "<option value='reDrawTravees'>reDrawTravees</option>"
             }
             if (obj.prompt)
                 html += "<option value='locate'> localiser</option>"
@@ -59,6 +60,9 @@ var Tablette = (function () {
         self.onTabletteOperationSelect = function (select) {
             var operation = $(select).val();
 
+    if (operation == "reDrawTravees") {
+    magasinD3.reDrawTravees("B-05-03")
+    }
             /*  $("#popupD3Div").css("visibility","hidden");
               $("#select").val("");*/
             if (operation == "commentaire") {
@@ -330,6 +334,25 @@ var Tablette = (function () {
             })
         }
 
+        self.getPremiereCoteTablettes=function(tablettes){
+            if(!Array.isArray(tablettes)){
+                tablettes=[tablettes];
+            }
+
+            if(!tablettes || tablettes.length==0)
+                return 1;
+            var cotesFirstTablette =tablettes[0].cotesParTablette;
+            if (cotesFirstTablette && cotesFirstTablette != "")
+                var array = /[0-9]{4}\/([0-9]{3})/.exec(cotesFirstTablette);
+            if (array.length > 1) {
+                try {
+                    return parseInt(array[1])
+                } catch (err) {
+                    return 1;
+                }
+            }
+            return 1;
+        }
 
         self.areTablettesContigues = function (a, b) {
 
