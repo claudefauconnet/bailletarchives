@@ -7,7 +7,7 @@ var config = (function () {
     self.maxVersementsToLocate = 5;
     self.coefRemplissageTablette = .7
     self.coteBoiteNbDigits = 3;
-    self.loginMode="database";  //json || database
+    self.loginMode = "database";  //json || database
 
     self.tableDefs = {
 
@@ -67,7 +67,7 @@ var config = (function () {
                     //  onRowClickedFn:Versement.onDataTableRowClicked,
                     editableColumns: {commentaire: {}},
                     columns: ["etat", "etatAuteur", "etatDate", "commentaire", "dateModification"],
-                   // order: [[2, 'desc']]
+                    // order: [[2, 'desc']]
 
                 },
                 "magasin": {
@@ -105,8 +105,6 @@ var config = (function () {
                     editableColumns: {commentaire: {}},
 
 
-
-
                 }
                 /* "article": {
                      type: "1-n",
@@ -124,9 +122,9 @@ var config = (function () {
             fieldConstraints: {
 
                 numVersement: {mandatory: true, unique: true, format: {regex: /^[0-9]\d{3}$/, message: "4 chiffres"}},
-                auteurVersement:{mandatoryOnNew:true},
-                receptionnePar:{mandatory:true},
-                dateVersement:{mandatoryOnNew:true},
+                auteurVersement: {mandatoryOnNew: true},
+                receptionnePar: {mandatory: true},
+                dateVersement: {mandatoryOnNew: true},
                 nature: {mandatory: true},
                 centreArchive: {mandatory: true},
                 etatTraitement: {mandatory: true},
@@ -137,12 +135,11 @@ var config = (function () {
             tableConstraints: {
                 cannotDelete: false
             },
-            fieldLabels:{
-               FR:{
-                   intitule:"intitulé",
-                   cotesExtremesDossiersNiveauUn:"cotesExtr.Dossiers"
-               }
-
+            fieldLabels: {
+                FR: {
+                    intitule: "intitulé",
+                    cotesExtremesDossiersNiveauUn: "cotesExtr.Dossiers"
+                }
 
 
             },
@@ -219,7 +216,6 @@ var config = (function () {
                 sortieArchiviste: {mandatory: true},
 
 
-
             },
 
             recordTools: [
@@ -231,8 +227,8 @@ var config = (function () {
                 },
                 {
                     id: "sortieSelectionnerBoites",
-                        title: "selectionner boites",
-                        toolFn: "Sortie.sortiesShowBoitesCbx"
+                    title: "selectionner boites",
+                    toolFn: "Sortie.sortiesShowBoitesCbx"
                 }
             ],
             onAfterDisplay: Sortie.setNewRecordDefaultValues,
@@ -246,12 +242,16 @@ var config = (function () {
             sortFields: ["dateModification desc"],
         },
 
-         "utilisateur": {
+        "utilisateur": {
             tableConstraints: {
                 cannotDelete: false
             },
             fieldConstraints: {
                 motDePasse: {hidden: true},
+                identifiant: {mandatory: true, unique: true, format: {regex: /.{4,10}/, message: "entre 4 et 10 characteres ou chiffres"}},
+                nomComplet: {mandatory: true, unique: true},
+                groupes: {mandatoryOnNew: true, format: {regex: /\w+,?\w?/, message: "groupes séparés par des ,"}},
+
             },
 
 
@@ -266,17 +266,16 @@ var config = (function () {
         "changerMotDePasse": {htmlPage: "changerMotDePasse.html"},
 
 
-
     }
 
 
     self.default = {
         textArea: {
-          //  cols: 50,
+            //  cols: 50,
             cols: 30,
             rows: 4
         },
-        fieldInputWith:200,
+        fieldInputWith: 200,
 
 
     }

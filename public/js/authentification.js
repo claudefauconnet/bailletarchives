@@ -227,7 +227,7 @@ var authentication = (function () {
         for (var key in options.changes){
             options.currentRecord[key]=options.changes[key];
         }
-
+        recordController.currentRecordChanges= {};
         var authenticationUrl = "../authDB";
         var payload = {
             enrole: 1,

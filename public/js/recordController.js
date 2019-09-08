@@ -201,6 +201,28 @@ var recordController = (function () {
         var isNewRecord = !context.currentRecord.id;
         async.series([
 
+
+                function (callbackSeries) {// check constraints
+
+                    self.checkConstraints(isNewRecord, function (err, errors) {
+                        if (err)
+                            return callbackSeries(err);
+
+                        if (errors.length > 0) {
+                            var message = "";
+                            errors.forEach(function (err) {
+                                message += err + "<br>"
+                            })
+                            mainController.setRecordErrorMessage(message);
+                            return callbackSeries("stop");
+                        } else {
+                            $("#recordMessageDiv").html("")
+                            return callbackSeries();
+                        }
+
+                    })
+                },
+
                 function (callbackSeries) {//on before save event
                     var fn = config.tableDefs[context.currentTable].onBeforeSave
                     if (fn) {
@@ -223,26 +245,7 @@ var recordController = (function () {
                 },
 
 
-                function (callbackSeries) {// check constraints
 
-                    self.checkConstraints(isNewRecord, function (err, errors) {
-                        if (err)
-                            return callbackSeries(err);
-
-                        if (errors.length > 0) {
-                            var message = "";
-                            errors.forEach(function (err) {
-                                message += err + "<br>"
-                            })
-                            mainController.setRecordErrorMessage(message);
-                            return callbackSeries("stop");
-                        } else {
-                            $("#recordMessageDiv").html("")
-                            return callbackSeries();
-                        }
-
-                    })
-                },
 
 
                 function (callbackSeries) { //save record
@@ -432,31 +435,41 @@ var recordController = (function () {
 
         if (!canBeDeleted)
             return;*/
+
+       function deleteInner(){
+           var canBeDeleted = confirm("supprimer cet enregistrement de la table " + context.currentTable + " ?");
+           if (canBeDeleted) {
+               self.execSQLDeleteRecord(context.currentTable, context.currentRecord.id, function (err, result) {
+                   if (err) {
+                       return mainController.setRecordErrorMessage(err)
+                   }
+                   mainController.setRecordMessage(result);
+                   dialog.dialog("close");
+                   listController.listRecords(context.currentListQueries[context.currentTable]);
+                   if (config.tableDefs[context.currentTable].onAfterDelete) {
+                       config.tableDefs[context.currentTable].onAfterDelete(context.currentRecord, function (err, result) {
+
+                       });
+                   }
+
+
+               })
+           }
+        }
+
+
+
         if (config.tableDefs[context.currentTable].onBeforeDelete) {
             config.tableDefs[context.currentTable].onBeforeDelete(context.currentRecord, function (err, result) {
                 if(err)
                     return mainController.setRecordErrorMessage(err);
 
-               var canBeDeleted = confirm("supprimer cet enregistrement de la table " + context.currentTable + " ?");
-                if (canBeDeleted) {
-
-                    self.execSQLDeleteRecord(context.currentTable, context.currentRecord.id, function (err, result) {
-                        if (err) {
-                            return mainController.setRecordErrorMessage(err)
-                        }
-                        mainController.setRecordMessage(result);
-                        dialog.dialog("close");
-                        listController.listRecords(context.currentListQueries[context.currentTable]);
-                        if (config.tableDefs[context.currentTable].onAfterDelete) {
-                            config.tableDefs[context.currentTable].onAfterDelete(context.currentRecord, function (err, result) {
-
-                            });
-                        }
+                    deleteInner();
 
 
-                    })
-                }
             });
+        }else{
+            deleteInner();
         }
 
 
