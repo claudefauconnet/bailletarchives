@@ -1,5 +1,5 @@
 "C:\Program Files\MariaDB 10.2\bin\mysqld"
-
+serveur 4cuGEbe4W83J5
 
 config server
 

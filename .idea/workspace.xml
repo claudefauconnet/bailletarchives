@@ -3,10 +3,14 @@
   <component name="ChangeListManager">
     <list default="true" id="6f79c96b-1e7e-4e88-9b09-aaa3d37d5521" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/htmlSnippets/changerMotDePasse.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/htmlSnippets/changerMotDePasse.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/authentification.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/authentification.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mariadbd.bat" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mariadbd.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/processData..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/processData..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/_tablette.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/_tablette.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/_versement.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/_versement.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/recordController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/recordController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/magasinD3.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/magasinD3.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/magasinD3Old.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -106,6 +110,9 @@
       <workItem from="1567072631980" duration="3851000" />
       <workItem from="1567668626890" duration="3509000" />
       <workItem from="1567748271044" duration="3070000" />
+      <workItem from="1568101807584" duration="3118000" />
+      <workItem from="1568220185661" duration="6244000" />
+      <workItem from="1568277296968" duration="13026000" />
     </task>
     <servers />
   </component>

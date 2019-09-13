@@ -7,6 +7,7 @@ var config = (function () {
     self.maxVersementsToLocate = 5;
     self.coefRemplissageTablette = .7
     self.coteBoiteNbDigits = 3;
+    self.margeAjoutVersementSurTabletteOccupee=0.05;
     self.loginMode = "database";  //json || database
 
     self.tableDefs = {

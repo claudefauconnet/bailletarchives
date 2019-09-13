@@ -256,7 +256,7 @@ var Versement = (function () {
                 if (longeurDisponible <= params.metrage)
                     return alert("Tablette  déjà occupee, le métrage demandé ne rentre pas dans la tablette, choisisez une autre tablette");
                 else {
-                    if (confirm("Tablette  déjà occupée, confirmez l'entree de ce nouveau versement sur cette tablette")) {
+                    if (confirm("\"cette tablette est déja occupée  mais peut accueillir ce versement, confirmer l'ajout\"")) {
                         Tablette.splitTablette(tablette.name, function (err, newTabletteId) {
 
                             Versement.entrerVersement({useTabletteId: newTabletteId});
@@ -469,7 +469,7 @@ var Versement = (function () {
                         } else
                             callback();
                     },
-                    function (callback) {//create tablettes
+                    function (callback) {//create coordonnees tablettes
                         if (tablettes.length > 0) {
                             self.AttachTablettesToVersement(versement, tablettes, params.nbBoites, tailleMoyBoite, function (err, result) {
                                 if (err)
@@ -715,22 +715,62 @@ var Versement = (function () {
             var tailleMoyBoite = params.metrage / params.nbBoites;
             if (tabletteDebutCoord && tabletteDebutCoord != "") {// chercher des tablettes depusi le début au à partir de coteDebutIndex
                 var obj = {metrage: params.metrage, magasin: params.magasin}
-                var sql = "select * from magasin where coordonnees='" + tabletteDebutCoord + "'";
+                var sql = "select magasin.*, versement.id, versement.metrage as metrageVersement, versement.nbBoites as nbBoitesVersement from magasin,versement where versement.id=magasin.id_versement and coordonnees='" + tabletteDebutCoord + "'";
                 mainController.execSql(sql, function (err, result) {
                     if (err)
                         return alert(err)
                     if (result.length == 0)
                         return alert("cette tablette n'existe pas")
-                    if (result[0].id_versement && result[0].id_versement != "")
-                        return alert("cette tablette n'est pas vide")
-                    var tabletteDebut = result[0];
+                    var line0 = result[0];
 
-                    magasinD3.chercherTablettesPourVersement(obj, tabletteDebut.coordonnees, function (err, result) {
-                        if (err)
-                            return alert(err);
-                        useTablette(result)
+                    // tablette occupee
+                    if (result[0].id_versement && result[0].id_versement != "") {
+                        if (!line0.metrageVersement)
+                            return alert("cette tablette n'a pas de metrage correspondant dans le versement, ajout impossible");
+                        else {
+                            var metrageOccupe=0;
+                            var nbBoitesTotal=0;
+                            var hasVersementMultiTablettes=false;
 
-                    })
+                            result.forEach(function (line) {
+                                if(line.metrageVersement>(line.DimTabletteMLineaire + config.margeAjoutVersementSurTabletteOccupee))
+                                    hasVersementMultiTablettes=true;
+                                if(line.metrageVersement)
+                                metrageOccupe+=line.metrageVersement;
+                                if(line.nbBoitesVersement)
+                                nbBoitesTotal+=line.nbBoitesVersement;
+
+                            })
+
+                            if(hasVersementMultiTablettes && nbBoitesTotal>0){
+                                var tailleMoyenneBoite=metrageOccupe/nbBoitesTotal;
+                               var  nbBoitesTablette=line0.cotesParTablette.split(" ").length
+                                metrageOccupe=tailleMoyenneBoite*nbBoitesTablette
+                            }
+                            // petites versements à mettre sur la meme tablette: duplication des coordonnées de tablette dans deux entrees magasin (marge margeAjoutVersementSurTabletteOccupee)
+                            if ((line0.DimTabletteMLineaire - metrageOccupe) > (obj.metrage + config.margeAjoutVersementSurTabletteOccupee)) {
+                                if (confirm("cette tablette est déja occupée  mais peut accueillir ce versement, confirmer l'ajout")) {
+                                    Tablette.splitTablette(tablette.coordonnees, function (err, newTabletteId) {
+                                        Versement.entrerVersement({useTabletteId: newTabletteId});
+                                    })
+                                    return;
+                                    //  return useTablette([result[0].coordonnees]);
+
+                                } else
+                                    return (alert("cherchez un autre emplacement..."))
+                            } else
+                                return alert(" pas assez de place sur cette tablette pour y ajouter le versement")
+
+                        }
+
+                        var tabletteDebut = result[0];
+                        magasinD3.chercherTablettesPourVersement(obj, tabletteDebut.coordonnees, function (err, result) {
+                            if (err)
+                                return alert(err);
+                            useTablette(result)
+
+                        })
+                    }
 
                 })
             } else {
@@ -791,13 +831,13 @@ var Versement = (function () {
         self.onMagasinsLoaded = function (magasins) {
             if (magasins.length > 0) {
                 $("#versementEntrerEnMagasinButton").attr("disabled", true);
-                $("#versementLocaliserButton").attr("disabled", true);
+                $("#versementLocaliserButton").removeAttr("disabled")
                 $("#versementRefoulerButton").removeAttr("disabled")
 
 
             } else {
                 $("#versementEntrerEnMagasinButton").removeAttr("disabled");
-                $("#versementLocaliserButton").removeAttr("disabled")
+                $("#versementLocaliserButton").attr("disabled", true);
                 $("#versementRefoulerButton").attr("disabled", true);
             }
 
@@ -809,9 +849,9 @@ var Versement = (function () {
             var userGroups = authentication.currentUser.groupes;
             if (!userGroups)
                 userGroups = "NONE";
-          /*  if (userGroups.indexOf("ADMIN") < 0) {
-                $("#deleteRecordButton").css("display", "none")
-            }*/
+            /*  if (userGroups.indexOf("ADMIN") < 0) {
+                  $("#deleteRecordButton").css("display", "none")
+              }*/
 
 
             if (!versement.id) {

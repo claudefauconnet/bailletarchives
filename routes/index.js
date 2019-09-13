@@ -32,7 +32,7 @@ router.post('/mysql', function (req, res, next) {
 
 });
 router.post('/authDB', function (req, res, next) {
-    console.log(JSON.stringify(req.body))
+   // console.log(JSON.stringify(req.body))
     if (req.body.tryLogin) {
         authentication.loginInDB(req.body.login, req.body.password, function (err, result) {
             processResponse(res, err, result)

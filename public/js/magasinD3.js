@@ -172,10 +172,48 @@ var magasinD3 = (function () {
         svgHeight = totalHeight //* .8
         $("#graphDiv").width(svgWidth)
         $("#graphDiv").height(svgHeight)
-
+        var tx = 0,
+            ty = 0,
+            scale = 1;
 
         zoom = d3.zoom().on("zoom", function () {
-            svg.attr("transform", d3.event.transform)
+            var position=d3.event.sourceEvent;
+            var transform=d3.event.transform;
+            if( position) {
+
+                transform.x -= (((totalWidth/2)-position.offsetX) * transform.k);
+                transform.y -= (((totalHeight/2)-position.offsetY) * transform.k);
+             svg.attr("transform", "translate("+transform.x +"," +transform.y  + ")")
+             //   svg.attr("transform", {k: 1, x: transform.x, y: transform.y});
+            }
+         //  svg.attr("transform",transform);
+
+          /*  {
+
+                var newTx, newTy, newScale;
+                var factor=1.5
+                var center = d3.mouse(document.querySelector('svg'));
+                // calculate new scale
+                if (d3.event.deltaY > 0) {
+
+                    newScale = scale * factor;
+                } else {
+                    newScale = scale / factor;
+                }
+
+                // calculate new translate position
+                // [current mouse position] - ([current mouse position] - [current translate]) * magnification
+                newTx = center[0] - (center[0] - tx) * newScale / scale;
+                newTy = center[1] - (center[1] - ty) * newScale / scale;
+
+                // set new scale and translate position
+           scale = newScale;
+
+                svg.attr('transform', `translate(${tx}, ${ty}) scale(${scale})`);
+
+
+            }
+            var center = d3.mouse(document.querySelector('svg'));*/
 
         }).scaleExtent([self.minZoom, self.maxZoom])
 

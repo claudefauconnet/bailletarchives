@@ -46,7 +46,7 @@ var Tablette = (function () {
                     "<option value='voirTablette'> voir tablette...</option>" +
                     "<option value='setUnavailable'> rendre indisponible</option>" +
                     "<option value='createUnder'> creer nouvelle</option>" +
-                    "<option value='split'> diviser </option>" +
+                   /* "<option value='split'> diviser </option>" +*/
                     "<option value='delete'> supprimer </option>" +
                     "<option value='commentaire'> commentaire...</option>"+
                 "<option value='reDrawTravees'>reDrawTravees</option>"
@@ -181,7 +181,7 @@ var Tablette = (function () {
 
                 var html = self.getEnterVersementExistantDialogHtml();
                 html += "<br><button id='popupD3DivOperationDiv_okButtonExistant' onclick='Versement.doAfterEntrerVersementExistantDialogValidate();'>OK</button>";
-                html += "<br><button style='visibility: hidden' id='popupD3DivOperationDiv_okButtonAll' onclick='Versement.doAfterEntrerVersementDialogValidate();'>OK</button>";
+                html += "<br><button style='visibility: hidden' id='popupD3DivOperationDiv_okButtonAll' onclick='Versement.doAfterEntrerVersementDialogValidate();'>Entrer versement</button>";
 
                 $("#popupD3DivOperationDiv").html(html);
                 $(".popupD3DivOperationDiv_hiddenInput").css("visibility", "hidden");
