@@ -1,5 +1,6 @@
 var config = (function () {
     var self = {}
+    self.appName="bailletarchives";
     self.locale = "FR";
     self.listHiddenFields = ["id"];
     self.hiddenTables = ["article", "listes"]
@@ -8,6 +9,7 @@ var config = (function () {
     self.coefRemplissageTablette = .7
     self.coteBoiteNbDigits = 3;
     self.margeAjoutVersementSurTabletteOccupee=0.05;
+    self.tailleMoyenneBoite=0.09
     self.loginMode = "database";  //json || database
 
     self.tableDefs = {
@@ -37,6 +39,12 @@ var config = (function () {
                     title: "Ajouter Tablette...",
                     id: "versementAjouterTabletteButton",
                     toolFn: "Versement.ajouterTablette"
+                },
+
+                {
+                    title: "Reconditionner...",
+                    id: "ReconditionnerVersementButton",
+                    toolFn: "reconditionnement.start"
                 }
 
 

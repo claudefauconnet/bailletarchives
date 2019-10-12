@@ -566,7 +566,8 @@ var Versement = (function () {
 
                     })
 
-                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where coordonnees in (" + tablettesStr + ")";
+                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where coordonnees in (" + tablettesStr + ") and id_versement="+versement.id;
+                    //and versement.id="+versement.id;  pour prendre en compte les tablettes avec plusieurs versements !!
                     mainController.execSql(sql, function (err, result) {
                         if (err)
                             return callbackSeries(err);
@@ -721,11 +722,11 @@ var Versement = (function () {
                         return alert(err)
                     if (result.length == 0)
                         return alert("cette tablette n'existe pas")
-                    var line0 = result[0];
+                    var tabletteCible = result[0];
 
                     // tablette occupee
                     if (result[0].id_versement && result[0].id_versement != "") {
-                        if (!line0.metrageVersement)
+                        if (!tabletteCible.metrageVersement)
                             return alert("cette tablette n'a pas de metrage correspondant dans le versement, ajout impossible");
                         else {
                             var metrageOccupe=0;
@@ -744,13 +745,14 @@ var Versement = (function () {
 
                             if(hasVersementMultiTablettes && nbBoitesTotal>0){
                                 var tailleMoyenneBoite=metrageOccupe/nbBoitesTotal;
-                               var  nbBoitesTablette=line0.cotesParTablette.split(" ").length
+                               var  nbBoitesTablette=tabletteCible.cotesParTablette.split(" ").length
                                 metrageOccupe=tailleMoyenneBoite*nbBoitesTablette
                             }
+
                             // petites versements à mettre sur la meme tablette: duplication des coordonnées de tablette dans deux entrees magasin (marge margeAjoutVersementSurTabletteOccupee)
-                            if ((line0.DimTabletteMLineaire - metrageOccupe) > (obj.metrage + config.margeAjoutVersementSurTabletteOccupee)) {
+                            if ((tabletteCible.DimTabletteMLineaire - metrageOccupe) > (obj.metrage + config.margeAjoutVersementSurTabletteOccupee)) {
                                 if (confirm("cette tablette est déja occupée  mais peut accueillir ce versement, confirmer l'ajout")) {
-                                    Tablette.splitTablette(tablette.coordonnees, function (err, newTabletteId) {
+                                    Tablette.splitTablette(tabletteCible.coordonnees, function (err, newTabletteId) {
                                         Versement.entrerVersement({useTabletteId: newTabletteId});
                                     })
                                     return;

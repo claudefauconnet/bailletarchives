@@ -10,7 +10,7 @@ var processData = {
 var whereStr="";
         if(where && where!="")
             whereStr=where;
-        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible,commentaires from magasin "+whereStr+" order by coordonnees"
+        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible,commentaires from magasin "+whereStr+" order by coordonnees,id"
         mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
             var tree = {
                 name: "Baillet",

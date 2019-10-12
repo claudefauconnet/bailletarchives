@@ -119,9 +119,10 @@ var Sortie = (function () {
                 var allBoites = [];
                 json.forEach(function (tablette) {
                     var boitesStr = tablette.cotesParTablette;
-                    if (boitesStr != null && boitesStr != "")
-                        boites = boitesStr.split(" ");
-                    allBoites = allBoites.concat(boites)
+                    if (boitesStr != null && boitesStr != "") {
+                       var boites = boitesStr.split(" ");
+                        allBoites = allBoites.concat(boites)
+                    }
                 })
                 html = "<div style='display:block;width: 250px'><input type='checkbox' onchange=Sortie.onCbxChanged($(this),'all')><B>Toutes les boites</B><br><div>"
                 allBoites.sort();

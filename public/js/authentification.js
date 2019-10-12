@@ -10,7 +10,7 @@ var authentication = (function () {
 
     self.init = function (activate) {
         var url = window.location.host;
-        if (activate) {//  && url.indexOf("localhost")<0 && url.indexOf("127.0.0.1")<0){
+        if (config.loginMode != "none"){//  && url.indexOf("localhost")<0 && url.indexOf("127.0.0.1")<0){
 
 
             $("#loginDiv").css("visibility", "visible");
@@ -30,12 +30,17 @@ var authentication = (function () {
         var password = $("#passwordInput").val();
         $("#main").css("visibility", "hidden");
 
-     /*   if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)) {
-            $("#loginMessage").html("invalid  login : Minimum eight characters, at least one uppercase letter, one lowercase letter and one number");
-        }*/
+        /*   if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)) {
+               $("#loginMessage").html("invalid  login : Minimum eight characters, at least one uppercase letter, one lowercase letter and one number");
+           }*/
         var user = null;
         async.series([
             function (callbackSeries) {
+                if (config.loginMode == "none"){
+                    user={identifiant:"none",
+                        login:"none",
+                        groups:"ADMIN"}
+                }
                 if (config.loginMode != "database")
                     return callbackSeries();
                 self.doLoginDatabase(login, password, function (err, result) {
@@ -62,9 +67,9 @@ var authentication = (function () {
         ], function (err) {
             if (err && err.responseJSON) {
                 if ( err.responseJSON.ERROR == "changePassword") {
-                  //    $("#loginMessage").html("le mot de passe doit être changé (<a href='htmlSnippets/changerMotDePasse.html'>cliquer ici</a>)");
+                    //    $("#loginMessage").html("le mot de passe doit être changé (<a href='htmlSnippets/changerMotDePasse.html'>cliquer ici</a>)");
                     $("#loginMessage").html("le mot de passe doit être changé <button onclick=tools.execTool('changerMotDePasse')>OK</button>");
-                   self.currentUser=user;
+                    self.currentUser=user;
                     mainController.init0();
 
                     return
@@ -82,6 +87,10 @@ var authentication = (function () {
             }
             if(!user)
                 return $("#loginMessage").html("invalid  login or password");
+
+            var userGroups=user.groupes.split(",");
+            if(userGroups.indexOf("admin")<0 && userGroups.indexOf(config.appName)<0 )
+                return $("#loginMessage").html("user not allowed on this application  : "+config.appName);
 
             $("#loginDiv").css("visibility", "hidden");
             $("#main").css("visibility", "visible");
@@ -104,7 +113,7 @@ var authentication = (function () {
         var payload = {
             tryLogin: 1,
             login: login,
-           password: password,
+            password: password,
 
 
         }
@@ -125,16 +134,16 @@ var authentication = (function () {
 
             }
         })
-       /* var sql = "select * from utilisateur where identifiant='" + login + "' and motDepasse='" + password + "'";
-        mainController.execSql(sql, function (err, result) {
-            if (err) {
-               return callback(err);
-            }
-            if (result.length == 0)
-               return callback();
-            return callback(null,result[0]);
+        /* var sql = "select * from utilisateur where identifiant='" + login + "' and motDepasse='" + password + "'";
+         mainController.execSql(sql, function (err, result) {
+             if (err) {
+                return callback(err);
+             }
+             if (result.length == 0)
+                return callback();
+             return callback(null,result[0]);
 
-        })*/
+         })*/
 
 
     }
@@ -227,11 +236,11 @@ var authentication = (function () {
         for (var key in options.changes){
             options.currentRecord[key]=options.changes[key];
         }
-        recordController.currentRecordChanges= {};
+
         var authenticationUrl = "../authDB";
         var payload = {
             enrole: 1,
-           users:JSON.stringify(options.currentRecord)
+            users:JSON.stringify(options.currentRecord)
 
 
         }

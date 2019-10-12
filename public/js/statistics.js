@@ -4,7 +4,7 @@ var statistics = (function () {
     self.stats = {
 
         "prochain numero de versement": {
-           sql: "select MAX( numVersement+1) as prochainNumeroVersement from versement"
+            sql: "select MAX( numVersement+1) as prochainNumeroVersement from versement where numVersement<>9999" // 9999 es tun versement fictif utilisé pour des sorties de boites ans versement
         //   sql: "select concat('0',MAX( CONVERT(numVersement, SIGNED INTEGER)+1)) as prochainNumeroVersement from versement"
           //  sql: "select concat('',MAX( CONVERT(numVersement, SIGNED INTEGER)+1)) as prochainNumeroVersement from versement"
         },

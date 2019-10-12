@@ -451,6 +451,7 @@ var mainController = (function () {
     self.setMessage = function (message) {
         $("#messageDiv").css("color", "blue");
         $("#messageDiv").html(message);
+
         return message;
 
     }

@@ -127,7 +127,7 @@ var recordController = (function () {
 
 
             if (obj && obj.id && (!config.tableDefs[context.currentTable].tableConstraints || config.tableDefs[context.currentTable].tableConstraints.cannotDelete !== true)) {
-                if(authentication.currentUser.groupes.indexOf("admin")>-1)
+                if( authentication.currentUser.groupes && authentication.currentUser.groupes.indexOf("admin")>-1)
                     toolsHtml+=("<button id='deleteRecordButton'  onclick='recordController.deleteRecord()'>Supprimer</button>")
             }
 
@@ -347,13 +347,13 @@ var recordController = (function () {
                 if (record[key] == "")
                     sql += key + "= null"
                 else
-                    sql += key + "=" + record[key].replace(",", ".");
+                    sql += key + "=" + (""+record[key]).replace(",", ".");
 
             } else if (type == "string") {
                 var str = self.escapeMySqlChars(record[key]);
                 sql += key + "='" + str + "'";
             } else if (type == "date") {
-                var str = record[key].replace(/\//g, "-");// date mysql  2018-09-21
+                var str = (""+record[key]).replace(/\//g, "-");// date mysql  2018-09-21
                 sql += key + "='" + str + "'";
             }
         }
@@ -418,43 +418,43 @@ var recordController = (function () {
         if (config.tableDefs[context.currentTable].relations)
             relations = Object.keys(config.tableDefs[context.currentTable].relations);
 
-       /* var canBeDeleted = 0;
-        /* relations.forEach(function (relation) {
+        /* var canBeDeleted = 0;
+         /* relations.forEach(function (relation) {
 
-                var dataTableDivName = "linkedRecordsDiv_" + relation;
+                 var dataTableDivName = "linkedRecordsDiv_" + relation;
 
-                if ($("#" + dataTableDivName).html().indexOf("dataTables_wrapper") > -1) {// si des lignes de datatable
-                    canBeDeleted += 1;
-
-
-                }
-            })*/
-       /* if (canBeDeleted > 0)
-            return alert("vous devez au préalable supprimer les  liens");
+                 if ($("#" + dataTableDivName).html().indexOf("dataTables_wrapper") > -1) {// si des lignes de datatable
+                     canBeDeleted += 1;
 
 
-        if (!canBeDeleted)
-            return;*/
-
-       function deleteInner(){
-           var canBeDeleted = confirm("supprimer cet enregistrement de la table " + context.currentTable + " ?");
-           if (canBeDeleted) {
-               self.execSQLDeleteRecord(context.currentTable, context.currentRecord.id, function (err, result) {
-                   if (err) {
-                       return mainController.setRecordErrorMessage(err)
-                   }
-                   mainController.setRecordMessage(result);
-                   dialog.dialog("close");
-                   listController.listRecords(context.currentListQueries[context.currentTable]);
-                   if (config.tableDefs[context.currentTable].onAfterDelete) {
-                       config.tableDefs[context.currentTable].onAfterDelete(context.currentRecord, function (err, result) {
-
-                       });
-                   }
+                 }
+             })*/
+        /* if (canBeDeleted > 0)
+             return alert("vous devez au préalable supprimer les  liens");
 
 
-               })
-           }
+         if (!canBeDeleted)
+             return;*/
+
+        function deleteInner(){
+            var canBeDeleted = confirm("supprimer cet enregistrement de la table " + context.currentTable + " ?");
+            if (canBeDeleted) {
+                self.execSQLDeleteRecord(context.currentTable, context.currentRecord.id, function (err, result) {
+                    if (err) {
+                        return mainController.setRecordErrorMessage(err)
+                    }
+                    mainController.setRecordMessage(result);
+                    dialog.dialog("close");
+                    listController.listRecords(context.currentListQueries[context.currentTable]);
+                    if (config.tableDefs[context.currentTable].onAfterDelete) {
+                        config.tableDefs[context.currentTable].onAfterDelete(context.currentRecord, function (err, result) {
+
+                        });
+                    }
+
+
+                })
+            }
         }
 
 
@@ -464,7 +464,7 @@ var recordController = (function () {
                 if(err)
                     return mainController.setRecordErrorMessage(err);
 
-                    deleteInner();
+                deleteInner();
 
 
             });
