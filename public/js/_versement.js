@@ -944,7 +944,7 @@ var Versement = (function () {
                         return callback(err);
 
                     var cotesBoitesStr = "";
-                    var regexSplitBoites = /[.*^\s]\s*/gm
+                    var regex = /[.*^\s]\s*/gm
                     json.forEach(function (tablette) {
                         infos.tablettes.metrage += tablette.metrage;
                         infos.tablettes.tailleTotaleTablettes += tablette.DimTabletteMLineaire

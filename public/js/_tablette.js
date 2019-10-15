@@ -164,7 +164,7 @@ var Tablette = (function () {
             }
             else if (operation == "releaseTablette") {
                 if (confirm("Confirmez la libereration de  la tablette")) {
-                    self.releaseTablette(magasinD3.currentTablette.name, function (err) {
+                    self.releaseTablettes(magasinD3.currentTablette.name, function (err) {
                             if (err)
                                 mainController.setErrorMessage(err);
                             var coordonneesObj = Tablette.getCoordonneesElements(magasinD3.currentTablette.name);
@@ -455,13 +455,28 @@ var Tablette = (function () {
             return obj;
 
         }
-        self.releaseTablette = function (tabletteCoordonnees, callback) {
-            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees='" + tabletteCoordonnees + "'";
+        self.releaseTablettes = function (tablettesCoordonnees, callback) {
+            if(!Array.isArray(tablettesCoordonnees))
+                tablettesCoordonnees=[tablettesCoordonnees];
+            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees in (" + tablettesCoordonnees.toString() + ")";
             mainController.execSql(sql, function (err, result) {
                 if (err)
                     mainController.setErrorMessage(err);
                 if (callback)
                     return callback(err);
+            })
+
+
+        }
+        self.releaseTablettesById = function (magasinIds, callback) {
+            if(!Array.isArray(magasinIds))
+                magasinIds=[magasinIds];
+            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where id in (" + magasinIds.toString() + ")";
+            mainController.execSql(sql, function (err, result) {
+                if (err)
+                    mainController.setErrorMessage(err);
+                if (callback)
+                    return callback();
             })
 
 
@@ -475,7 +490,7 @@ var Tablette = (function () {
             }
 
             if (tablette.cotesParTablette == "" && confirm("liberer la tablette (supprimer le lien avec le versement")) {
-                self.releaseTablette(tablette.name, function (err) {
+                self.releaseTablettes(tablette.name, function (err) {
                         if (err)
                             mainController.setErrorMessage(err);
                         datatable.row(rowIndex).remove().draw();
@@ -534,8 +549,7 @@ var Tablette = (function () {
 
                 result.forEach(function(line, lineIndex){
                     var newCotesParTablette=""
-                    var regex=/[.*^\s]\s*/gm
-                    var boitesArray=line.cotesParTablette.trim().split(regex);
+                    var boitesArray= self.getBoitesTablette(line)
                    boitesArray.forEach(function(boite,indexBoites){
                        var p=boite.indexOf("/")
                        if(p>0){
@@ -573,6 +587,75 @@ var Tablette = (function () {
 
 
 
+
+
+            })
+
+
+        }
+
+        self.getBoitesTablette=function(tablette){
+            if(tablette && tablette.cotesParTablette && tablette.cotesParTablette!="") {
+                var regex = /[.*^\s]\s*/gm
+                var boitesArray = tablette.cotesParTablette.trim().split(regex);
+                return boitesArray;
+            }
+            else
+                return [];
+        }
+
+        self.showVersementBoitesCbx = function (numVersement, callback) {
+
+            if (!numVersement || numVersement == "")
+                return mainController.setRecordErrorMessage("saisissez un versement")
+            var sql = "select magasin.* from magasin, versement where versement.id=magasin.id_versement and versement.numVersement=" + numVersement + " order by magasin.coordonnees";
+            mainController.execSql(sql, function (err, json) {
+                if (err)
+                    return mainController.setRecordErrorMessage(err);
+                var html = "";
+                if (json.length == 0)
+                    html = " pas de boites correspondantse";
+                else {
+
+                    var boitesTablettes = [];
+                    var maxBoitesTablette;
+                    context.retraitementBoites = {}
+                    json.forEach(function (line) {
+                        var tablette = {coordonnees: line.coordonnees, boites: [], id_tablette: line.id};
+                        var boitesStr = line.cotesParTablette;
+                        if (boitesStr != null && boitesStr != "") {
+                            var boites = boitesStr.split(" ");
+                            var maxBoitesTablette = Math.max(maxBoitesTablette, boites.length)
+                            boites.forEach(function (boite) {
+                                tablette.boites.push(boite)
+                                context.retraitementBoites[tablette.coordonnees + "_" + boite] = {
+                                    cote: boite,
+                                    coordonnees: tablette.coordonnees,
+                                    id_tablette: tablette.id_tablette,
+                                    versementSource: line.id_versement
+                                }
+                            })
+
+                            boitesTablettes = boitesTablettes.concat(tablette);
+                        }
+                    })
+                    html = "<table border='1'>"
+                    boitesTablettes.forEach(function (tablette) {
+                        html += "<tr>"
+                        html += "<td>" + tablette.coordonnees + "</td><td><input type='checkbox' onchange=retraitement.onAllCbxChanged($(this),'" + tablette.coordonnees + "')>Toutes</td>";
+                        html += "<td>"
+                        tablette.boites.forEach(function (boite) {
+                            html += "<input type='checkbox'  class='retraitementCbx' value='" + tablette.coordonnees + "_" + boite + "'style='width: auto''><span style='font-size: 10px'>" + boite + "</span>"
+                        })
+                        html += "</td>"
+                        html += "<tr>"
+                    })
+                    html += "</table>"
+
+
+                    return callback(null, html);
+
+                }
 
 
             })

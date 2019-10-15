@@ -2,21 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6f79c96b-1e7e-4e88-9b09-aaa3d37d5521" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/public/js/_reconditionnement.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/authentication..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/authentication..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/logger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/logger..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/processData..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/processData..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/_sortie.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/_sortie.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/_reconditionnement.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/_retraitement.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/_tablette.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/_tablette.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/_versement.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/_versement.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/authentification.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/authentification.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/mainController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/recordController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/recordController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/js/statistics.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/statistics.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -42,7 +34,7 @@
     <property name="HbShouldOpenHtmlAsHb" value="" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../mail2pdfImap" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../nlp2" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="liveEdit" />
   </component>
@@ -133,7 +125,7 @@
       <workItem from="1570296178656" duration="5154000" />
       <workItem from="1570519543852" duration="4768000" />
       <workItem from="1570616526444" duration="1645000" />
-      <workItem from="1570784153163" duration="16800000" />
+      <workItem from="1570784153163" duration="30281000" />
     </task>
     <servers />
   </component>

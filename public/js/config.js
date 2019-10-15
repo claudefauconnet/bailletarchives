@@ -42,9 +42,9 @@ var config = (function () {
                 },
 
                 {
-                    title: "Reconditionner...",
-                    id: "ReconditionnerVersementButton",
-                    toolFn: "reconditionnement.start"
+                    title: "Retraiter",
+                    id: "retraitementButton",
+                    toolFn: "Retraitement.start"
                 }
 
 
