@@ -57,7 +57,7 @@ var config = (function () {
                     toolFn: "Versement.SetVersementCotesExtremesFromMagasin"
                 },
                 "nbBoites": {
-                    title: "calculer",
+                    title: "mettre à jour",
                     toolFn: "Versement.SetVersementnbBoitesFromMagasin"
                 }
             },

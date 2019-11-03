@@ -6,9 +6,9 @@ var Tablette = (function () {
             var html = ""
             context.currentTable = "magasin";
             if (obj.prompt) {
-                var oldTablette=$("#currentMainMenuTabletteSpan").html();
+                var oldTablette = $("#currentMainMenuTabletteSpan").html();
 
-                var coordonneesTablette = prompt("coordonnées tablette :",oldTablette)
+                var coordonneesTablette = prompt("coordonnées tablette :", oldTablette)
                 if (!coordonneesTablette || coordonneesTablette == "")
                     return "";
                 var tabletteObj = magasinD3.getTabletteObject(coordonneesTablette);
@@ -26,8 +26,7 @@ var Tablette = (function () {
                     "<option value='releaseTablette'> liberer tablette</option>" +
                     "<option value='commentaire'> commentaire...</option>" +
                     "<option value='voirVersement'> voir versement</option>"
-            }
-            else if (obj.avecCotesSansVersement) {
+            } else if (obj.avecCotesSansVersement) {
                 html += " <option></option>" +
                     "<option value='releaseTablette'> liberer tablette</option>" +
                     "<option value='voirTablette'> voir tablette...</option>" +
@@ -38,18 +37,17 @@ var Tablette = (function () {
                     "<option value='voirTablette'> voir tablette...</option>" +
                     "<option value='releaseTablette'> liberer tablette</option>" +
                     "<option value='commentaire'> commentaire...</option>"
-            }
-            else {
+            } else {
                 html += " <option></option>" +
                     //   "<option value='entrerNouveauVersement'> entrer nouveau versement</option>" +
                     "<option value='entrerVersementExistant'> entrer/refouler versement existant</option>" +
                     "<option value='voirTablette'> voir tablette...</option>" +
                     "<option value='setUnavailable'> rendre indisponible</option>" +
                     "<option value='createUnder'> creer nouvelle</option>" +
-                   /* "<option value='split'> diviser </option>" +*/
+                    /* "<option value='split'> diviser </option>" +*/
                     "<option value='delete'> supprimer </option>" +
-                    "<option value='commentaire'> commentaire...</option>"+
-                "<option value='reDrawTravees'>reDrawTravees</option>"
+                    "<option value='commentaire'> commentaire...</option>" +
+                    "<option value='reDrawTravees'>reDrawTravees</option>"
             }
             if (obj.prompt)
                 html += "<option value='locate'> localiser</option>"
@@ -60,16 +58,16 @@ var Tablette = (function () {
         self.onTabletteOperationSelect = function (select) {
             var operation = $(select).val();
 
-    if (operation == "reDrawTravees") {
-    magasinD3.reDrawTravees("B-05-03")
-    }
+            if (operation == "reDrawTravees") {
+                magasinD3.reDrawTravees("B-05-03")
+            }
             /*  $("#popupD3Div").css("visibility","hidden");
               $("#select").val("");*/
             if (operation == "commentaire") {
                 var oldCommentaires = magasinD3.currentTablette.commentaires
                 var commentaire = prompt("entrer un commentaire pour la  tablette " + magasinD3.currentTablette.name, oldCommentaires);
                 if (commentaire != null && commentaire != "") {
-                    commentaire=recordController.escapeMySqlChars(commentaire);
+                    commentaire = recordController.escapeMySqlChars(commentaire);
                     var sql = "update magasin set commentaires='" + commentaire + "' where coordonnees='" + magasinD3.currentTablette.name + "'";
                     mainController.execSql(sql, function (err, result) {
                         if (err)
@@ -102,14 +100,10 @@ var Tablette = (function () {
                     mainController.showNewRecordDialog();
                 }
                 $("#popupD3Div").css("visibility", "hidden");
-            }
-            else if (operation == "split") {
+            } else if (operation == "split") {
                 var coordonnees = magasinD3.currentTablette.name
                 self.splitTablette(coordonnees)
-            }
-
-
-            else if (operation == "delete") {
+            } else if (operation == "delete") {
                 var message = "Voulez vous supprimer la tablette " + magasinD3.currentTablette.name + "";
                 /*if (tablette.isEmpty == false) {
                     message+=" bien qu'elle ne soit pas vide"
@@ -128,8 +122,7 @@ var Tablette = (function () {
                     })
                 }
 
-            }
-            else if (operation == "setUnavailable") {
+            } else if (operation == "setUnavailable") {
                 var coordonnees = magasinD3.currentTablette.name;
                 var coordonneesObj = Tablette.getCoordonneesElements(coordonnees)
                 var sql = "select * from magasin where coordonnees='" + coordonnees + "'"
@@ -142,11 +135,10 @@ var Tablette = (function () {
                     }
 
                     var commentaire = prompt("Entrer un commentaire");
-                    commentaire=recordController.escapeMySqlChars(commentaire);
+                    commentaire = recordController.escapeMySqlChars(commentaire);
                     var commentaireStr = "";
                     if (commentaire && commentaire != "")
                         commentaireStr = ", commentaires='" + commentaire + "'"
-
 
 
                     var sql = "update magasin set indisponible=1" + commentaireStr + " where coordonnees='" + coordonnees + "'"
@@ -161,8 +153,7 @@ var Tablette = (function () {
                     })
                 })
 
-            }
-            else if (operation == "releaseTablette") {
+            } else if (operation == "releaseTablette") {
                 if (confirm("Confirmez la libereration de  la tablette")) {
                     self.releaseTablettes(magasinD3.currentTablette.name, function (err) {
                             if (err)
@@ -174,9 +165,7 @@ var Tablette = (function () {
                         }
                     )
                 }
-            }
-
-            else if (operation == "entrerVersementExistant") {
+            } else if (operation == "entrerVersementExistant") {
 
 
                 var html = self.getEnterVersementExistantDialogHtml();
@@ -203,12 +192,11 @@ var Tablette = (function () {
 
             }
 
-            if(operation=="locate"){
-                self.locate( magasinD3.currentTablette.name)
+            if (operation == "locate") {
+                self.locate(magasinD3.currentTablette.name)
             }
 
             $('#operationTabletteSelect').find('option').remove().end()
-
 
 
         }
@@ -334,14 +322,14 @@ var Tablette = (function () {
             })
         }
 
-        self.getPremiereCoteTablettes=function(tablettes){
-            if(!Array.isArray(tablettes)){
-                tablettes=[tablettes];
+        self.getPremiereCoteTablettes = function (tablettes) {
+            if (!Array.isArray(tablettes)) {
+                tablettes = [tablettes];
             }
 
-            if(!tablettes || tablettes.length==0)
+            if (!tablettes || tablettes.length == 0)
                 return 1;
-            var cotesFirstTablette =tablettes[0].cotesParTablette;
+            var cotesFirstTablette = tablettes[0].cotesParTablette;
             if (cotesFirstTablette && cotesFirstTablette != "")
                 var array = /[0-9]{4}\/([0-9]{3})/.exec(cotesFirstTablette);
             if (array.length > 1) {
@@ -399,7 +387,7 @@ var Tablette = (function () {
             mainController.execSql(sql, callback);
         }
         self.updateCommentaireParTablette = function (commentaires, idMagasin, callback) {
-            commentaires=recordController.escapeMySqlChars(commentaires);
+            commentaires = recordController.escapeMySqlChars(commentaires);
             var sql = "update  magasin set commentaires='" + commentaires + "' where id=" + idMagasin;
             mainController.execSql(sql, callback);
 
@@ -456,8 +444,8 @@ var Tablette = (function () {
 
         }
         self.releaseTablettes = function (tablettesCoordonnees, callback) {
-            if(!Array.isArray(tablettesCoordonnees))
-                tablettesCoordonnees=[tablettesCoordonnees];
+            if (!Array.isArray(tablettesCoordonnees))
+                tablettesCoordonnees = [tablettesCoordonnees];
             var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees in (" + tablettesCoordonnees.toString() + ")";
             mainController.execSql(sql, function (err, result) {
                 if (err)
@@ -469,8 +457,8 @@ var Tablette = (function () {
 
         }
         self.releaseTablettesById = function (magasinIds, callback) {
-            if(!Array.isArray(magasinIds))
-                magasinIds=[magasinIds];
+            if (!Array.isArray(magasinIds))
+                magasinIds = [magasinIds];
             var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where id in (" + magasinIds.toString() + ")";
             mainController.execSql(sql, function (err, result) {
                 if (err)
@@ -499,8 +487,7 @@ var Tablette = (function () {
                 )
 
 
-            }
-            else {
+            } else {
                 updateGraph();
             }
         }
@@ -541,52 +528,48 @@ var Tablette = (function () {
             })
         }
 
-        ,self.updateCotesParTabletteZeros= function(){// check cotesParTablette and add zeros to box number if box number length <4
+            , self.updateCotesParTabletteZeros = function () {// check cotesParTablette and add zeros to box number if box number length <4
 
 
-            var sql="select id, cotesParTablette from magasin where cotesParTablette is not null and cotesParTablette!=''"
-            mainController.execSql(sql,function(err,result){
+            var sql = "select id, cotesParTablette from magasin where cotesParTablette is not null and cotesParTablette!=''"
+            mainController.execSql(sql, function (err, result) {
 
-                result.forEach(function(line, lineIndex){
-                    var newCotesParTablette=""
-                    var boitesArray= self.getBoitesTablette(line)
-                   boitesArray.forEach(function(boite,indexBoites){
-                       var p=boite.indexOf("/")
-                       if(p>0){
-                           var numVersement=boite.substring(0, p)
-                           while((boite.length-p-1)<3) {
-                               boite = boite.substring(0, p+1) + "0" + boite.substring(p+1)
-                           }
-                       }
-                       if(indexBoites>0)
-                           newCotesParTablette+=" ";
-                       newCotesParTablette+=boite;
-                   })
-                    result[lineIndex].cotesParTablette=newCotesParTablette;
+                result.forEach(function (line, lineIndex) {
+                    var newCotesParTablette = ""
+                    var boitesArray = self.getBoitesTablette(line)
+                    boitesArray.forEach(function (boite, indexBoites) {
+                        var p = boite.indexOf("/")
+                        if (p > 0) {
+                            var numVersement = boite.substring(0, p)
+                            while ((boite.length - p - 1) < 3) {
+                                boite = boite.substring(0, p + 1) + "0" + boite.substring(p + 1)
+                            }
+                        }
+                        if (indexBoites > 0)
+                            newCotesParTablette += " ";
+                        newCotesParTablette += boite;
+                    })
+                    result[lineIndex].cotesParTablette = newCotesParTablette;
 
 
                 })
 
 
-                var str=""
+                var str = ""
 
-                    var count=1
-                    async.eachSeries(result,function(line,callbackEach){
-                        var sql="update magasin set cotesParTablette='"+line.cotesParTablette+"' where id="+line.id+";";
-                        mainController.execSql(sql, function(err, result){
-                            if(err)
-                               return  callbackEach(err)
-                            console.log(""+(count++))
-                            callbackEach();
-                        })
-
-                    },function(err){
-                        console.log("done");
+                var count = 1
+                async.eachSeries(result, function (line, callbackEach) {
+                    var sql = "update magasin set cotesParTablette='" + line.cotesParTablette + "' where id=" + line.id + ";";
+                    mainController.execSql(sql, function (err, result) {
+                        if (err)
+                            return callbackEach(err)
+                        console.log("" + (count++))
+                        callbackEach();
                     })
 
-
-
-
+                }, function (err) {
+                    console.log("done");
+                })
 
 
             })
@@ -594,13 +577,12 @@ var Tablette = (function () {
 
         }
 
-        self.getBoitesTablette=function(tablette){
-            if(tablette && tablette.cotesParTablette && tablette.cotesParTablette!="") {
+        self.getBoitesTablette = function (tablette) {
+            if (tablette && tablette.cotesParTablette && tablette.cotesParTablette != "") {
                 var regex = /[.*^\s]\s*/gm
                 var boitesArray = tablette.cotesParTablette.trim().split(regex);
                 return boitesArray;
-            }
-            else
+            } else
                 return [];
         }
 
@@ -664,6 +646,93 @@ var Tablette = (function () {
         }
 
 
+        self.showCreateTableDialog = function () {
+            var jsonSchema = {
+                "tablettes": {
+                    "type": "object",
+                    "name": "tablettes",
+                    "title": " creer tablettes",
+                    "properties": {
+                        "magasin": {
+                            "type": "string",
+                            "title": "magasin",
+                            "required": true
+                        },
+                        "nbEpis": {
+                            "type": "integer",
+                            "title": "nbre d'épis",
+                            "required": true
+                        }, "nbTravees": {
+                            "type": "integer",
+                            "title": "nbre de travées/epi",
+                            "required": true
+                        },
+                        "nbTablettes": {
+                            "type": "integer",
+                            "title": "nbre de tablettes/travee",
+                            "required": true
+                        },
+                        "largeurTablette": {
+                            "type": "number",
+                            "title": "largeur tablette (m)",
+                            "default": 1.15,
+                            "required": true
+                        },
+                    }
+                }
+            }
+
+
+            var formStr = "<div style='width: 200px'><form id='shemaForm'></form></div>"
+            $("#dialog3Div").html(formStr);
+            $("#dialog3Div").dialog('open');
+
+            var options = {
+                "schema": jsonSchema,
+                "onSubmit": Tablette.createTablettes
+            }
+
+            $("#shemaForm").jsonForm(options);
+
+
+        }
+        self.createTablettes = function (err, data) {
+            $("#dialog3Div").dialog('close');
+            if (err)
+                return
+
+            if (magasinD3.magasins.indexOf(data.tablettes.magasin) > -1)
+                return alert("Le magasin " + data.tablettes.magasin + " existe déjà")
+            var insertStr = "insert into magasin (coordonnees,DimTabletteMLineaire,magasin,epi,travee,tablette) values \n";
+            for (var i = 1; i < data.tablettes.nbEpis + 1; i++) {
+                for (var j = 1; j < data.tablettes.nbTravees + 1; j++) {
+                    for (var k = 1; k < data.tablettes.nbTablettes + 1; k++) {
+                        var epiStr = i < 10 ? ("0" + i) : ("" + i);
+                        var traveeStr = j < 10 ? ("0" + j) : ("" + j);
+                        var tabletteStr = ("" + k);
+                        var coordonnees = data.tablettes.magasin + "-" + epiStr + "-" + traveeStr + "-" + tabletteStr;
+
+                        insertStr += "('" + coordonnees + "'," + data.tablettes.largeurTablette +",'" + data.tablettes.magasin+ "','" + epiStr + "','" + traveeStr + "','" + tabletteStr + "'),\n"
+
+                    }
+
+                }
+
+            }
+            insertStr=insertStr.substring(0,(insertStr.length-2))
+            mainController.execSql(insertStr, function (err, result) {
+                if (err)
+                    return alert(err.toString())
+                return alert("tablettes créees rechergez la page pour les voir apparaitre")
+
+
+            })
+
+
+        }
+
         return self;
     }
+
+
 )()

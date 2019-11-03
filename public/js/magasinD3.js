@@ -5,6 +5,7 @@ var magasinD3 = (function () {
     self.currentBoite = {}
     self.currentVersementSansBoites = null;
     self.data = {};
+    self.magasins=[]
     var cachedHtml = null;
 
 
@@ -34,7 +35,7 @@ var magasinD3 = (function () {
     var drawTraveeNumber = true;
     var drawTabletteNumber = true;
 
-    self.magasinsToDraw = ["A", "B", "C", "D", "G", "H"];
+    self.magasinsToDraw = ["A", "B", "C", "D", "G", "H","X"];
     self.colors = {
         "magasin": "#e8c8b3",
         "epi": "#e0d5ff",
@@ -75,6 +76,7 @@ var magasinD3 = (function () {
         var tabletteOK = null;
 
         magasinData.children.forEach(function (magasin,) {
+
             if (array[0] == magasin.name)
                 magasin.children.forEach(function (epi) {
                     if (array[0] + "-" + array[1] == epi.name)
@@ -271,6 +273,7 @@ var magasinD3 = (function () {
             var magY = 10;
             var drawObject = true;
             data.children.forEach(function (magasin, indexMagasin) {
+                self.magasins.push(magasin.name)
                     if (options.magasinsToDraw != null && options.magasinsToDraw.indexOf(magasin.name) < 0)
                         return;
 

@@ -566,7 +566,7 @@ var Versement = (function () {
 
                     })
 
-                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where coordonnees in (" + tablettesStr + ") and id_versement="+versement.id;
+                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where coordonnees in (" + tablettesStr + ") and id_versement=" + versement.id;
                     //and versement.id="+versement.id;  pour prendre en compte les tablettes avec plusieurs versements !!
                     mainController.execSql(sql, function (err, result) {
                         if (err)
@@ -631,8 +631,8 @@ var Versement = (function () {
                     var tabletteNbBoites = dimTablette / tailleMoyBoite;
                     var decimalPart = tabletteNbBoites - Math.floor(tabletteNbBoites);
                     tabletteNbBoites = Math.floor(tabletteNbBoites);
-                    if (decimalPart > (1 - config.coefRemplissageTablette))
-                        tabletteNbBoites -= 1;
+                    /*     if (decimalPart > (1 - config.coefRemplissageTablette))
+                             tabletteNbBoites -= 1;*/
                     return tabletteNbBoites;
                 }
 
@@ -709,45 +709,36 @@ var Versement = (function () {
 
 
             var params = Tablette.getIntegrerVersementDialogParams();
+            params.magasin = $("#popupD3DivOperationDiv_Magasin").val().toUpperCase();
             if (params.error)
                 return alert(params.error);
-
             var tabletteDebutCoord = $("#popupD3DivOperationDiv_tabletteDebut").val();
             var tailleMoyBoite = params.metrage / params.nbBoites;
-            if (tabletteDebutCoord && tabletteDebutCoord != "") {// chercher des tablettes depusi le début au à partir de coteDebutIndex
-                var obj = {metrage: params.metrage, magasin: params.magasin}
-                var sql = "select magasin.*, versement.id, versement.metrage as metrageVersement, versement.nbBoites as nbBoitesVersement from magasin,versement where versement.id=magasin.id_versement and coordonnees='" + tabletteDebutCoord + "'";
-                mainController.execSql(sql, function (err, result) {
-                    if (err)
-                        return alert(err)
-                    if (result.length == 0)
-                        return alert("cette tablette n'existe pas")
-                    var tabletteCible = result[0];
 
-                    // tablette occupee
-                    if (result[0].id_versement && result[0].id_versement != "") {
-                        if (!tabletteCible.metrageVersement)
-                            return alert("cette tablette n'a pas de metrage correspondant dans le versement, ajout impossible");
-                        else {
-                            var metrageOccupe=0;
-                            var nbBoitesTotal=0;
-                            var hasVersementMultiTablettes=false;
 
-                            result.forEach(function (line) {
-                                if(line.metrageVersement>(line.DimTabletteMLineaire + config.margeAjoutVersementSurTabletteOccupee))
-                                    hasVersementMultiTablettes=true;
-                                if(line.metrageVersement)
-                                metrageOccupe+=line.metrageVersement;
-                                if(line.nbBoitesVersement)
-                                nbBoitesTotal+=line.nbBoitesVersement;
+            async.series([
+                function(callbackSeries) {
 
-                            })
+                    if (!tabletteDebutCoord || tabletteDebutCoord == "") {// chercher des tablettes depusi le début au à partir de coteDebutIndex)
+                        return callbackSeries();
+                    }
+                    var obj = {metrage: params.metrage, magasin: params.magasin}
+                    var sql = "select magasin.* from magasin where coordonnees='" + tabletteDebutCoord + "'"
+                    //il peut y avoir plusieurs versement sur les memes coordonnées donc plusieurs id magasin correspondant
 
-                            if(hasVersementMultiTablettes && nbBoitesTotal>0){
-                                var tailleMoyenneBoite=metrageOccupe/nbBoitesTotal;
-                               var  nbBoitesTablette=tabletteCible.cotesParTablette.split(" ").length
-                                metrageOccupe=tailleMoyenneBoite*nbBoitesTablette
-                            }
+                    mainController.execSql(sql, function (err, result) {
+                        if (err)
+                            return alert(err)
+                        if (result.length == 0)
+                            return alert("cette tablette n'existe pas")
+                        var tabletteCible = result[0];
+
+                        // tablette deja occupee
+                        if (tabletteCible.id_versement && tabletteCible.id_versement != "") {
+                            var metrageOccupe = 0;
+                            if (tabletteCible.cotesParTablette)
+                                metrageOccupe = (tabletteCible.cotesParTablette.split(" ").length) * config.tailleMoyenneBoite;
+
 
                             // petites versements à mettre sur la meme tablette: duplication des coordonnées de tablette dans deux entrees magasin (marge margeAjoutVersementSurTabletteOccupee)
                             if ((tabletteCible.DimTabletteMLineaire - metrageOccupe) > (obj.metrage + config.margeAjoutVersementSurTabletteOccupee)) {
@@ -755,66 +746,59 @@ var Versement = (function () {
                                     Tablette.splitTablette(tabletteCible.coordonnees, function (err, newTabletteId) {
                                         Versement.entrerVersement({useTabletteId: newTabletteId});
                                     })
-                                    return;
-                                    //  return useTablette([result[0].coordonnees]);
 
-                                } else
-                                    return (alert("cherchez un autre emplacement..."))
+                                } else {
+                                    alert("cherchez un autre emplacement...")
+
+                                }
                             } else
-                                return alert(" pas assez de place sur cette tablette pour y ajouter le versement")
+                              alert(" pas assez de place sur cette tablette pour y ajouter le versement");
+
+                            return callbackSeries();
+
 
                         }
+                        else{
 
-                        var tabletteDebut = result[0];
-                        magasinD3.chercherTablettesPourVersement(obj, tabletteDebut.coordonnees, function (err, result) {
+                            magasinD3.chercherTablettesPourVersement(obj, tabletteCible.coordonnees, function (err, result) {
+                                if (err)
+                                    return alert(err);
+                                useTablette(result)
+                                return callbackSeries();
+                            })
+                        }
+                    })
+                },
+
+
+                // cas recherche sans tablette initiale et avec ou sans magasin
+                function(callbackSeries){
+
+                    if (tabletteDebutCoord  && tabletteDebutCoord != "")
+                        return callbackSeries();
+
+                        var obj = {metrage: params.metrage, magasin: params.magasin}
+                        magasinD3.chercherTablettesPourVersement(obj, null, function (err, result) {
                             if (err)
-                                return alert(err);
+                                return $("#popupD3DivOperationDiv_tablette").html(html);
                             useTablette(result)
-
                         })
+
+                        return callbackSeries();
                     }
 
-                })
-            } else {
-                params.magasin = $("#popupD3DivOperationDiv_Magasin").val().toUpperCase();
-                var obj = {metrage: params.metrage, magasin: params.magasin}
-                magasinD3.chercherTablettesPourVersement(obj, null, function (err, result) {
-                    if (err)
-                        return $("#popupD3DivOperationDiv_tablette").html(html);
-                    useTablette(result)
-                })
+
+
+
+            ],function(err) {
+            }
+            )
+
+
+
             }
 
 
-        }
-
-
-        /*   var metrage = $("#attr_metrage").val()
-           var nbBoites = $("#attr_nbBoites").val()
-
-
-           if (metrage == "" || nbBoites == "")
-               return alert(" le métrage et le nombre de boites sont obligatoires")
-
-           $("#dialogD3").attr("title", "chercher des tablettes");
-           $("#dialogD3").dialog("option", "position", {my: "center", at: "center", of: $("#mainDiv")});
-
-           dialogD3.dialog("open")
-           $("#dialogD3").load("./htmlSnippets/" + "findTablettesDialogD3.html", function () {
-               $("#findTablettesD3_versement").val(context.currentRecord.numVersement);
-               $("#findTablettesD3_nbBoites").val(metrage)
-               $("#findTablettesD3_metrage").val(nbBoites);
-
-               metrage = parseFloat(metrage.replace(",", ".")) * 100
-               nbBoites = parseInt(nbBoites)
-
-               var ep = "" + (Math.round(parseInt(metrage / nbBoites)) / 100);
-               ep = ep.replace(".", ",");
-               $("#findTablettesD3_epaisseurMoyBoite").val(ep);
-
-
-           })
-       }*/
 
 
         self.getBoiteVersement = function (boite, callback) {
@@ -886,7 +870,11 @@ var Versement = (function () {
             if (versement.etatTraitementDate)//reinitilaiser etat traitement lorsqu'on ouvre un versement (demande juillet 2019)
                 $("#attr_etatTraitementDate").val("");
 
+            if (versement.etatTraitement == "retraitement/reconditionnement") {
+                $("#retraitementButton").attr("disabled", true);
+                $("#versementEntrerEnMagasinButton").removeAttr("disabled");
 
+            }
         }
 
         self.getNewNumVersement = function (callback) {
