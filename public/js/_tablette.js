@@ -707,10 +707,10 @@ var Tablette = (function () {
             for (var i = 1; i < data.tablettes.nbEpis + 1; i++) {
                 for (var j = 1; j < data.tablettes.nbTravees + 1; j++) {
                     for (var k = 1; k < data.tablettes.nbTablettes + 1; k++) {
-                        var epiStr = i < 10 ? ("0" + i) : ("" + i);
-                        var traveeStr = j < 10 ? ("0" + j) : ("" + j);
-                        var tabletteStr = ("" + k);
-                        var coordonnees = data.tablettes.magasin + "-" + epiStr + "-" + traveeStr + "-" + tabletteStr;
+                        var epiStr =data.tablettes.magasin+"-"+( i < 10 ? ("0" + i) : ("" + i));
+                        var traveeStr =epiStr+"-"+(j < 10 ? ("0" + j) : ("" + j));
+                        var tabletteStr = traveeStr+"-"+("" + k);
+                        var coordonnees = tabletteStr;
 
                         insertStr += "('" + coordonnees + "'," + data.tablettes.largeurTablette +",'" + data.tablettes.magasin+ "','" + epiStr + "','" + traveeStr + "','" + tabletteStr + "'),\n"
 

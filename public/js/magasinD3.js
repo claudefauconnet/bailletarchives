@@ -35,7 +35,8 @@ var magasinD3 = (function () {
     var drawTraveeNumber = true;
     var drawTabletteNumber = true;
 
-    self.magasinsToDraw = ["A", "B", "C", "D", "G", "H","X"];
+    self.magasinsToDraw =[] //["A", "B", "C", "D", "G", "H","X"];
+    self.magasinsToNotDraw = ["E","F"];
     self.colors = {
         "magasin": "#e8c8b3",
         "epi": "#e0d5ff",
@@ -252,15 +253,24 @@ var magasinD3 = (function () {
             options = {}
 
 
-        if (!options.filter) {
-            self.initDrawMagasins(options);
 
-        }
         if (!options.magasinsToDraw)
             options.magasinsToDraw = self.magasinsToDraw;
 
 
         d3.json(mainController.urlPrefix + "/magasinD3Tree", function (data) {
+
+            options.magasinsToDraw=[];
+            data.children.forEach(function(magasin){
+                if(self.magasinsToNotDraw.indexOf(magasin.name)<0)
+                    options.magasinsToDraw.push( magasin.name)
+            })
+            self.magasinsToDraw=  options.magasinsToDraw
+            if (!options.filter) {
+                self.initDrawMagasins(options);
+
+            }
+
             var nMag = data.children.length;
             magasinData = data;
             self.data = data;
@@ -994,8 +1004,9 @@ var magasinD3 = (function () {
                     var xx = parseInt(d3.select(this).select("rect").attr("x"));
                     var yy = parseInt(d3.select(this).select("rect").attr("y"));
 
-                    zoom.translateTo(svg, xx + 300, 400)
-                    zoom.scaleTo(svg, self.avgZoom);
+                    zoom.translateTo(svg, xx,100)
+                  /*  zoom.translateTo(svg, xx + 300, 400)
+                    zoom.scaleTo(svg, self.avgZoom);*/
                 }
             })
 
