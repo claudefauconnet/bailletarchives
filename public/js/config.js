@@ -10,7 +10,7 @@ var config = (function () {
     self.coteBoiteNbDigits = 3;
     self.margeAjoutVersementSurTabletteOccupee=0.05;
     self.tailleMoyenneBoite=0.09
-    self.loginMode = "database";  //json || database
+    self.loginMode = "none";  //json || database
 
     self.tableDefs = {
 

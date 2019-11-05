@@ -43,7 +43,9 @@ var mainController = (function () {
                 return;
             mainController.initTablesSelects();
             mainController.loadLists();
-            if (true) {
+            if(authentication.currentUser.groupes.indexOf("admin")<0){
+                $("#showCreateTableButton").css("display","none");
+
                 self.showInMainDiv("graph");
                 magasinD3.init("graphWrapperDiv", function () {
                     //  magasinD3.init("mainDiv",function() {
@@ -54,7 +56,10 @@ var mainController = (function () {
                     "           <br> <div></div><img src=\"images/photoBaillet.jpg\" width='800px'></div>" +
                     "            </div>");
                 $("#dialogDiv").dialog("open");
-            }
+
+
+        }
+
 
 
         });

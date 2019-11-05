@@ -471,21 +471,8 @@
             });
 
 
-            /*$("#loginDialogDiv").dialog({
-                autoOpen: false,
-                modal: true,
-                buttons: {
-                    "OK": function () {
-                        mainController.logon();
-                    },
-                    "Fermer": function () {
-                        $(this).dialog("close");
-                    }
-                }
-            });*/
 
 
-            if (false) {
 
                 authentication.init(true, function (err, result) {
 
@@ -493,10 +480,8 @@
                 /* $("#searchTableInput").attr("disabled", true)
                  $("#leftAccordion").css("opacity", 0.2);
                  $("#loginDialogDiv").dialog("open");*/
-            }
-            else {
-                mainController.init0();
-            }
+
+
 
 
         })
@@ -562,7 +547,7 @@
                     <button onclick="Boite.locate()">Localiser Boite</button><span id="currentMainMenuBoiteSpan"></span>
                 </div>
                 <div>
-                    <button onclick="Tablette.showCreateTableDialog()">Creer des tablettes</button><span id="currentMainMenuBoiteSpan"></span>
+                    <button id='showCreateTableButton' onclick="Tablette.showCreateTableDialog()">Creer des tablettes</button><span id="currentMainMenuBoiteSpan"></span>
                 </div>
 
 

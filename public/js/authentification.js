@@ -21,6 +21,13 @@ var authentication = (function () {
             ;
             // $("#panels").css("display", "none")
 
+        }else {
+            authentication.currentUser = {
+                identifiant: "admin",
+                login: "none",
+                groupes: "admin"
+            }
+            mainController.init0();
         }
 
     }
