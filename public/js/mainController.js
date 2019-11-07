@@ -43,9 +43,9 @@ var mainController = (function () {
                 return;
             mainController.initTablesSelects();
             mainController.loadLists();
-            if(authentication.currentUser.groupes.indexOf("admin")<0){
-                $("#showCreateTableButton").css("display","none");
-
+            if(authentication.currentUser.groupes.indexOf("admin")<0) {
+                $("#showCreateTableButton").css("display", "none");
+            }
                 self.showInMainDiv("graph");
                 magasinD3.init("graphWrapperDiv", function () {
                     //  magasinD3.init("mainDiv",function() {
@@ -58,7 +58,7 @@ var mainController = (function () {
                 $("#dialogDiv").dialog("open");
 
 
-        }
+
 
 
 

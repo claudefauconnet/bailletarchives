@@ -651,26 +651,29 @@ var Tablette = (function () {
                 "tablettes": {
                     "type": "object",
                     "name": "tablettes",
-                    "title": " creer tablettes",
+                    "title": " creer des tablettes",
                     "properties": {
-                        "magasin": {
+                        "magasinEpiTravee": {
                             "type": "string",
-                            "title": "magasin",
+                            "title": "magasin, epi ou travee",
                             "required": true
                         },
                         "nbEpis": {
                             "type": "integer",
                             "title": "nbre d'épis",
-                            "required": true
+                            "required": true,
+                            "default":1
                         }, "nbTravees": {
                             "type": "integer",
                             "title": "nbre de travées/epi",
-                            "required": true
+                            "required": true,
+                            "default":1
                         },
                         "nbTablettes": {
                             "type": "integer",
                             "title": "nbre de tablettes/travee",
-                            "required": true
+                            "required": true,
+                            "default":1
                         },
                         "largeurTablette": {
                             "type": "number",
@@ -699,34 +702,108 @@ var Tablette = (function () {
         self.createTablettes = function (err, data) {
             $("#dialog3Div").dialog('close');
             if (err)
-                return
+                return;
 
-            if (magasinD3.magasins.indexOf(data.tablettes.magasin) > -1)
-                return alert("Le magasin " + data.tablettes.magasin + " existe déjà")
-            var insertStr = "insert into magasin (coordonnees,DimTabletteMLineaire,magasin,epi,travee,tablette) values \n";
-            for (var i = 1; i < data.tablettes.nbEpis + 1; i++) {
-                for (var j = 1; j < data.tablettes.nbTravees + 1; j++) {
-                    for (var k = 1; k < data.tablettes.nbTablettes + 1; k++) {
-                        var epiStr =data.tablettes.magasin+"-"+( i < 10 ? ("0" + i) : ("" + i));
-                        var traveeStr =epiStr+"-"+(j < 10 ? ("0" + j) : ("" + j));
-                        var tabletteStr = traveeStr+"-"+("" + k);
-                        var coordonnees = tabletteStr;
+           var array= data.tablettes.magasinEpiTravee.split("-");
 
-                        insertStr += "('" + coordonnees + "'," + data.tablettes.largeurTablette +",'" + data.tablettes.magasin+ "','" + epiStr + "','" + traveeStr + "','" + tabletteStr + "'),\n"
+          if(array.length==0 || array.length>3)
+              return alert("saisie incorrecte:magasinEpiTravee");
 
-                    }
+          var i=0;
+          var startingElt=null;
+          async.eachSeries(array,function(line,callbackEach){
+              var sql="select * from magasin where " ;
+              if( i==0)
+                  sql+=" magasin='"+array[i]+"'";
+              if( i==1)
+                  sql+=" epi='"+array[0]+"-"+array[1]+"'";
+              if( i==2)
+                  sql+=" travee='"+array[0]+"-"+array[1]+"-"+array[2]+"'";
+              i++;
 
-                }
+              mainController.execSql(sql, function(err,result) {
+                  if (err)
+                      return callbackEach(err)
+                  if (result.length == 0)
+                     return callbackEach()
 
-            }
-            insertStr=insertStr.substring(0,(insertStr.length-2))
-            mainController.execSql(insertStr, function (err, result) {
-                if (err)
-                    return alert(err.toString())
-                return alert("tablettes créees rechergez la page pour les voir apparaitre")
+                  startingElt={sql:sql,result:result[0]}
+                  return callbackEach()
+                      })
+
+
+
+
+
+          },function(err){
+              if(err){
+                  if(err=="new")
+                      startingElt=null;
+                  else alert(err.responseText)
+
+              }
+
+
+              var startingMagasin=0;
+              var  startingEpi=0;
+              var startingTravee=0;
+              if(startingElt!=null){
+                  var array=startingElt.result.coordonnees.split("-");
+                  startingMagasin=array[0];
+
+
+                  if(startingElt.sql.indexOf("magasin=")>-1)
+                      startingEpi=parseInt(array[1])
+                  else if(startingElt.sql.indexOf("epi=")>-1){
+                   //   startingEpi=parseInt(array[1])
+                      startingTravee=parseInt(array[2])+1
+                  }
+              }
+              else{
+                  startingMagasin= data.tablettes.magasinEpiTravee;
+              }
+
+              if (magasinD3.magasins.indexOf(data.tablettes.magasin) > -1)
+                  return alert("Le magasin " +startingMagasin  + " existe déjà")
+              var insertStr = "insert into magasin (coordonnees,DimTabletteMLineaire,magasin,epi,travee,tablette) values \n";
+              for (var i = 1; i < data.tablettes.nbEpis + 1; i++) {
+                  var iepi=startingEpi+i;
+                  for (var j = 1; j < data.tablettes.nbTravees + 1; j++) {
+                      var jtravee=startingTravee+j;
+                      for (var k = 1; k < data.tablettes.nbTablettes + 1; k++) {
+                          var epiStr =startingMagasin+"-"+( iepi < 10 ? ("0" + iepi) : ("" + iepi));
+                          var traveeStr =epiStr+"-"+(jtravee < 10 ? ("0" + jtravee) : ("" + jtravee));
+                          var tabletteStr = traveeStr+"-"+("" + k);
+                          var coordonnees = tabletteStr;
+
+                          insertStr += "('" + coordonnees + "'," + data.tablettes.largeurTablette +",'" + startingMagasin+ "','" + epiStr + "','" + traveeStr + "','" + tabletteStr + "'),\n"
+
+                      }
+
+                  }
+
+              }
+              insertStr=insertStr.substring(0,(insertStr.length-2))
+              mainController.execSql(insertStr, function (err, result) {
+                  if (err)
+                      return alert(err.toString())
+                  return alert("tablettes créees rechargez la page pour les voir apparaitre")
+
+
+              })
+
+
 
 
             })
+
+
+
+
+
+
+
+
 
 
         }
