@@ -9,8 +9,7 @@ var listController = (function () {
         sql = sql.replace(/%/g, '+"');
         try {
             return eval(sql);
-        }
-        catch (e) {
+        } catch (e) {
             return console.log(e);
         }
     }
@@ -43,8 +42,7 @@ var listController = (function () {
 
             if (relations[context.currentTable]) {
                 joinObj = relations[context.currentTable].joinObj;
-            }
-            else {
+            } else {
                 return mainController.setErrorMessage("jointure impossible entre les tables " + table + " et " + joinTable)
             }
         }
@@ -59,12 +57,9 @@ var listController = (function () {
 
             if (operator == "LIKE") {
                 value = "'%" + value + "%'"
-            }
-            else if (operator == "NOT LIKE") {
+            } else if (operator == "NOT LIKE") {
                 value = "'%" + value + "%'"
-            }
-
-            else {
+            } else {
                 var type = mainController.getFieldType(table, column);
                 if (type == "string")
                     value = "'" + value + "'";
@@ -75,8 +70,7 @@ var listController = (function () {
                             value = "" + (parseInt(value) + 1) + "/01/01";
                         else
                             value = value + "/01/01";
-                    }
-                    else if (parts.length == 2)
+                    } else if (parts.length == 2)
                         value = value + "/01";
                     else if (parts.length > 3 || parts.length < 1)
                         return mainController.setErrorMessage("format de date invalide :format attendu AAAA/MM/JJ")
@@ -93,10 +87,9 @@ var listController = (function () {
 
         }
         if (operator == "EMPTY") {
-            whereStr=  column+" is null or "+column+" =''"
-        }
-        else  if (operator == "NOT EMPTY") {
-            whereStr=  column+" is not null and "+column+" !=''"
+            whereStr = column + " is null or " + column + " =''"
+        } else if (operator == "NOT EMPTY") {
+            whereStr = column + " is not null and " + column + " !=''"
         }
 
         if (whereStr != "") {
@@ -244,8 +237,7 @@ var listController = (function () {
             editableColumns = relations[linkedTable].editableColumns;
             definedColumns = relations[linkedTable].columns;
             order = relations[linkedTable].order;
-        }
-        else {
+        } else {
             context.currentLinkedTable = {};
         }
 
@@ -382,16 +374,16 @@ var listController = (function () {
 
             if (data != null && data != line[colName] && confirm("modifier " + colName + " : " + colName)) {
 
-                    line[colName] =  data.trim()
+                line[colName] = data.trim()
 
 
-                data=recordController.escapeMySqlChars(data);
+                data = recordController.escapeMySqlChars(data);
                 var sql = "update  " + linkedTable + " set " + colName + "='" + data + "' where id=" + line.id;
                 mainController.execSql(sql, function (err, result) {
                     if (err)
                         return console.log(err);
                     if (editableColumns[colName].callback) {
-                        editableColumns[colName].callback(line,datatable,rowIndex,colIndex)
+                        editableColumns[colName].callback(line, datatable, rowIndex, colIndex)
                     }
 
 
@@ -499,6 +491,31 @@ var listController = (function () {
 
         }
 
+    }
+
+    self.locateBySql = function (sql) {
+
+        mainController.execSql(sql, function (err, json) {
+            if (err)
+                return $("#messageDiv").html(err);
+            if (json.length == 0)
+                return $("#messageDiv").html("pas de resultat");
+            var highlighted = [];
+            var zoomLevel = json.length > 1 ? 0.2 : 1;
+            var nature = null;
+            json.forEach(function (line) {
+                if (context.currentTable == "versement") {
+                    highlighted.push(new RegExp(line.numVersement + "\\/\\d+"))
+                    nature = "boite";
+                } else if (context.currentTable == "magasin") {
+                    highlighted.push(line.coordonnees);
+                    nature = "tablette";
+                }
+
+            })
+            magasinD3.locate(nature, "name", highlighted, zoomLevel)
+
+        })
     }
 
 

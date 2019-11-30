@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+<body>
+
+
+<script>
+
+    var size = 1000;
+    var height = 500;
+    var width = 960;
+    var i = 0;
+
+    var data = d3.range(size)
+        .map(function() {
+            return {
+                r: Math.floor(Math.random() * 8 + 2),
+                x: Math.floor(Math.random() * width),
+                y: Math.floor(Math.random() * height),
+                i: i++
+            };
+        });
+
+    var ease = d3.ease('cubic-in-out');
+    var duration = 1000;
+    var delay = function(d){
+        return d.i;
+    }
+    var maxDelay = 0;
+    var timeScale = d3.scale.linear()
+        .domain([0, duration])
+        .range([0,1]);
+
+    data.forEach(function(d){
+        d.trans = {
+            i: d3.interpolate(height, d.y),
+            delay: delay(d)
+        };
+        if (d.trans.delay > maxDelay) {
+            maxDelay = d.trans.delay;
+        }
+    });
+    var renderTime = 0;
+    d3.timer(moveCircles);
+
+    var canvas = d3.select('body')
+        .append('canvas')
+        .attr({
+            height: height,
+            width: width
+        });
+
+    canvas.on('mousemove', clicked);
+    canvas.on('mouseout', drawCircles);
+
+    var context = canvas.node()
+        .getContext("2d");
+
+    function moveCircles(t) {
+        data.forEach(function(d){
+            var time = ease(timeScale(t - d.trans.delay));
+            d.y = d.trans.i(time);
+        });
+        drawCircles();
+        if(t >= duration + maxDelay){
+            console.log('Render time:', renderTime);
+            return true;
+        }
+    }
+
+    function drawCircles(point) {
+        var start = new Date();
+        context.clearRect(0, 0, width, height);
+        fill = point ? "#e4e5e5" : "steelblue";
+        data.forEach(function(d) {
+            if (d === point) {
+                context.fillStyle = 'steelblue';
+            } else {
+                context.fillStyle = fill;
+            }
+            context.beginPath();
+            context.moveTo(d.x, d.y);
+            context.arc(d.x, d.y, d.r, 0, 2 * Math.PI);
+            context.fill();
+        });
+        var end = new Date();
+        renderTime += (end-start);
+    }
+
+    function clicked() {
+        var point = d3.mouse(this);
+        var node;
+        var minDistance = Infinity;
+        var start = new Date();
+        data.forEach(function(d) {
+            var dx = d.x - point[0];
+            var dy = d.y - point[1];
+            var distance = Math.sqrt((dx * dx) + (dy * dy));
+            // if (distance < d.r) {
+            // if (distance < minDistance) {
+            if (distance < minDistance && distance < d.r + 10) {
+                // drawCircles(d);
+                minDistance = distance;
+                node = d;
+            }
+        });
+        var end = new Date();
+        console.log('Calc Time:', end-start);
+        drawCircles(node);
+    }
+
+</script>
+
+
+</html>

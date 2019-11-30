@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="js/jquery/jquery.min.js"></script>
+    <script src="js/d3/d3.v5.js" charset="utf-8"></script>
+    <script src="js/magasinsD3Canvas.js"></script>
+</head>
+<body>
+<span id="magasinButtonsDiv"></span>&nbsp;<span id="graphInfos"></span>
+<div id="graphDiv" style="width:1000px;height: 1000px"></div>
+</body>
+
+<script>
+    magasinsD3Canvas.drawAll();
+
+function old() {
+    var totalWidth = 1000;//$("#graphDiv").width();
+    var totalHeight =1000// $("#graphDiv").height();
+
+    var allRects = [];
+    var currentZoomTransform = 1;
+
+    function prepareData(data) {
+        var magW = totalWidth / 10;
+        var magH = totalHeight / 10;
+
+        var magX = 10;
+        var magY = 10;
+        var dataMagasins = [];
+        data.children.forEach(function (magasin, indexMagasin) {
+            var rect = {
+                type: "rect",
+                x: magX,
+                y: magY,
+                h: magH,
+                w: magW,
+                color: "#e4e5e5"
+            }
+            var text = {
+                type: "text",
+                x: rect.x + (rect.w / 2),
+                y: rect.y - 20,
+                font: "20px arial",
+                text: magasin.name,
+            }
+            allRects.push({x1: rect.x, x2: rect.x + rect.w, y1: rect.y, y2: rect.y + rect.h, data: magasin})
+            dataMagasins.push(rect);
+            dataMagasins.push(text);
+            magX += magW + 10;
+
+        })
+
+        return {magasins: dataMagasins}
+    }
+
+    function bindMagasins(data, custom) {
+        var join = custom.selectAll('custom.rect')
+            .data(data);
+
+        var enterSel = join.enter()
+            .append('custom')
+            .attr('class', 'rect')
+            .attr('x', function (d, i) {
+                return d.x;
+            })
+            .attr('y', function (d, i) {
+                return d.y;
+            })
+            .attr('width', function (d, i) {
+                return d.w
+            })
+            .attr('height', function (d, i) {
+                return d.h
+            })
+            .attr('fillStyle', function (d) {
+                return d.color
+            })
+
+    }
+
+    function clicked() {
+        var point = d3.mouse(this);
+        point[0] = (point[0] - currentZoomTransform.x) / currentZoomTransform.k
+        point[1] = (point[1] - currentZoomTransform.y) / currentZoomTransform.k
+
+
+        var node;
+        allRects.forEach(function (rect) {
+            if (rect.x1 < point[0] && rect.x2 > point[0]) {
+                if (rect.y1 < point[1] && rect.y2 > point[1]) {
+                    return node = rect.data;
+                }
+            }
+        })
+
+
+    }
+
+
+    drawAll = function (options, callback) {
+
+
+        var canvas = d3.select('#graphDiv')
+            .append('canvas')
+            .attr('width', totalWidth)
+            .attr('height', totalHeight);
+
+        canvas.on('mousedown', clicked);
+
+        var context = canvas.node().getContext('2d');
+        var customBase = document.createElement('custom');
+        var custom = d3.select(customBase); // this is our svg replacement
+
+
+        d3.select(context.canvas).call(d3.zoom()
+            .scaleExtent([0.2, 3])
+            .on("zoom", () => zoomed(d3.event.transform)));
+
+
+        function draw() {
+            var elements = custom.selectAll('custom.rect') // this is the same as the join variable, but used here to draw
+
+            elements.each(function (d, i) {
+
+                // for each virtual/custom element...
+                if (d.type == "rect") {
+                    var node = d3.select(this);
+                    context.fillStyle = node.attr('fillStyle');
+                    context.fillRect(node.attr('x'), node.attr('y'), node.attr('width'), node.attr('height'))
+                } else if (d.type = "text") {
+                    context.font = d.font;
+                    context.fillText(d.text, d.x, d.y);
+                }
+            });
+        }
+
+
+        function zoomed(transform) {
+            context.save();
+            context.clearRect(0, 0, totalWidth, totalWidth);
+            context.translate(transform.x, transform.y);
+            context.scale(transform.k, transform.k);
+            currentZoomTransform = transform
+            draw();
+            /*   context.beginPath();
+               for (const [x, y] of data) {
+                   context.moveTo(x + r, y);
+                   context.arc(x, y, r, 0, 2 * Math.PI);
+               }*/
+            context.fill();
+            context.restore();
+        }
+
+        zoomed(d3.zoomIdentity);
+
+
+        d3.json("./magasinD3Tree", function (data) {
+            var data = prepareData(data);
+            bindMagasins(data.magasins, custom);
+
+
+            // clear canvas
+            context.fillStyle = '#fff';
+            context.fillRect(0, 0, totalWidth, totalHeight);
+            draw();
+
+            // draw each individual custom element with their properties
+
+
+        })
+    }
+    drawAll();
+}
+
+</script>
+
+
+</html>

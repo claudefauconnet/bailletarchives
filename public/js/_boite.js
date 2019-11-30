@@ -56,7 +56,7 @@ var Boite = (function () {
             boite = prompt("boite :")
         if (boite && boite != "") {
             $("#currentMainMenuBoiteSpan").html(boite)
-            magasinD3.locate("boite", "id", [boite], 1);
+            magasinD3.locate("boite", "name", [boite], 1);
             mainController.showInMainDiv('graph');
         }
 

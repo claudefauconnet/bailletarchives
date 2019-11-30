@@ -43,23 +43,19 @@ var mainController = (function () {
                 return;
             mainController.initTablesSelects();
             mainController.loadLists();
-            if(authentication.currentUser.groupes.indexOf("admin")<0) {
+            if (authentication.currentUser.groupes.indexOf("admin") < 0) {
                 $("#showCreateTableButton").css("display", "none");
             }
-                self.showInMainDiv("graph");
-                magasinD3.init("graphWrapperDiv", function () {
-                    //  magasinD3.init("mainDiv",function() {
-                    $("#dialogDiv").dialog("close");
-                });
-                $("#dialogDiv").html(" <div style=\"height: 100%; display: flex;flex-direction: column; align-items: center; justify-content: center;\">" +
-                    "   <div style='font:bold 18px sans-serif;color: #5f3f3f'>Bienvenue aux archives du centre Joseph Wrésinski</div>" +
-                    "           <br> <div></div><img src=\"images/photoBaillet.jpg\" width='800px'></div>" +
-                    "            </div>");
-                $("#dialogDiv").dialog("open");
-
-
-
-
+            self.showInMainDiv("graph");
+            magasinD3.init("graphWrapperDiv", function () {
+                //  magasinD3.init("mainDiv",function() {
+                $("#dialogDiv").dialog("close");
+            });
+            $("#dialogDiv").html(" <div style=\"height: 100%; display: flex;flex-direction: column; align-items: center; justify-content: center;\">" +
+                "   <div style='font:bold 18px sans-serif;color: #5f3f3f'>Bienvenue aux archives du centre Joseph Wrésinski</div>" +
+                "           <br> <div></div><img src=\"images/photoBaillet.jpg\" width='800px'></div>" +
+                "            </div>");
+            $("#dialogDiv").dialog("open");
 
 
         });
@@ -89,7 +85,7 @@ var mainController = (function () {
         $("#locateButton").bind("click", function () {
             self.showInMainDiv("graph")
             context.currentCriteria = [];
-            listController.addSearchCriteria(Versement.locateBySql);
+            listController.addSearchCriteria(listController.locateBySql);
             context.currentCriteria = [];
 
         })
@@ -156,8 +152,7 @@ var mainController = (function () {
         if (width >= self.leftPanelWidth) {
             $("#left").width(0)
             $("#left").css("display", "none")
-        }
-        else {
+        } else {
             $("#left").width(self.leftPanelWidth)
             $("#left").css("display", "inline")
         }
@@ -231,10 +226,10 @@ var mainController = (function () {
         if (!table)
             table = context.currentTable;
 
-        var infos=null;
+        var infos = null;
         context.dataModel[table].forEach(function (field) {
             if (field.name == _field)
-                infos= field;
+                infos = field;
         })
         return infos;
 
@@ -259,8 +254,7 @@ var mainController = (function () {
         var operatorsArray = operators[type];
         try {
             self.fillSelectOptions("searchOperatorInput", operatorsArray, false)
-        }
-        catch (e) {
+        } catch (e) {
             var x = field
         }
     }
@@ -356,14 +350,10 @@ var mainController = (function () {
             // magasinD3.init("graphDiv")
             mainController.showInMainDiv("graph");
 
-        }
-
-        else if (tabName == "Versements") {
+        } else if (tabName == "Versements") {
             self.onchangeTable("versement");
             mainController.showSearchDiv("searchDiv-Versements");
-        }
-
-        else if (tabName == "Magasins") {
+        } else if (tabName == "Magasins") {
 
             self.onchangeTable("magasin");
             mainController.showSearchDiv("searchDiv-Magasin");
@@ -520,8 +510,7 @@ var mainController = (function () {
         if (type == "graph") {
             $("#graphWrapperDiv").css("display", "block");
             $("#listWrapperDiv").css("display", "none");
-        }
-        else if (type == "list") {
+        } else if (type == "list") {
             $("#graphWrapperDiv").css("display", "none");
             $("#listWrapperDiv").css("display", "block");
         }
@@ -532,8 +521,7 @@ var mainController = (function () {
         var html = $("#mainDiv").html();
         if (html.indexOf("graphDiv") > -1) {
             context.hiddenMainDivContent["graph"] = $("#graphDiv").detach();
-        }
-        else {
+        } else {
             context.hiddenMainDivContent["list"] = $("#table_mainDiv_wrapper").detach();
         }
 
@@ -552,6 +540,8 @@ var mainController = (function () {
     }
 
 
-    return self;
 
-})();
+        return self;
+
+    }
+)();

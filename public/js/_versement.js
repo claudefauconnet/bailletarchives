@@ -106,61 +106,14 @@ var Versement = (function () {
 
         self.locateCurrentVersement = function () {
             $("#dialogDiv").dialog("close");
-            mainController.showInMainDiv("graph")
-            self.locateByNumVersement(context.currentRecord.numVersement);
-        }
-
-        self.locateByNumVersement = function (_numVersement) {
-            $("#popupD3Div").css("visibility", "hidden")
-            var boites = [];
-            d3.selectAll(".boite").each(function (d, i) {
-                var boiteD3 = d3.select(this)
-                var numVersement = boiteD3.attr("numVersement");
-                if (!numVersement)
-                    numVersement = boiteD3.attr("numversement");
-                if (_numVersement == numVersement) {
-                    boites.push(boiteD3.attr("name"))
-                }
-
-            })
-
-            magasinD3.locate("boite", "id", boites, 1);
-        }
-
-        self.locateBySql = function (sql) {
-
-            mainController.execSql(sql, function (err, json) {
-                if (json.length > config.maxVersementsToLocate) {
-                    return mainController.setMessage("trop de résultats :" + json.length + " précisez la requête");
-                }
-
-                var numVersements = [];
-                json.forEach(function (line) {
-                    numVersements.push(line.numVersement);
-                })
-                var found = 0;
-                var firstBoiteName = ""
-                var coordonnees = "";
-                var boites = [];
-
-                $("#popupD3Div").css("visibility", "hidden")
-                d3.selectAll(".boite").each(function (d, i) {
-                    var boiteD3 = d3.select(this)
-                    var numVersement = boiteD3.attr("numVersement");
-                    if (!numVersement)
-                        numVersement = boiteD3.attr("numversement");
-                    if (numVersements.indexOf(numVersement) > -1) {
-                        boites.push(boiteD3.attr("name"))
-                    }
-
-                })
-
-                magasinD3.locate("boite", "id", boites, 1);
-
-
-            })
+            mainController.showInMainDiv("graph");
+            var highlighted = [new RegExp(context.currentRecord.numVersement + "\\/\\d+")]
+            magasinD3.locate("boite", "name", highlighted, 1.0)
 
         }
+
+
+
         self.showDialogEntrerVersement = function () {
 
 
@@ -717,65 +670,64 @@ var Versement = (function () {
 
 
             async.series([
-                function(callbackSeries) {
+                    function (callbackSeries) {
 
-                    if (!tabletteDebutCoord || tabletteDebutCoord == "") {// chercher des tablettes depusi le début au à partir de coteDebutIndex)
-                        return callbackSeries();
-                    }
-                    var obj = {metrage: params.metrage, magasin: params.magasin}
-                    var sql = "select magasin.* from magasin where coordonnees='" + tabletteDebutCoord + "'"
-                    //il peut y avoir plusieurs versement sur les memes coordonnées donc plusieurs id magasin correspondant
-
-                    mainController.execSql(sql, function (err, result) {
-                        if (err)
-                            return alert(err)
-                        if (result.length == 0)
-                            return alert("cette tablette n'existe pas")
-                        var tabletteCible = result[0];
-
-                        // tablette deja occupee
-                        if (tabletteCible.id_versement && tabletteCible.id_versement != "") {
-                            var metrageOccupe = 0;
-                            if (tabletteCible.cotesParTablette)
-                                metrageOccupe = (tabletteCible.cotesParTablette.split(" ").length) * config.tailleMoyenneBoite;
-
-
-                            // petites versements à mettre sur la meme tablette: duplication des coordonnées de tablette dans deux entrees magasin (marge margeAjoutVersementSurTabletteOccupee)
-                            if ((tabletteCible.DimTabletteMLineaire - metrageOccupe) > (obj.metrage + config.margeAjoutVersementSurTabletteOccupee)) {
-                                if (confirm("cette tablette est déja occupée  mais peut accueillir ce versement, confirmer l'ajout")) {
-                                    Tablette.splitTablette(tabletteCible.coordonnees, function (err, newTabletteId) {
-                                        Versement.entrerVersement({useTabletteId: newTabletteId});
-                                    })
-
-                                } else {
-                                    alert("cherchez un autre emplacement...")
-
-                                }
-                            } else
-                              alert(" pas assez de place sur cette tablette pour y ajouter le versement");
-
+                        if (!tabletteDebutCoord || tabletteDebutCoord == "") {// chercher des tablettes depusi le début au à partir de coteDebutIndex)
                             return callbackSeries();
-
-
                         }
-                        else{
+                        var obj = {metrage: params.metrage, magasin: params.magasin}
+                        var sql = "select magasin.* from magasin where coordonnees='" + tabletteDebutCoord + "'"
+                        //il peut y avoir plusieurs versement sur les memes coordonnées donc plusieurs id magasin correspondant
 
-                            magasinD3.chercherTablettesPourVersement(obj, tabletteCible.coordonnees, function (err, result) {
-                                if (err)
-                                    return alert(err);
-                                useTablette(result)
+                        mainController.execSql(sql, function (err, result) {
+                            if (err)
+                                return alert(err)
+                            if (result.length == 0)
+                                return alert("cette tablette n'existe pas")
+                            var tabletteCible = result[0];
+
+                            // tablette deja occupee
+                            if (tabletteCible.id_versement && tabletteCible.id_versement != "") {
+                                var metrageOccupe = 0;
+                                if (tabletteCible.cotesParTablette)
+                                    metrageOccupe = (tabletteCible.cotesParTablette.split(" ").length) * config.tailleMoyenneBoite;
+
+
+                                // petites versements à mettre sur la meme tablette: duplication des coordonnées de tablette dans deux entrees magasin (marge margeAjoutVersementSurTabletteOccupee)
+                                if ((tabletteCible.DimTabletteMLineaire - metrageOccupe) > (obj.metrage + config.margeAjoutVersementSurTabletteOccupee)) {
+                                    if (confirm("cette tablette est déja occupée  mais peut accueillir ce versement, confirmer l'ajout")) {
+                                        Tablette.splitTablette(tabletteCible.coordonnees, function (err, newTabletteId) {
+                                            Versement.entrerVersement({useTabletteId: newTabletteId});
+                                        })
+
+                                    } else {
+                                        alert("cherchez un autre emplacement...")
+
+                                    }
+                                } else
+                                    alert(" pas assez de place sur cette tablette pour y ajouter le versement");
+
                                 return callbackSeries();
-                            })
-                        }
-                    })
-                },
 
 
-                // cas recherche sans tablette initiale et avec ou sans magasin
-                function(callbackSeries){
+                            } else {
 
-                    if (tabletteDebutCoord  && tabletteDebutCoord != "")
-                        return callbackSeries();
+                                magasinD3.chercherTablettesPourVersement(obj, tabletteCible.coordonnees, function (err, result) {
+                                    if (err)
+                                        return alert(err);
+                                    useTablette(result)
+                                    return callbackSeries();
+                                })
+                            }
+                        })
+                    },
+
+
+                    // cas recherche sans tablette initiale et avec ou sans magasin
+                    function (callbackSeries) {
+
+                        if (tabletteDebutCoord && tabletteDebutCoord != "")
+                            return callbackSeries();
 
                         var obj = {metrage: params.metrage, magasin: params.magasin}
                         magasinD3.chercherTablettesPourVersement(obj, null, function (err, result) {
@@ -788,17 +740,12 @@ var Versement = (function () {
                     }
 
 
-
-
-            ],function(err) {
-            }
+                ], function (err) {
+                }
             )
 
 
-
-            }
-
-
+        }
 
 
         self.getBoiteVersement = function (boite, callback) {
