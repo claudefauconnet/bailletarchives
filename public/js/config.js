@@ -75,7 +75,7 @@ var config = (function () {
                     selectfields: ["coordonnees"],
                     //  onRowClickedFn:Versement.onDataTableRowClicked,
                     editableColumns: {commentaire: {}},
-                    columns: ["etat", "etatAuteur", "etatDate", "commentaire", "dateModification"],
+                    columns: ["etat", "etatAuteur", "etatDate", "commentaire"],
                     // order: [[2, 'desc']]
 
                 },
