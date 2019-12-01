@@ -69,7 +69,7 @@ var Retraitement = (function () {
                         })
                     }
                     var options = {filter: {travees: travees}}
-                    magasinD3.drawMagasins(options);
+                   magasinD3.drawAll();
                     callbackSeries();
                 }
                 //mise à jour record form

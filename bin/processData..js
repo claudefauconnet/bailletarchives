@@ -82,7 +82,7 @@ var whereStr="";
                         isEmpty: isEmpty,
                         indisponible: (line.indisponible ? (line.commentaires || "indisponible") : null),
                         avecVersementSanscotes: avecVersementSanscotes,
-                        avecCotesSansVersement, avecCotesSansVersement,
+                        avecCotesSansVersement: avecCotesSansVersement,
                         versements:[line.numVersement]
                     }
                 }else{

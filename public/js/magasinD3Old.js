@@ -96,7 +96,7 @@ var magasinD3 = (function () {
 
         $('#' + containerDiv).css("font-size", "10px");
 
-            magasinsD3Canvas.drawAll({onclickFn:magasinD3.onCanvasClick},function(err, result){
+           magasinD3.drawAll({onclickFn:magasinD3.onCanvasClick},function(err, result){
                 $("#magasinD3MessageDiv").html("")
                magasinsD3Canvas.zoomOnMagasin("tous")
                 if (callback)
@@ -265,7 +265,7 @@ var magasinD3 = (function () {
         var endTime = new Date();
 
         $("#magasinD3MessageDiv").html("Chargement du graphe en cours...")
-        magasinD3.drawMagasins(null, function () {
+       magasinD3.drawAll(null, function () {
             $("#magasinD3MessageDiv").html("")
 
          //   self.initialZoom();

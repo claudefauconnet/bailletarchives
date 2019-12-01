@@ -17,25 +17,29 @@ var Tablette = (function () {
                 if (!tabletteObj)
                     return alert("Tablette non trouvée :" + coordonneesTablette)
                 obj = tabletteObj;
+                self.currentTablette = tabletteObj;
                 $("#currentMainMenuTabletteSpan").html(coordonneesTablette)
-            }
 
+            }
 
             if (obj.avecVersementSanscotes) {
                 html += " <option></option>" +
                     "<option value='releaseTablette'> liberer tablette</option>" +
                     "<option value='commentaire'> commentaire...</option>" +
+                    "<option value='createUnder'> creer nouvelle</option>" +
                     "<option value='voirVersement'> voir versement</option>"
             } else if (obj.avecCotesSansVersement) {
                 html += " <option></option>" +
                     "<option value='releaseTablette'> liberer tablette</option>" +
                     "<option value='voirTablette'> voir tablette...</option>" +
+                    "<option value='createUnder'> creer nouvelle</option>" +
                     "<option value='commentaire'> commentaire...</option>"
                 //   "<option value='entrerVersementExistant'> entrer versement existant</option>" +
             } else if (obj.indisponible) {
                 html += " <option></option>" +
-                    "<option value='voirTablette'> voir tablette...</option>" +
                     "<option value='releaseTablette'> liberer tablette</option>" +
+                    "<option value='voirTablette'> voir tablette...</option>" +
+                    "<option value='createUnder'> creer nouvelle</option>" +
                     "<option value='commentaire'> commentaire...</option>"
             } else {
                 html += " <option></option>" +
@@ -46,8 +50,8 @@ var Tablette = (function () {
                     "<option value='createUnder'> creer nouvelle</option>" +
                     /* "<option value='split'> diviser </option>" +*/
                     "<option value='delete'> supprimer </option>" +
-                    "<option value='commentaire'> commentaire...</option>" +
-                    "<option value='reDrawTravees'>reDrawTravees</option>"
+                    "<option value='commentaire'> commentaire...</option>"
+
             }
             if (obj.prompt)
                 html += "<option value='locate'> localiser</option>"
@@ -58,11 +62,8 @@ var Tablette = (function () {
         self.onTabletteOperationSelect = function (select) {
             var operation = $(select).val();
 
-            if (operation == "reDrawTravees") {
-                magasinD3.reDrawTravees("B-05-03")
-            }
-            /*  $("#popupD3Div").css("visibility","hidden");
-              $("#select").val("");*/
+
+
             if (operation == "commentaire") {
                 var oldCommentaires = magasinD3.currentTablette.commentaires
                 var commentaire = prompt("entrer un commentaire pour la  tablette " + magasinD3.currentTablette.name, oldCommentaires);
@@ -75,7 +76,7 @@ var Tablette = (function () {
                         $("#popupD3Div").css("visibility", "hidden");
                         var d3Id = magasinD3.currentTablette.d3Id;
                         var options = {filter: {tablettes: [magasinD3.currentTablette.d3Id]}}
-                        magasinD3.drawMagasins(options);
+                       magasinD3.drawAll();
 
                     })
                 }
@@ -98,6 +99,7 @@ var Tablette = (function () {
                 } else {
                     context.currentTable = "magasin";
                     mainController.showNewRecordDialog();
+                    magasinD3.drawAll()
                 }
                 $("#popupD3Div").css("visibility", "hidden");
             } else if (operation == "split") {
@@ -116,7 +118,7 @@ var Tablette = (function () {
                             return mainController.setErrorMessage(err);
                         var coordonneesObj = self.getCoordonneesElements(magasinD3.currentTablette.name);
                         var options = {filter: {travees: [coordonneesObj.travee]}}
-                        magasinD3.drawMagasins(options);
+                       magasinD3.drawAll();
                         $("#popupD3Div").css("visibility", "hidden");
 
                     })
@@ -147,7 +149,7 @@ var Tablette = (function () {
                             return mainController.setErrorMessage(err);
 
                         var options = {filter: {travees: [coordonneesObj.travee]}}
-                        magasinD3.drawMagasins(options);
+                       magasinD3.drawAll();
                         $("#popupD3Div").css("visibility", "hidden");
 
                     })
@@ -160,7 +162,7 @@ var Tablette = (function () {
                                 mainController.setErrorMessage(err);
                             var coordonneesObj = Tablette.getCoordonneesElements(magasinD3.currentTablette.name);
                             var options = {filter: {travees: [coordonneesObj.travee]}}
-                            magasinD3.drawMagasins(options);
+                           magasinD3.drawAll();
                             $("#popupD3Div").css("visibility", "hidden");
                         }
                     )
@@ -197,7 +199,7 @@ var Tablette = (function () {
             }
 
             $('#operationTabletteSelect').find('option').remove().end()
-
+            $("#popupD3Div").css("visibility","hidden")
 
         }
 
@@ -258,7 +260,7 @@ var Tablette = (function () {
                       return mainController.setErrorMessage(err);
                   }
                   $("#popupD3Div").css("visibility", "hidden");
-                  magasinD3.drawMagasins();
+                 magasinD3.drawAll();
               })*/
 
         }
@@ -281,7 +283,7 @@ var Tablette = (function () {
                     return mainController.setErrorMessage(err);
                 }
                 $("#popupD3Div").css("visibility", "hidden");
-                //   magasinD3.drawMagasins()
+                //  magasinD3.drawAll()
             })
 
         }
@@ -301,7 +303,7 @@ var Tablette = (function () {
                     return mainController.setErrorMessage(err);
                 }
                 $("#popupD3Div").css("visibility", "hidden");
-                //  magasinD3.drawMagasins()
+                // magasinD3.drawAll()
             })
         }
 
@@ -410,16 +412,16 @@ var Tablette = (function () {
             var idMagasin = options.currentRecord.id;
             var coordonnees = options.changes.coordonnees || options.currentRecord.coordonnees;
             var coordonneesObj = self.getCoordonneesElements(coordonnees);
-            options.currentRecord.magasin = coordonneesObj.magasin;
+          /*  options.currentRecord.magasin = coordonneesObj.magasin;
             options.currentRecord.epi = coordonneesObj.epi;
             options.currentRecord.travee = coordonneesObj.travee;
-            options.currentRecord.tablette = coordonneesObj.tablette;
+            options.currentRecord.tablette = coordonneesObj.tablette;*/
             var sql = "update magasin set magasin='" + coordonneesObj.magasin + "',epi='" + coordonneesObj.epi + "',travee='" + coordonneesObj.travee + "',tablette='" + coordonneesObj.tablette + "' where id=" + idMagasin;
             mainController.execSql(sql, function (err, result) {
                 if (err)
                     return mainController.setErrorMessage(err);
-                var options = {filter: {travees: [coordonneesObj.travee]}}
-                magasinD3.drawMagasins(options);
+               magasinD3.drawAll();
+                recordController.currentRecordChanges = {};
 
             });
 
@@ -443,10 +445,9 @@ var Tablette = (function () {
             return obj;
 
         }
-        self.releaseTablettes = function (tablettesCoordonnees, callback) {
-            if (!Array.isArray(tablettesCoordonnees))
-                tablettesCoordonnees = [tablettesCoordonnees];
-            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees in (" + tablettesCoordonnees.toString() + ")";
+        self.releaseTablettes = function (tabletteCoordonnees, callback) {
+
+            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees in ('" + tabletteCoordonnees+ "')";
             mainController.execSql(sql, function (err, result) {
                 if (err)
                     mainController.setErrorMessage(err);
@@ -474,7 +475,7 @@ var Tablette = (function () {
             function updateGraph() {
                 var coordonneesObj = Tablette.getCoordonneesElements(tablette.coordonnees);
                 var options = {filter: {travees: [coordonneesObj.travee]}}
-                magasinD3.drawMagasins(options);
+               magasinD3.drawAll(options);
             }
 
             if (tablette.cotesParTablette == "" && confirm("liberer la tablette (supprimer le lien avec le versement")) {
@@ -519,7 +520,7 @@ var Tablette = (function () {
                             return callback(err, result.insertId);
 
                         /*    var options = {filter: {travees: [coordonneesObj.travee]}}
-                            magasinD3.drawMagasins(options);*/
+                           magasinD3.drawAll(options);*/
                         $("#popupD3Div").css("visibility", "hidden");
 
 

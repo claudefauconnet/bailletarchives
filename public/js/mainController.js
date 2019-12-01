@@ -47,8 +47,7 @@ var mainController = (function () {
                 $("#showCreateTableButton").css("display", "none");
             }
             self.showInMainDiv("graph");
-            magasinD3.init("graphWrapperDiv", function () {
-                //  magasinD3.init("mainDiv",function() {
+            magasinD3.drawAll("graphWrapperDiv", function () {
                 $("#dialogDiv").dialog("close");
             });
             $("#dialogDiv").html(" <div style=\"height: 100%; display: flex;flex-direction: column; align-items: center; justify-content: center;\">" +
@@ -347,7 +346,6 @@ var mainController = (function () {
 
     self.onChangeMainAccordionTab = function (tabName) {
         if (tabName == "Accueil") {
-            // magasinD3.init("graphDiv")
             mainController.showInMainDiv("graph");
 
         } else if (tabName == "Versements") {
@@ -528,8 +526,7 @@ var mainController = (function () {
 
         if (type == "graph" && context.hiddenMainDivContent["graph"]) {
             context.hiddenMainDivContent["graph"].appendTo($("#mainDiv"))
-            magasinD3.clearHighlights();
-            magasinD3.initialZoom();
+
         }
         if (type == "list" && context.hiddenMainDivContent["list"]) {
             context.hiddenMainDivContent["list"].appendTo($("#mainDiv"))

@@ -395,31 +395,15 @@
                 modal: true,
 
 
-                /* buttons: {
-                     Fermer: {
-                       //  class: 'dialogButton',
-                         text:" Fermer",
-                        click: function () {
 
-                             dialog.dialog("close");
-                             $("#dialogD3").dialog("close");
-                             if (context.redrawMagasinD3) {
-                                 context.redrawMagasinD3 = null;
-                               //  magasinD3.drawMagasins()
-                             }
-
-                         }
-                     }
-                 },*/
                 open:function(){
                     $(".ui-dialog .ui-dialog-titlebar").css("display","none")
                 },
               close: function () {
 
-                 //   $("#dialogDiv").dialog("close");
+
                     if (context.redrawMagasinD3) {
                         context.redrawMagasinD3 = null;
-                        //  magasinD3.drawMagasins()
                     }
                     if(Object.keys(recordController.currentRecordChanges).length>0)
                         recordController.closeRecordDialog()

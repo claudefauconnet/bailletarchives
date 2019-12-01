@@ -77,7 +77,9 @@ var magasinsD3Canvas = (function () {
 
 
         function onClick(point, obj) {
-            if (onclickFn)
+            if(!obj)
+                return;
+            if (onclickFn )
                 onclickFn(point, obj)
             if (obj.data) {
                 $("#graphInfos").html(obj.data.name);

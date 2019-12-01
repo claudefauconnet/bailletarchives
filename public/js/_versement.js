@@ -241,7 +241,7 @@ var Versement = (function () {
                 if (numVersement)
                     buttonTitle = "enter versement"
                 else
-                    buttonTitle = "creer versement et entrer"
+                    buttonTitle = " entrer"
 
                 html += "</ul></div>"
                 html += "<button onclick='Versement.entrerVersement()'>" + buttonTitle + "</button>";
@@ -468,10 +468,8 @@ var Versement = (function () {
                                 })
                             }
                             var options = {filter: {travees: travees}}
-                            magasinD3.drawMagasins(options);
-                            //  magasinD3.reDrawTravees(travees)
+                            magasinD3.drawAll();
 
-                            //   magasinD3.zoomOnMagasin(tablettes[0].substring(0, 1))
                         }
                         callback(null);
                     }
@@ -656,7 +654,7 @@ var Versement = (function () {
                 self.currentCandidateTablettes = tablettes;
 
                 var html = Tablette.getTabletteProposeesHtml(tablettes);
-                html += "<br><button onclick='Versement.entrerVersement()'>Entrer versement</button>"
+                html += "<br><button onclick='Versement.entrerVersement()'>Chercher des tablettes disponibles</button>"
                 $("#popupD3DivOperationDiv_tablette").html(html);
             }
 
@@ -732,7 +730,7 @@ var Versement = (function () {
                         var obj = {metrage: params.metrage, magasin: params.magasin}
                         magasinD3.chercherTablettesPourVersement(obj, null, function (err, result) {
                             if (err)
-                                return $("#popupD3DivOperationDiv_tablette").html(html);
+                                return alert(err);
                             useTablette(result)
                         })
 
@@ -1006,7 +1004,7 @@ var Versement = (function () {
                         })
 
                         var options = {filter: {travees: travees}}
-                        magasinD3.drawMagasins(options);
+                       magasinD3.drawAll();
                         return callbackSeries();
 
                     }

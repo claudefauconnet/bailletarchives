@@ -370,27 +370,12 @@
                 height: mainController.totalDims.h - 100,
                 width: "100%",
                 modal: true,
-               /* buttons: {
-                    Fermer: {
-                      //  class: 'dialogButton',
-                        text:" Fermer",
-                       click: function () {
 
-                            dialog.dialog("close");
-                            $("#dialogD3").dialog("close");
-                            if (context.redrawMagasinD3) {
-                                context.redrawMagasinD3 = null;
-                              //  magasinD3.drawMagasins()
-                            }
-
-                        }
-                    }
-                },*/
                 close: function () {
                     $("#dialogDiv").dialog("close");
                     if( context.redrawMagasinD3 ){
                         context.redrawMagasinD3=null;
-                      //  magasinD3.drawMagasins()
+                      // magasinD3.drawAll()
                     }
 
                     // allFields.removeClass("ui-state-error");

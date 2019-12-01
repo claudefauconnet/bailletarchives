@@ -7,7 +7,10 @@ var magasinD3 = (function () {
     self.currentVersementSansBoites = null;
 
 
-    self.init = function (containerDiv, callback) {
+    self.drawAll = function (containerDiv, callback) {
+
+        if(!containerDiv)
+            containerDiv="graphWrapperDiv";
         var w = $("#" + containerDiv).width() - 5;
         var h = $("#" + containerDiv).height() - 35;
 
@@ -34,9 +37,11 @@ var magasinD3 = (function () {
     self.onCanvasClick = function (point, obj) {
         $("#popupD3Div").css("visibility", "hidden")
         if (obj.nature == "tablette") {
-            self.onTabletteClick(obj.data, point[0], point[1])
+            self.onTabletteClick(obj.data, point[0], point[1]);
+
         } else if (obj.nature == "boite") {
             self.onBoiteClick(obj.data, point[0], point[1]);
+
         }
     }
 
@@ -128,12 +133,11 @@ var magasinD3 = (function () {
         var highlighted = [];
         magasinsD3Canvas.canvasData.forEach(function (rect, rectIndex) {
             data.forEach(function (value) {
-                if (rect.nature == nature && rect.data ) {
-                    if(value.exec  && value.test(rect.data[property]))//regex
-                    highlighted.push(rectIndex)
-                    else
-                        if(rect.data[property] == value)
-                            highlighted.push(rectIndex)
+                if (rect.nature == nature && rect.data) {
+                    if (value.exec && value.test(rect.data[property]))//regex
+                        highlighted.push(rectIndex)
+                    else if (rect.data[property] == value)
+                        highlighted.push(rectIndex)
                 }
             })
 
@@ -143,227 +147,121 @@ var magasinD3 = (function () {
 
         magasinsD3Canvas.highlighted = highlighted;
 
-        if(highlighted.length==1)
-        magasinsD3Canvas.zoomOnObjectIndex(highlighted[0],1.0)
+        if (highlighted.length == 1)
+            magasinsD3Canvas.zoomOnObjectIndex(highlighted[0], 1.0)
         else
             magasinsD3Canvas.zoomOut()
 
     }
 
 
-    /*********************************************************************************************************************************************/
-
-
     self.getTabletteObject = function (coordonnees) {
         if (!magasinsD3Canvas.canvasData)
             return "data non chargées";
-        var array = coordonnees.split("-");
-        if (array.length != 4)
-            return "coordonnees invalides";
-        var tabletteOK = null;
-
-        magasinsD3Canvas.canvasData.children.forEach(function (magasin,) {
-
-            if (array[0] == magasin.name)
-                magasin.children.forEach(function (epi) {
-                    if (array[0] + "-" + array[1] == epi.name)
-                        epi.children.forEach(function (travee) {
-                            if (array[0] + "-" + array[1] + "-" + array[2] == travee.name)
-                                travee.children.forEach(function (tablette) {
-                                    if (coordonnees == tablette.name) {
-
-                                        self.currentTablette = tablette;
-                                        self.currentVersement = null;
-                                        self.currentBoite = null;
-                                        return tabletteOK = tablette;
-                                    }
-
-                                })
-                        })
-                })
+        var data;
+        magasinsD3Canvas.canvasData.forEach(function (rect) {
+            if (!data && rect.nature == "tablette" && rect.data.name == coordonnees)
+                data = rect.data;
         })
-        return tabletteOK;
-
-    }
-
-
-    self.centerOnElt = function (elt, zoomLevel) {
-        if (!zoomLevel)
-            var zoomLevel = d3.zoomTransform(elt).k;
-
-    }
-
-    self.locateOld = function (classe, property, array, zoomLevel) {
-
-        self.clearHighlights();
-        var found = 0;
-        var firstBoiteName = ""
-        var coordonnees = "";
-        var ok = false;
-        $("#popupD3Div").css("visibility", "hidden")
-        d3.selectAll(".tablette rect").classed("unselected", true)
-        d3.selectAll("." + classe + " rect").classed("unselected", true).each(function (d, i) {
-
-            var firstbox = true;
-            var d3Prop = d3.select(this.parentNode).attr(property);
-
-            if (d3Prop != null && d3Prop != "") {
-
-                if (array.indexOf(d3Prop) > -1) {
-                    d3.select(this).classed("unselected", false);
-                    var parent = d3.select(this.parentNode.parentNode)
-                    parent.classed("unselected", false);
-
-                    ok = true;
-                    found += 1
-                    if (firstbox) {
-                        firstbox = false
-                        //  zoom.scaleTo(svg, zoomLevel);
-                        self.centerOnElt(this, zoomLevel)
-
-                    }
-                }
-            }
-        })
-
-        //
-        if (!ok)
-            return alert("aucun element trouvé");
-        d3.selectAll(".unselected").style("opacity", 0.1)
-        return;
+        return data;
 
 
     }
 
-
-    self.clearHighlights = function () {
-        $("#popupD3Div").css("visibility", "hidden")
-        //   d3.selectAll(".tablette rect").style("opacity", 1)
-        d3.selectAll(".unselected").style("opacity", 1)
-        d3.selectAll(".unselected").classed("unselected", false);
-    }
+    /*********************************************************************************************************************************************/
 
 
-    self.refreshDrawingElement = function (subTree) {
-        var d3Obj = d3.select("#" + subTree.name);
-
-        d3Obj.selectAll("g").remove()
-
-
-        var children = d3Obj.select(function () {
-            return this.childNodes;
-        })
-        subTree.children.forEach(function (child) {
-
-        })
-        vd3Obj.remove();
-
-
-    }
-
-
-    self.findElementInDataTree = function (coordonnees) {
-        var indexArray = [];
-        var obj = null;
-        var coordonneesArray = coordonnees.split("-");
-        magasinsD3Canvas.canvasData.children.forEach(function (mag, indexMag) {
-            if (coordonneesArray[0] == mag.name) {
-                indexArray.push(indexMag);
-                if (!obj && coordonneesArray.length == 1)
-                    obj = magasinsD3Canvas.canvasData.children[indexMag];
-
-                mag.children.forEach(function (epi, indexEpi) {
-                    if (coordonneesArray[0] + "-" + coordonneesArray[1] == epi.name) {
-                        indexArray.push(indexEpi);
-                        if (!obj && coordonneesArray.length == 2)
-                            obj = magasinsD3Canvas.canvasData.children[indexMag].children[indexEpi];
-
-                        epi.children.forEach(function (travee, indexTravee) {
-                            if (coordonneesArray[0] + "-" + coordonneesArray[1] + "-" + coordonneesArray[2] == travee.name) {
-                                indexArray.push(indexTravee);
-                                if (!obj && coordonneesArray.length == 3)
-                                    obj = magasinsD3Canvas.canvasData.children[indexMag].children[indexEpi].children[indexTravee];
-
-                                travee.children.forEach(function (tablette, indexTablette) {
-                                    if (!obj && coordonnees == tablette.name) {
-                                        indexArray.push(indexEpi);
-                                        obj = magasinsD3Canvas.canvasData.children[indexMag].children[indexEpi].children[indexTravee].children[indexTablette];
-                                    }
-
-                                })
-                            }
-                        })
-                    }
-                })
-            }
-        })
-        return obj;
-    }
-
-
-    /**
-     *
-     * si tabletteDepartCoordonnees on ne commence que lorsqu'on la trouve
-     *
-     *
-     * @param obj
-     * @param callback
-     * @returns {*}
-     */
-    self.chercherTablettesPourVersement = function (obj, tabletteDepartCoords, callback) {
-        if (!obj.metrage || obj.metrage == null)
+    self.chercherTablettesPourVersement = function (demande, tabletteDepartCoords, callback) {
+        if (!demande.metrage || demande.metrage == null)
             return alert("metrage non spécifié");
-        //obj.metrage = parseFloat(obj.metrage.replace(",", "."));
+
         var longueurCumulee = 0;
         var tablettesOK = [];
         var done = false;
         var start = false;
         if (!tabletteDepartCoords)
             start = true;
-        magasinsD3Canvas.canvasData.children.forEach(function (magasin) {
+        var magasinDepartOK=false
+        var tabletteDepartOK=false
 
-            if (obj.magasin && obj.magasin != "")
-                if (magasin.name != obj.magasin)
+        magasinsD3Canvas.canvasData.forEach(function (rect) {
+            if (rect.type == "text")
+                return;
+            if (done)
+                return;
+            // contraintes sur la tablette de début
+            if (!magasinDepartOK && demande.magasin && demande.magasin != "") {
+                if (rect.nature!="magasin" || rect.data.name != demande.magasin)
                     return;
-            if (!done)
-                magasin.children.forEach(function (epi) {
-                    if (!done)
-                        epi.children.forEach(function (travee) {
-                            if (!done)
-                                travee.children.forEach(function (tablette) {
-                                    if (!start && tablette.name == tabletteDepartCoords)// si tabletteDepartCoords on ne commence que lorsqu'on la trouve
-                                        start = true;
+                else
+                    magasinDepartOK=true
 
-                                    if (!done && start)
-                                        if ((!tablette.numVersement || tablette.numVersement == 0) && tablette.children.length == 0) {// tablette vide
-                                            if (tablettesOK.length > 0 && !Tablette.areTablettesContigues(tablettesOK[tablettesOK.length - 1], tablette.name)) {
-                                                tablettesOK = []// on recommence si tablettes pas contigues
-                                                longueurCumulee = 0;
-                                            }
-                                            longueurCumulee += tablette.longueurM;
-                                            tablettesOK.push(tablette.name)
-                                            if (longueurCumulee >= obj.metrage)
-                                                done = true;
-                                        } else {
-                                            tablettesOK = []// on recommence si uen tablette est occuppée
-                                            longueurCumulee = 0;
-                                        }
+            }
 
+            if (!tabletteDepartOK && tablettesOK.length==0  && tabletteDepartCoords && tabletteDepartCoords != "") {
+                if (rect.nature!="tablette" || rect.data.name != tabletteDepartCoords)
+                    return;
+                else
+                    tabletteDepartOK=true
 
-                                })
-                        })
-                })
+            }
+
+            if (rect.nature == "tablette") {
+                var tablette = rect.data;
+                if ((!tablette.numVersement || tablette.numVersement == 0) && tablette.children.length == 0) {// tablette vide
+                    if (tablettesOK.length > 0 && !Tablette.areTablettesContigues(tablettesOK[tablettesOK.length - 1], tablette.name)) {
+                        tablettesOK = []// on recommence si tablettes pas contigues
+                        longueurCumulee = 0;
+                    }
+                    longueurCumulee += tablette.longueurM;
+                    tablettesOK.push(tablette.name)
+                    if (longueurCumulee >= demande.metrage)
+                        done = true;
+                } else {
+                    tablettesOK = []// on recommence si uen tablette est occuppée
+                    longueurCumulee = 0;
+                }
+
+            }
 
         })
         if (tablettesOK.length == 0)
             return callback("aucune tablette disponible")
+        if (longueurCumulee <demande.metrage)
+            return callback("aucune tablette disponible")
 
         return callback(null, tablettesOK);
+
 
     }
 
 
     self.isTabletteLastInTravee = function (tablette) {
+
+        var ok = false;
+        var start = false;
+
+        magasinsD3Canvas.canvasData.forEach(function (rect, index) {
+            if (start)
+                return;
+            if (rect.type == "text")
+                return;
+            if (rect.nature == "tablette" && rect.data.name == tablette.name) {
+               start = true;
+                if (index >= magasinsD3Canvas.canvasData.length - 2)
+                    ok = true;
+                if (magasinsD3Canvas.canvasData[index + 2].nature != "tablette")
+                    ok = true;
+            }
+
+        })
+        return ok;
+
+    }
+
+
+
+    self.isTabletteLastInTraveeOld= function (tablette) {
         var ok = false;
         var tabletteElts = Tablette.getCoordonneesElements(tablette.name)
         magasinsD3Canvas.canvasData.children.forEach(function (magasin) {
