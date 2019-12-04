@@ -407,21 +407,18 @@ var Tablette = (function () {
             // return alert("en construction");
         }
 
-        self.onAfterSave = function (options) {
+        self.onAfterSave = function (options,callback) {
 
             var idMagasin = options.currentRecord.id;
             var coordonnees = options.changes.coordonnees || options.currentRecord.coordonnees;
             var coordonneesObj = self.getCoordonneesElements(coordonnees);
-          /*  options.currentRecord.magasin = coordonneesObj.magasin;
-            options.currentRecord.epi = coordonneesObj.epi;
-            options.currentRecord.travee = coordonneesObj.travee;
-            options.currentRecord.tablette = coordonneesObj.tablette;*/
+
             var sql = "update magasin set magasin='" + coordonneesObj.magasin + "',epi='" + coordonneesObj.epi + "',travee='" + coordonneesObj.travee + "',tablette='" + coordonneesObj.tablette + "' where id=" + idMagasin;
             mainController.execSql(sql, function (err, result) {
                 if (err)
-                    return mainController.setErrorMessage(err);
+                    return callback(err);
                magasinD3.drawAll();
-                recordController.currentRecordChanges = {};
+                callback();
 
             });
 

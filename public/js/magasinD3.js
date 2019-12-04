@@ -36,6 +36,8 @@ var magasinD3 = (function () {
 
     self.onCanvasClick = function (point, obj) {
         $("#popupD3Div").css("visibility", "hidden")
+        if(!obj)
+            return;
         if (obj.nature == "tablette") {
             self.onTabletteClick(obj.data, point[0], point[1]);
 

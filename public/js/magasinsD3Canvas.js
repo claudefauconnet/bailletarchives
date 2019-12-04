@@ -77,8 +77,7 @@ var magasinsD3Canvas = (function () {
 
 
         function onClick(point, obj) {
-            if(!obj)
-                return;
+
             if (onclickFn )
                 onclickFn(point, obj)
             if (obj.data) {
@@ -108,6 +107,8 @@ var magasinsD3Canvas = (function () {
             point[1] = (point[1] - currentZoomTransform.y) / currentZoomTransform.k
             var node;
             canvasData.forEach(function (rect) {
+
+
                 if (rect.x < point[0] && (rect.x + rect.w) > point[0]) {
                     if (rect.y < point[1] && (rect.y + rect.h) > point[1]) {
                         return node = rect;
@@ -465,6 +466,8 @@ var magasinsD3Canvas = (function () {
                                                     type: "text",
                                                     x: rect.x - 5,
                                                     y: rect.y + (rect.h / 2) + 4,
+                                                    h: 30,
+                                                    w: 30,
                                                     font: "8px verdana",
                                                     text: "" + (indexTablette + 1),
                                                     color: "green",
