@@ -63,7 +63,6 @@ var Tablette = (function () {
             var operation = $(select).val();
 
 
-
             if (operation == "commentaire") {
                 var oldCommentaires = magasinD3.currentTablette.commentaires
                 var commentaire = prompt("entrer un commentaire pour la  tablette " + magasinD3.currentTablette.name, oldCommentaires);
@@ -76,7 +75,7 @@ var Tablette = (function () {
                         $("#popupD3Div").css("visibility", "hidden");
                         var d3Id = magasinD3.currentTablette.d3Id;
                         var options = {filter: {tablettes: [magasinD3.currentTablette.d3Id]}}
-                       magasinD3.drawAll();
+                        magasinD3.drawAll();
 
                     })
                 }
@@ -118,7 +117,7 @@ var Tablette = (function () {
                             return mainController.setErrorMessage(err);
                         var coordonneesObj = self.getCoordonneesElements(magasinD3.currentTablette.name);
                         var options = {filter: {travees: [coordonneesObj.travee]}}
-                       magasinD3.drawAll();
+                        magasinD3.drawAll();
                         $("#popupD3Div").css("visibility", "hidden");
 
                     })
@@ -149,7 +148,7 @@ var Tablette = (function () {
                             return mainController.setErrorMessage(err);
 
                         var options = {filter: {travees: [coordonneesObj.travee]}}
-                       magasinD3.drawAll();
+                        magasinD3.drawAll();
                         $("#popupD3Div").css("visibility", "hidden");
 
                     })
@@ -162,7 +161,7 @@ var Tablette = (function () {
                                 mainController.setErrorMessage(err);
                             var coordonneesObj = Tablette.getCoordonneesElements(magasinD3.currentTablette.name);
                             var options = {filter: {travees: [coordonneesObj.travee]}}
-                           magasinD3.drawAll();
+                            magasinD3.drawAll();
                             $("#popupD3Div").css("visibility", "hidden");
                         }
                     )
@@ -199,7 +198,7 @@ var Tablette = (function () {
             }
 
             $('#operationTabletteSelect').find('option').remove().end()
-            $("#popupD3Div").css("visibility","hidden")
+            $("#popupD3Div").css("visibility", "hidden")
 
         }
 
@@ -407,7 +406,7 @@ var Tablette = (function () {
             // return alert("en construction");
         }
 
-        self.onAfterSave = function (options,callback) {
+        self.onAfterSave = function (options, callback) {
 
             var idMagasin = options.currentRecord.id;
             var coordonnees = options.changes.coordonnees || options.currentRecord.coordonnees;
@@ -417,7 +416,7 @@ var Tablette = (function () {
             mainController.execSql(sql, function (err, result) {
                 if (err)
                     return callback(err);
-               magasinD3.drawAll();
+                magasinD3.drawAll();
                 callback();
 
             });
@@ -444,7 +443,7 @@ var Tablette = (function () {
         }
         self.releaseTablettes = function (tabletteCoordonnees, callback) {
 
-            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees in ('" + tabletteCoordonnees+ "')";
+            var sql = "update magasin set numVersement=null, id_versement=null, cotesParTablette=null,metrage=0, indisponible=null,commentaires=null where coordonnees in ('" + tabletteCoordonnees + "')";
             mainController.execSql(sql, function (err, result) {
                 if (err)
                     mainController.setErrorMessage(err);
@@ -472,7 +471,7 @@ var Tablette = (function () {
             function updateGraph() {
                 var coordonneesObj = Tablette.getCoordonneesElements(tablette.coordonnees);
                 var options = {filter: {travees: [coordonneesObj.travee]}}
-               magasinD3.drawAll(options);
+                magasinD3.drawAll(options);
             }
 
             if (tablette.cotesParTablette == "" && confirm("liberer la tablette (supprimer le lien avec le versement")) {
@@ -490,7 +489,19 @@ var Tablette = (function () {
             }
         }
 
-        self.splitTablette = function (coordonnees, callback) {
+        self.splitTablette = function (coordonnees, options, callback) {
+            if (!options)
+                options = {}
+            var cotesParTablette = "";
+            var idVersement = -9999;
+            var numVersement = "";
+
+            if (options.cotesParTablette)
+                cotesParTablette = options.cotesParTablette;
+            if (options.idVersement)
+                idVersement = options.idVersement;
+            if (options.numVersement)
+                numVersement = options.numVersement;
 
             var sql = "select * from magasin where coordonnees='" + coordonnees + "'"
             mainController.execSql(sql, function (err, result) {
@@ -499,14 +510,18 @@ var Tablette = (function () {
                 if (result.length > 0) {
                     var tablette = result[0];
                     var coordonneesObj = self.getCoordonneesElements(coordonnees);
-                    var sql2 = "insert into magasin  (coordonnees,DimTabletteMLineaire,magasin,epi,travee,tablette)" +
+                    var sql2 = "insert into magasin  (coordonnees,DimTabletteMLineaire,magasin,epi,travee,tablette,id_versement,numVersement,cotesParTablette)" +
                         " values (" +
                         "'" + tablette.coordonnees + "'," +
                         "" + tablette.DimTabletteMLineaire + "," +
                         "'" + coordonneesObj.magasin + "'," +
                         "'" + coordonneesObj.epi + "'," +
                         "'" + coordonneesObj.travee + "'," +
-                        "'" + coordonneesObj.tablette + "'" +
+                        "'" + coordonneesObj.tablette + "'," +
+                        "'" + idVersement + "'," +
+                        "'" + numVersement + "'," +
+                        "'" + cotesParTablette + "'" +
+
                         ")"
 
 
@@ -871,6 +886,41 @@ var Tablette = (function () {
 
 
             })
+
+
+        }
+        self.getLongueurDisponibleSurTablette = function (tablette, tailleMoyenneBoite) {
+            if (tablette.longueurM) {//appel de pusi magasinD3
+                if (!(tablette.numVersement || tablette.numVersement == 0) && (!tablette.children || tablette.children.length == 0))// tablette vide
+                    return tablette.longueurM;
+
+                else {
+                    var nBoitesOnTablette = tablette.children.length;
+                    var longueurOccupeeTheorique = nBoitesOnTablette * tailleMoyenneBoite;
+                    var marge = config.margeAjoutVersementSurTabletteOccupee * tablette.longueurM;
+                    var longueurDisponible = tablette.longueurM - longueurOccupeeTheorique - marge;
+                    if (longueurDisponible > tailleMoyenneBoite)
+                        return longueurDisponible;
+                    return 0;
+                }
+            }
+            else if(   tablette.DimTabletteMLineaire){//apple depuis entrer versement
+                if(!tablette.cotesParTablette || tablette.cotesParTablette=="")
+                    return tablette.DimTabletteMLineaire;
+
+                else {
+                    var nBoitesOnTablette=tablette.cotesParTablette.split(" ").length;
+                    var longueurOccupeeTheorique = nBoitesOnTablette * tailleMoyenneBoite;
+                    var marge = config.margeAjoutVersementSurTabletteOccupee * tablette.DimTabletteMLineaire;
+                    var longueurDisponible = tablette.DimTabletteMLineaire - longueurOccupeeTheorique - marge;
+                    if (longueurDisponible > tailleMoyenneBoite)
+                        return longueurDisponible;
+                    return 0;
+                }
+
+
+            }
+            return 0;
 
 
         }

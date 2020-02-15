@@ -1,6 +1,14 @@
 var statistics = (function () {
     var self = {};
 
+
+
+
+
+
+
+
+
     self.stats = {
 
         "prochain numero de versement": {
@@ -38,7 +46,7 @@ var statistics = (function () {
                 mainController.setErrorMessage(err)
            if (!context.dataTables["stats"])
                 context.dataTables["stats"] = new dataTable();
-            context.dataTables["stats"].loadJson(null,"mainDiv", json, {dom: "ltiB",noFixedColumns:true,})
+            context.dataTables["stats"].loadJson(null,"listWrapperDiv", json, {})
 
            // listController.loadLinkedRecords("stats", "stats", function(){
 

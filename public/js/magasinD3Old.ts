@@ -9,8 +9,8 @@ var magasinD3 = (function () {
 
     self.drawAll = function (containerDiv, callback) {
 
-        if (!containerDiv)
-            containerDiv = "graphWrapperDiv";
+        if(!containerDiv)
+            containerDiv="graphWrapperDiv";
         var w = $("#" + containerDiv).width() - 5;
         var h = $("#" + containerDiv).height() - 35;
 
@@ -36,7 +36,7 @@ var magasinD3 = (function () {
 
     self.onCanvasClick = function (point, obj) {
         $("#popupD3Div").css("visibility", "hidden")
-        if (!obj)
+        if(!obj)
             return;
         if (obj.nature == "tablette") {
             self.onTabletteClick(obj.data, point[0], point[1]);
@@ -177,19 +177,14 @@ var magasinD3 = (function () {
         if (!demande.metrage || demande.metrage == null)
             return alert("metrage non spécifié");
 
-        var tailleMoyenneBoite = demande.metrage / demande.nbBoites
-
         var longueurCumulee = 0;
         var tablettesOK = [];
         var done = false;
         var start = false;
         if (!tabletteDepartCoords)
             start = true;
-        var magasinDepartOK = false
-        var tabletteDepartOK = false
-
-
-
+        var magasinDepartOK=false
+        var tabletteDepartOK=false
 
         magasinsD3Canvas.canvasData.forEach(function (rect) {
             if (rect.type == "text")
@@ -198,36 +193,34 @@ var magasinD3 = (function () {
                 return;
             // contraintes sur la tablette de début
             if (!magasinDepartOK && demande.magasin && demande.magasin != "") {
-                if (rect.nature != "magasin" || rect.data.name != demande.magasin)
+                if (rect.nature!="magasin" || rect.data.name != demande.magasin)
                     return;
                 else
-                    magasinDepartOK = true
+                    magasinDepartOK=true
 
             }
 
-            if (!tabletteDepartOK && tablettesOK.length == 0 && tabletteDepartCoords && tabletteDepartCoords != "") {
-                if (rect.nature != "tablette" || rect.data.name != tabletteDepartCoords)
+            if (!tabletteDepartOK && tablettesOK.length==0  && tabletteDepartCoords && tabletteDepartCoords != "") {
+                if (rect.nature!="tablette" || rect.data.name != tabletteDepartCoords)
                     return;
                 else
-                    tabletteDepartOK = true
+                    tabletteDepartOK=true
 
             }
 
             if (rect.nature == "tablette") {
                 var tablette = rect.data;
-                var longueurDisponible=Tablette.getLongueurDisponibleSurTablette(tablette,tailleMoyenneBoite);
-                if (longueurDisponible>0) {// tablette vide
+                if ((!tablette.numVersement || tablette.numVersement == 0) && tablette.children.length == 0) {// tablette vide
                     if (tablettesOK.length > 0 && !Tablette.areTablettesContigues(tablettesOK[tablettesOK.length - 1], tablette.name)) {
                         tablettesOK = []// on recommence si tablettes pas contigues
                         longueurCumulee = 0;
                     }
-                    longueurCumulee += longueurDisponible;
-                    tablette.longueurDisponible=longueurDisponible
+                    longueurCumulee += tablette.longueurM;
                     tablettesOK.push(tablette.name)
                     if (longueurCumulee >= demande.metrage)
                         done = true;
                 } else {
-                    tablettesOK = []// on recommence si une tablette est occuppée
+                    tablettesOK = []// on recommence si uen tablette est occuppée
                     longueurCumulee = 0;
                 }
 
@@ -236,7 +229,7 @@ var magasinD3 = (function () {
         })
         if (tablettesOK.length == 0)
             return callback("aucune tablette disponible")
-        if (longueurCumulee < demande.metrage)
+        if (longueurCumulee <demande.metrage)
             return callback("aucune tablette disponible")
 
         return callback(null, tablettesOK);
@@ -269,7 +262,8 @@ var magasinD3 = (function () {
     }
 
 
-    self.isTabletteLastInTraveeOld = function (tablette) {
+
+    self.isTabletteLastInTraveeOld= function (tablette) {
         var ok = false;
         var tabletteElts = Tablette.getCoordonneesElements(tablette.name)
         magasinsD3Canvas.canvasData.children.forEach(function (magasin) {

@@ -113,6 +113,7 @@ var Versement = (function () {
         }
 
 
+
         self.showDialogEntrerVersement = function () {
 
 
@@ -209,7 +210,7 @@ var Versement = (function () {
                     return alert("Tablette  déjà occupee, le métrage demandé ne rentre pas dans la tablette, choisisez une autre tablette");
                 else {
                     if (confirm("\"cette tablette est déja occupée  mais peut accueillir ce versement, confirmer l'ajout\"")) {
-                        Tablette.splitTablette(tablette.name, null, function (err, newTabletteId) {
+                        Tablette.splitTablette(tablette.name, function (err, newTabletteId) {
 
                             Versement.entrerVersement({useTabletteId: newTabletteId});
 
@@ -406,30 +407,16 @@ var Versement = (function () {
                                 tablettesStr += '"' + coordonnee + '"';
 
                             })
-                            var sql = "select id, coordonnees,DimTabletteMLineaire,cotesParTablette from magasin where coordonnees in (" + tablettesStr + ") order by coordonnees";
+                            var sql = "select id, coordonnees,DimTabletteMLineaire from magasin where coordonnees in (" + tablettesStr + ") order by coordonnees";
                             mainController.execSql(sql, function (err, result) {
                                 if (err)
                                     return callback(err);
 
                                 tablettes = result;
                                 tablettes = self.setCotesParTablette(versement, tablettes, params.nbBoites, tailleMoyBoite, params.coteDebutIndex);
-                                if (tablettes.duplicateTablette) {
-                                    var duplicate = tablettes.duplicateTablette;
-                                    var options={idVersement:versement.id,numVersement:versement.numVersement,cotesParTablette:duplicate.cotesParTablette}
-                                    Tablette.splitTablette(duplicate.tablette.coordonnees, options, function (err, result) {
-                                        if (err) {
-                                            return callback(err);
-                                        }
-                                        return callback();
-
-                                    })
-                                } else {
-                                    callback();
-                                }
-
 
                                 versement.cotesExtremesBoites = self.getTablettesCotesExtremes(tablettes);
-
+                                callback();
 
                             })
                         } else
@@ -587,55 +574,39 @@ var Versement = (function () {
 
 
             self.setCotesParTablette = function (versement, tablettes, nbBoites, tailleMoyBoite, coteDebut) {
-                var tabletteOccupeeDone = false;
-                var tablettes2=[];
 
-                // *************************traitement pour aggreger les tablettes avec les memes coordonnées
-                var tablettesMap={}
-                tablettes.forEach(function (tablette) {
-                    if(!tablettesMap[tablette.coordonnees])
-                        tablettesMap[tablette.coordonnees]=tablette
-                    else
-                        tablettesMap[tablette.coordonnees].cotesParTablette+","+tablette.cotesParTablette;
-                })
-                tablettes=[]
-                for (var key in tablettesMap){
-                    tablettes.push(tablettesMap [key])
+
+                function getTabletteNbBoites(dimTablette) {
+                    // le taux d'occupation d'une tablette ne doit pas dépasser  config.coefRemplissageTablette si c'est le cas on enlève une boite qu'on met sur la tablette suivante
+
+                    var tabletteNbBoites = dimTablette / tailleMoyBoite;
+                    var decimalPart = tabletteNbBoites - Math.floor(tabletteNbBoites);
+                    tabletteNbBoites = Math.floor(tabletteNbBoites);
+                    /*     if (decimalPart > (1 - config.coefRemplissageTablette))
+                             tabletteNbBoites -= 1;*/
+                    return tabletteNbBoites;
                 }
-                // *************************fin traitement pour aggreger les tablettes avec les memes coordonnées
 
                 var boiteIndex = coteDebut;
                 var totalBoites = 0;
 
-                var newSplittedTabletteId =
-                    tablettes.forEach(function (tablette) {
-                        var cotesParTablette = "";
-                      //  var tabletteNbBoites = getTabletteNbBoites(tablette);
-                        var longueurDisponible=Tablette.getLongueurDisponibleSurTablette(tablette,tailleMoyBoite);;
-                        var tabletteNbBoites = Math.floor(longueurDisponible/ (tailleMoyBoite));
+                tablettes.forEach(function (tablette) {
+                    var cotesParTablette = "";
+                    var tabletteNbBoites = getTabletteNbBoites(tablette.DimTabletteMLineaire);
+                    for (var i = 0; i < tabletteNbBoites; i++) {
+                        var cote = versement.numVersement + "/" + util.integerToStringWithFixedLength(boiteIndex, config.coteBoiteNbDigits);
+                        if (i > 0)
+                            cotesParTablette += " ";
+                        cotesParTablette += cote;
+                        boiteIndex += 1;
+                        totalBoites += 1
+                        if (totalBoites >= nbBoites)
+                            break;
 
-                        for (var i = 0; i < tabletteNbBoites; i++) {
-                            var cote = versement.numVersement + "/" + util.integerToStringWithFixedLength(boiteIndex, config.coteBoiteNbDigits);
-                            if (cotesParTablette != "")
-                                cotesParTablette += " ";
-                            cotesParTablette += cote;
-                            boiteIndex += 1;
-                            totalBoites += 1
-                            if (totalBoites >= nbBoites)
-                                break;
-
-                        }
-
-                        if (tablette.cotesParTablette && tablette.cotesParTablette != "" ) {
-                            if(!tablettes2.duplicateTablette)
-                            tablettes2.duplicateTablette = {tablette: tablette, cotesParTablette: cotesParTablette}
-
-                        } else {
-                            tablette.cotesParTablette =cotesParTablette;
-                            tablettes2.push(tablette)
-                        }
-                    })
-                return tablettes2;
+                    }
+                    tablette.cotesParTablette = cotesParTablette;
+                })
+                return tablettes;
             }
 
 
@@ -683,7 +654,7 @@ var Versement = (function () {
                 self.currentCandidateTablettes = tablettes;
 
                 var html = Tablette.getTabletteProposeesHtml(tablettes);
-                html += "<br><button onclick='Versement.entrerVersement()'>Entrer versement</button>"
+                html += "<br><button onclick='Versement.entrerVersement()'>Chercher des tablettes disponibles</button>"
                 $("#popupD3DivOperationDiv_tablette").html(html);
             }
 
@@ -707,15 +678,13 @@ var Versement = (function () {
                         //il peut y avoir plusieurs versement sur les memes coordonnées donc plusieurs id magasin correspondant
 
                         mainController.execSql(sql, function (err, result) {
-
                             if (err)
                                 return alert(err)
                             if (result.length == 0)
                                 return alert("cette tablette n'existe pas")
+
                             var tabletteCible = result[0];
-
                             var obj = {metrage: params.metrage, magasin: params.magasin}
-
                             // tablette deja occupee
                             if (tabletteCible.id_versement && tabletteCible.id_versement != "") {
                                 var metrageOccupe = 0;
@@ -726,7 +695,7 @@ var Versement = (function () {
                                 // petites versements à mettre sur la meme tablette: duplication des coordonnées de tablette dans deux entrees magasin (marge margeAjoutVersementSurTabletteOccupee)
                                 if ((tabletteCible.DimTabletteMLineaire - metrageOccupe) > (obj.metrage + config.margeAjoutVersementSurTabletteOccupee)) {
                                     if (confirm("cette tablette est déja occupée  mais peut accueillir ce versement, confirmer l'ajout")) {
-                                        Tablette.splitTablette(tabletteCible.coordonnees, null, function (err, newTabletteId) {
+                                        Tablette.splitTablette(tabletteCible.coordonnees, function (err, newTabletteId) {
                                             Versement.entrerVersement({useTabletteId: newTabletteId});
                                         })
 
@@ -734,25 +703,14 @@ var Versement = (function () {
                                         alert("cherchez un autre emplacement...")
 
                                     }
-                                } else{
-                                    //  alert(" pas assez de place sur cette tablette pour y ajouter le versement");
-                                    var obj = {metrage: params.metrage, magasin: params.magasin, nbBoites: params.nbBoites}
-
-                                    magasinD3.chercherTablettesPourVersement(obj, tabletteCible.coordonnees, function (err, result) {
-                                        if (err)
-                                            return alert(err);
-                                        useTablette(result)
-                                        return callbackSeries();
-                                    })
-                                }
-
-
+                                } else
+                                    alert(" pas assez de place sur cette tablette pour y ajouter le versement");
 
                                 return callbackSeries();
 
 
                             } else {
-                                var obj = {metrage: params.metrage, magasin: params.magasin, nbBoites: params.nbBoites}
+
                                 magasinD3.chercherTablettesPourVersement(obj, tabletteCible.coordonnees, function (err, result) {
                                     if (err)
                                         return alert(err);
@@ -770,7 +728,7 @@ var Versement = (function () {
                         if (tabletteDebutCoord && tabletteDebutCoord != "")
                             return callbackSeries();
 
-                        var obj = {metrage: params.metrage, magasin: params.magasin, nbBoites: params.nbBoites}
+                        var obj = {metrage: params.metrage, magasin: params.magasin}
                         magasinD3.chercherTablettesPourVersement(obj, null, function (err, result) {
                             if (err)
                                 return alert(err);
