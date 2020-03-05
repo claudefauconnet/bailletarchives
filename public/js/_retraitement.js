@@ -3,6 +3,7 @@ var Retraitement = (function () {
 
 
     self.start = function () {
+        $("#dialogD3").dialog("close")
         var numVersement = $("#attr_numVersement").val();
         if (confirm("Confirmez la suppression des  boites de ce traitement et la liberation des tablettes associées ")) {
             var nBoites = 0;

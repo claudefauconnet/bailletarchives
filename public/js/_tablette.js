@@ -11,7 +11,7 @@ var Tablette = (function () {
                 var coordonneesTablette = prompt("coordonnées tablette :", oldTablette)
                 if (!coordonneesTablette || coordonneesTablette == "")
                     return "";
-                var tabletteObj = magasinD3.getTabletteObject(coordonneesTablette);
+                var tabletteObj = magasinsD3Canvas.getTabletteObject(coordonneesTablette);
                 if (typeof tabletteObj === "string")// error
                     return alert(tabletteObj)
                 if (!tabletteObj)
@@ -204,7 +204,7 @@ var Tablette = (function () {
 
         self.getEnterVersementExistantDialogHtml = function () {
             var html = "<br>Numero du versement : <input size='4' id=popupD3DivOperationDiv_numVersement value=''> ";
-
+            html += "<button onclick=\"$('#dialogD3').dialog('close')\">Annuler</button>";
             html += "<br>metrage <input  class='popupD3DivOperationDiv_hiddenInput' style='width:30px' id='popupD3DivOperationDiv_metrage'><br>";
             html += "nombre de boites<input class='popupD3DivOperationDiv_hiddenInput' style='width:30px' id='popupD3DivOperationDiv_nbBoites'><br>";
             html += "index cote de début<input class='popupD3DivOperationDiv_hiddenInput' style='width:30px' id='popupD3DivOperationDiv_coteDebut' value='1'> ";
@@ -832,7 +832,7 @@ var Tablette = (function () {
                     startingMagasin = data.tablettes.magasinEpiTravee;
                 }
 
-                if (magasinD3.magasins.indexOf(data.tablettes.magasin) > -1)
+                if (magasinsD3Canvas.magasins.indexOf(data.tablettes.magasin) > -1)
                     return alert("Le magasin " + startingMagasin + " existe déjà")
 
                 try {
@@ -903,13 +903,12 @@ var Tablette = (function () {
                         return longueurDisponible;
                     return 0;
                 }
-            }
-            else if(   tablette.DimTabletteMLineaire){//apple depuis entrer versement
-                if(!tablette.cotesParTablette || tablette.cotesParTablette=="")
+            } else if (tablette.DimTabletteMLineaire) {//apple depuis entrer versement
+                if (!tablette.cotesParTablette || tablette.cotesParTablette == "")
                     return tablette.DimTabletteMLineaire;
 
                 else {
-                    var nBoitesOnTablette=tablette.cotesParTablette.split(" ").length;
+                    var nBoitesOnTablette = tablette.cotesParTablette.split(" ").length;
                     var longueurOccupeeTheorique = nBoitesOnTablette * tailleMoyenneBoite;
                     var marge = config.margeAjoutVersementSurTabletteOccupee * tablette.DimTabletteMLineaire;
                     var longueurDisponible = tablette.DimTabletteMLineaire - longueurOccupeeTheorique - marge;

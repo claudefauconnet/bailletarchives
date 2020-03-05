@@ -106,6 +106,7 @@ var Versement = (function () {
 
         self.locateCurrentVersement = function () {
             $("#dialogDiv").dialog("close");
+            $("#dialogD3").dialog("close");
             mainController.showInMainDiv("graph");
             var highlighted = [new RegExp(context.currentRecord.numVersement + "\\/\\d+")]
             magasinD3.locate("boite", "name", highlighted, 1.0)
@@ -613,7 +614,7 @@ var Versement = (function () {
                       //  var tabletteNbBoites = getTabletteNbBoites(tablette);
                         var longueurDisponible=Tablette.getLongueurDisponibleSurTablette(tablette,tailleMoyBoite);;
                         var tabletteNbBoites = Math.floor(longueurDisponible/ (tailleMoyBoite));
-
+//console.log(tablette.coordonnees+"  "+longueurDisponible+" "+tabletteNbBoites)
                         for (var i = 0; i < tabletteNbBoites; i++) {
                             var cote = versement.numVersement + "/" + util.integerToStringWithFixedLength(boiteIndex, config.coteBoiteNbDigits);
                             if (cotesParTablette != "")
@@ -625,6 +626,7 @@ var Versement = (function () {
                                 break;
 
                         }
+                   //     console.log(tablette.coordonnees+"  "+longueurDisponible+" "+tabletteNbBoites+"  "+cotesParTablette)
 
                         if (tablette.cotesParTablette && tablette.cotesParTablette != "" ) {
                             if(!tablettes2.duplicateTablette)
@@ -658,7 +660,7 @@ var Versement = (function () {
                 //  var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + ",cotesParTablette='" + tablette.cotesParTablette + "' where magasin.coordonnees='" + tablette.coordonnees + "'";
                 var sql = "update magasin set numVersement='" + versement.numVersement + "',id_versement=" + versement.id + ",cotesParTablette='" + tablette.cotesParTablette + "' where magasin.id='" + tablette.id + "'";
 
-                console.log(sql)
+            //    console.log(sql)
                 mainController.execSql(sql, function (err, result) {
                     if (err)
                         return callbackSeries(err);
@@ -920,7 +922,8 @@ var Versement = (function () {
                         return callback(err);
 
                     var cotesBoitesStr = "";
-                    var regex = /[.*^\s]\s*/gm
+                    var regex = /[.*^\s]\s*/gm;
+                    var error=null;
                     json.forEach(function (tablette) {
                         infos.tablettes.metrage += tablette.metrage;
                         infos.tablettes.tailleTotaleTablettes += tablette.DimTabletteMLineaire
@@ -932,8 +935,15 @@ var Versement = (function () {
                             //  tabletteBoites = tablette.cotesParTablette.split(" ");
                             tabletteBoites = cotesBoitesStr.trim().split(regex);
 
+
                         }
                         tabletteBoites.forEach(function (boite, index) {
+                            var array=boite.split("/")
+                            if(array.length!=2){
+                               if( error==null)
+                                   error="Erreur dans les cotes par tablette : ";
+                                error+=tablette.coordonnees+" / "+boite+" ,  "
+                            }
                             var p = boite.indexOf("/");
                             if (p > -1)
                                 tabletteBoites[index] = parseInt(boite.substring(p + 1))
@@ -943,10 +953,14 @@ var Versement = (function () {
 
 
                     })
+
+                    if( error)
+                        return callback(error);
                     infos.tablettes.coteBoites.sort();
 
                     var regex = /[.*^\s]\s*/gm
                     var boitesArray = cotesBoitesStr.trim().split(regex);
+
                     var coteDebut = boitesArray[0];
                     var coteFin = boitesArray[boitesArray.length - 1];
 
@@ -991,7 +1005,7 @@ var Versement = (function () {
                 if (json.length > 0)
                     tablettesExtremes = self.getTablettesCotesExtremes(json);
                 $(input).val(tablettesExtremes)
-                recordController.incrementChanges(input);
+                recordController.incrementChanges("#attr_cotesExtremesBoites");
             })
         }
 
@@ -999,9 +1013,10 @@ var Versement = (function () {
 
 
             self.getVersementMagasinInfos({id: versementId}, function (err, infos) {
-
+                if (err)
+                    return alert(err);
                 $("#attr_nbBoites").val(infos.tablettes.nbreTotalBoites);
-                recordController.incrementChanges(input);
+                recordController.incrementChanges("#attr_nbBoites");
             })
         }
 

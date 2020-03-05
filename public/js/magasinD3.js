@@ -217,9 +217,11 @@ var magasinD3 = (function () {
                 var tablette = rect.data;
                 var longueurDisponible=Tablette.getLongueurDisponibleSurTablette(tablette,tailleMoyenneBoite);
                 if (longueurDisponible>0) {// tablette vide
-                    if (tablettesOK.length > 0 && !Tablette.areTablettesContigues(tablettesOK[tablettesOK.length - 1], tablette.name)) {
-                        tablettesOK = []// on recommence si tablettes pas contigues
-                        longueurCumulee = 0;
+                    if (tablettesOK.length > 0) {
+                        if (!tablette.isEmpty || !Tablette.areTablettesContigues(tablettesOK[tablettesOK.length - 1], tablette.name)){
+                            tablettesOK = []// on recommence si tablettes pas contigues
+                            longueurCumulee = 0;
+                        }
                     }
                     longueurCumulee += longueurDisponible;
                     tablette.longueurDisponible=longueurDisponible

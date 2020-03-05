@@ -27,7 +27,7 @@
         var numVersement = $("#deplacerBoites_numVersement").val();
         Versement.getVersementMagasinInfos({numVersement:numVersement}, function (err, infos) {
             if (err)
-               console.log(err);
+                return alert(err);
         //  $("#deplacerBoites_message").html(JSON.stringify(infos,null,2));
 
             context.currentVersementInfos=infos;

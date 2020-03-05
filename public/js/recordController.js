@@ -14,6 +14,7 @@ var recordController = (function () {
 
 
     self.closeRecordDialog = function () {
+        $("#dialogD3").dialog("close")
         if (Object.keys(self.currentRecordChanges).length > 0) {
             $("#dialog-confirm").html("Des données ont été modifiées");
 
@@ -200,6 +201,7 @@ var recordController = (function () {
 
 
     self.saveRecord = function (callback) {
+        $("#dialogD3").dialog("close")
         var isNewRecord = !context.currentRecord.id;
         async.series([
 
@@ -415,6 +417,7 @@ var recordController = (function () {
 
 
     self.deleteRecord = function () {
+        $("#dialogD3").dialog("close")
         var ok = true;
         var linkedTables = [];
         if (config.tableDefs[context.currentTable].relations)
