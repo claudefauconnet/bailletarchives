@@ -5,7 +5,7 @@ var Versement = (function () {
         //   self.updateRecordHistory = function (id, etat, commentaire) {
 
 
-        self.onfAfterSave = function (options, callback) {
+        self.onAfterSave = function (options, callback) {
             $("#versementEntrerEnMagasinButton").removeAttr("disabled");
             $("#versementLocaliserButton").removeAttr("disabled");
             $("#versementRefoulerButton").removeAttr("disabled");
@@ -820,7 +820,7 @@ var Versement = (function () {
 
         }
 
-        self.setNewRecordDefaultValues = function (versement) {
+        self.onBeforeEditing = function (versement) {
 
             var userGroups = authentication.currentUser.groupes;
             if (!userGroups)

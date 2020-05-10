@@ -152,8 +152,8 @@ var config = (function () {
 
 
             },
-            onAfterDisplay: Versement.setNewRecordDefaultValues,
-            onAfterSave: Versement.onfAfterSave,
+            onAfterDisplay: Versement.onBeforeEditing,
+            onAfterSave: Versement.onAfterSave,
             onBeforeDelete: Versement.onBeforeDelete,
             onAfterDelete: Versement.onAfterDelete,
             onBeforeSave: Versement.onBeforeSave
@@ -240,7 +240,7 @@ var config = (function () {
                     toolFn: "Sortie.sortiesShowBoitesCbx"
                 }
             ],
-            onAfterDisplay: Sortie.setNewRecordDefaultValues,
+            onAfterDisplay: Sortie.onBeforeEditing,
             onBeforeSave: Sortie.onBeforeSave
         },
         "versement_historique": {
@@ -266,6 +266,21 @@ var config = (function () {
 
             tabs: [],
             onBeforeSave: authentication.onBeforeSave
+        },
+        "divers": {
+            defaultSearchField: "intitule",
+            tabs: ["magasin",],
+            sortFields: ["intitule desc"],
+            recordTools: [
+                {
+                    title: "Localiser...",
+                    id: "versementLocaliserButton",
+                    toolFn: "Versement.locateCurrentVersement"
+                },
+
+
+            ],
+            onAfterDisplay: Divers.onBeforeEditing,
         }
     }
     self.lists = {};

@@ -2,7 +2,7 @@ var Sortie = (function () {
     var self = {};
 
 
-    self.setNewRecordDefaultValues = function (sortie) {
+    self.onBeforeEditing = function (sortie) {
         if (!sortie.sortieArchiviste) {
             $("#attr_sortieArchiviste").val(authentication.currentUser.nomComplet);
             recordController.incrementChanges(attr_sortieArchiviste);
