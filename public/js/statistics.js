@@ -31,6 +31,19 @@ var statistics = (function () {
         },
         "versements dans plusieurs epi...": {
             sql: " select distinct numVersement from magasin where  numVersement in (select numVersement from magasin group by numVersement having count(distinct magasin) >1)"
+        },
+        "metrage total materiel": {
+            sql: " select sum( magasin.DimTabletteMLineaire) as espaceOccupeMateriel from magasin,espace_occupe where magasin.id_espace_occupe=espace_occupe.id and espace_occupe.nature=\"matériel\""
+        },  "metrage espace occupé par nature": {
+            sql: " select  nature,sum( magasin.DimTabletteMLineaire) as espaceOccupeMateriel from magasin,espace_occupe where magasin.id_espace_occupe=espace_occupe.id group by nature"
+        },
+        "metrage materiel par magasin": {
+            sql: " select magasin,sum( magasin.DimTabletteMLineaire) as espaceOccupeMateriel from magasin,espace_occupe where magasin.id_espace_occupe=espace_occupe.id and espace_occupe.nature=\"matériel\" group by magasin"
+        },  "metrage espace occupé par nature et magasin": {
+            sql: " select  magasin,nature,sum( magasin.DimTabletteMLineaire) as espaceOccupeMateriel from magasin,espace_occupe where magasin.id_espace_occupe=espace_occupe.id group by magasin,nature"
+        }
+        , "metrage patrimoine total": {
+           sql: "select 'non côté' as nature,sum( magasin.DimTabletteMLineaire) as total from magasin,espace_occupe where magasin.id_espace_occupe=espace_occupe.id and espace_occupe.nature<>\"matériel\" UNION select 'versement' as nature, sum( versement.metrage) as total from versement "
         }
     }
 

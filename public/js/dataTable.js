@@ -19,8 +19,13 @@ var dataTable = function () {
       var columns = [];
         var keys = [];
 
-        if (config.tableDefs[table] && config.tableDefs[table].sortFields)
+        if (config.tableDefs[table] && config.tableDefs[table].sortFields) {
             sortColumns = config.tableDefs[table].sortFields;
+        }
+        if (config.tableDefs[table] && config.tableDefs[table].columns) {
+            definedColumns = config.tableDefs[table].columns;
+        }
+
 
 
         if(definedColumns){

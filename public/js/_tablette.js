@@ -26,6 +26,7 @@ var Tablette = (function () {
                 html += " <option></option>" +
                     "<option value='releaseTablette'> liberer tablette</option>" +
                     "<option value='commentaire'> commentaire...</option>" +
+                    "<option value='voirTablette'> voir tablette...</option>" +
                     "<option value='createUnder'> creer nouvelle</option>" +
                     "<option value='voirVersement'> voir versement</option>"
             } else if (obj.avecCotesSansVersement) {

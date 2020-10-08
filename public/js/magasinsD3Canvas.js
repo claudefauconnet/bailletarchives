@@ -43,7 +43,8 @@ var magasinsD3Canvas = (function () {
             "tablette": "#fff0f0",
             "tabletteIndisponible": "#666",
             "tabletteavecVersementSanscotes": "#8EE889",
-            "tabletteavecCotesSansVersement": "#E820C9"
+            "tabletteavecCotesSansVersement": "#E820C9",
+            "tabletteIsMateriel":"#333",
         }
 
         var highlightAttrs = {
@@ -448,6 +449,8 @@ var magasinsD3Canvas = (function () {
                                                     bgColor = self.colors["tabletteavecVersementSanscotes"];
                                                 if (tablette.avecCotesSansVersement)
                                                     bgColor = self.colors["tabletteavecCotesSansVersement"];
+                                                if(tablette.isMateriel)
+                                                    bgColor = self.colors["tabletteIsMateriel"];
 
                                                 var rect = {
                                                     type: "rect",

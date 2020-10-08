@@ -503,6 +503,7 @@ var listController = (function () {
             var highlighted = [];
             var zoomLevel = json.length > 1 ? 0.2 : 1;
             var nature = null;
+            var property="name"
             json.forEach(function (line) {
                 if (context.currentTable == "versement") {
                     highlighted.push(new RegExp(line.numVersement + "\\/\\d+"))
@@ -510,10 +511,15 @@ var listController = (function () {
                 } else if (context.currentTable == "magasin") {
                     highlighted.push(line.coordonnees);
                     nature = "tablette";
-                }
+
+            } else if (context.currentTable == "espace_occupe") {
+                highlighted.push(line.id);
+                nature = "tablette";
+                    property="id_espace_occupe"
+            }
 
             })
-            magasinD3.locate(nature, "name", highlighted, zoomLevel)
+            magasinD3.locate(nature, property, highlighted, zoomLevel)
 
         })
     }

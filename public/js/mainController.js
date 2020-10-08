@@ -63,7 +63,7 @@ var mainController = (function () {
 
     self.bindActions = function () {
 
-        $("#searchTableInput").bind("change", function () {
+        $("#searchTableInput").bind("click", function () {
             context.currentTable = $(this).val();
             mainController.onchangeTable(context.currentTable);
             mainController.showSearchDiv("searchDiv-Autres");
@@ -348,22 +348,23 @@ var mainController = (function () {
         if (tabName == "Accueil") {
             mainController.showInMainDiv("graph");
 
-        } else if (tabName == "Versements") {
+        }
+        else if (tabName == "Versements") {
             self.onchangeTable("versement");
             mainController.showSearchDiv("searchDiv-Versements");
-        } else if (tabName == "Magasins") {
+        }
+        else if (tabName == "Espaces occupés") {
+            self.onchangeTable("espace_occupe");
+            mainController.showSearchDiv("searchDiv-EspacesOccupes");
+        }
+        else if (tabName == "Magasins") {
 
             self.onchangeTable("magasin");
             mainController.showSearchDiv("searchDiv-Magasin");
-            //   $("#operationTabletteSelect").append(Tablette.getOperationSelectOptions({prompt:1}))
 
-            // $("#operationBoiteSelect").append(Boite.getOperationSelectOptions())
 
         }
-        /*    else if (tabName == "Sorties") {
-                context.currentTable = "sortie_boite"
-                mainController.showSearchDiv("searchDiv-Sorties");
-            }*/
+
 
         else if (tabName == "Autres") {
 

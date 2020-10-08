@@ -5,392 +5,419 @@ var async = require('async');
 
 
 var processData = {
-    getMagasinTree: function (where,callback) {
-        var tailleMoyenneBoite = 0.09
-var whereStr="";
-        if(where && where!="")
-            whereStr=where;
-        var sql = "select id,numVersement,id_versement,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible,commentaires from magasin "+whereStr+" order by coordonnees,id"
-        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
-            var tree = {
-                name: "Baillet",
-                childrenObjs: {},
-                children: [],
-                countBoites: 0,
-                longueurTotale: 0,
-                longueurOccupee: 0,
-            };
-            result.forEach(function (line) {
-                if (!line.magasin || !line.magasin.match(/[A-Z]/))
-                    return;
-                var xx = 3
-                if (!tree.childrenObjs[line.magasin])
-                    tree.childrenObjs[line.magasin] = {
-                        type: "magasin",
-                        name: line.magasin,
-                        childrenObjs: {},
-                        countBoites: 0,
-                        longueurTotale: 0,
-                        longueurOccupee: 0
-                    };
+    getMagasinTree: function (where, callback) {
+        processData.magasinsGetEspacesOccupesMateriel(function (err, result) {
+            if (err)
+                return callback(err);
+            var magasinEspaceOccupeMateriel = result;
 
 
-                if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi])
-                    tree.childrenObjs[line.magasin].childrenObjs[line.epi] = {
-                        type: "epi",
-                        name: line.epi,
-                        childrenObjs: {},
-                        countBoites: 0,
-                        longueurTotale: 0,
-                        longueurOccupee: 0
+            var tailleMoyenneBoite = 0.09
+            var whereStr = "";
+            if (where && where != "")
+                whereStr = where;
+            var sql = "select id,numVersement,id_versement,id_espace_occupe,magasin,epi, travee, tablette,cotesParTablette,metrage,DimTabletteMLineaire as longueurTablette,indisponible,commentaires from magasin " + whereStr + " order by coordonnees,id"
+            mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+                var tree = {
+                    name: "Baillet",
+                    childrenObjs: {},
+                    children: [],
+                    countBoites: 0,
+                    longueurTotale: 0,
+                    longueurOccupee: 0,
+                };
+                result.forEach(function (line) {
+                    if (!line.magasin || !line.magasin.match(/[A-Z]/))
+                        return;
+                    var xx = 3
+                    if (!tree.childrenObjs[line.magasin])
+                        tree.childrenObjs[line.magasin] = {
+                            type: "magasin",
+                            name: line.magasin,
+                            childrenObjs: {},
+                            countBoites: 0,
+                            longueurTotale: 0,
+                            longueurOccupee: 0
+                        };
+
+
+                    if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi])
+                        tree.childrenObjs[line.magasin].childrenObjs[line.epi] = {
+                            type: "epi",
+                            name: line.epi,
+                            childrenObjs: {},
+                            countBoites: 0,
+                            longueurTotale: 0,
+                            longueurOccupee: 0
+                        }
+
+                    if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee])
+                        tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee] = {
+                            type: "travee",
+                            name: line.travee,
+                            childrenObjs: {},
+                            countBoites: 0,
+                            longueurTotale: 0, longueurOccupee: 0
+                        }
+                    var isEmpty = true;
+                    if (line.cotesParTablette != null && line.cotesParTablette.trim() != "") {
+                        isEmpty = false;
+                    }
+                    var avecVersementSanscotes = null;
+                    var avecCotesSansVersement = null;
+                    // tablette avec un versement sans cotes
+                    if (line.numVersement && (!line.cotesParTablette || line.cotesParTablette == ""))
+                        avecVersementSanscotes = line.numVersement;
+
+                    if (!line.numVersement && line.cotesParTablette && line.cotesParTablette != "")
+                        avecCotesSansVersement = true;
+
+                    var isMateriel=magasinEspaceOccupeMateriel.indexOf(line.id)>-1;
+
+                    if(isMateriel)
+                        var x=3
+
+                    if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette]) {
+                        tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette] = {
+                            type: "tablette",
+                            //  id: line.id, ce qui compte c'est le name !!! voir magasinD3 drawTablette
+                            name: line.tablette,
+                            childrenObjs: {},
+                            countBoites: 0,
+                            commentaires: line.commentaires,
+                            longueurM: line.longueurTablette,
+                            numVersement: line.numVersement,
+                            longueurTotale: 0,
+                            longueurOccupee: 0,
+                            isEmpty: isEmpty,
+                            isMateriel:isMateriel,
+                            id_espace_occupe: line.id_espace_occupe,
+                            indisponible: (line.indisponible ? (line.commentaires || "indisponible") : null),
+                            avecVersementSanscotes: avecVersementSanscotes,
+                            avecCotesSansVersement: avecCotesSansVersement,
+                            versements: [line.numVersement]
+                        }
+                    } else {
+                        tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].versements.push(line.numVersement);
+
                     }
 
-                if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee])
-                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee] = {
-                        type: "travee",
-                        name: line.travee,
-                        childrenObjs: {},
-                        countBoites: 0,
-                        longueurTotale: 0, longueurOccupee: 0
-                    }
-                var isEmpty = true;
-                if (line.cotesParTablette != null && line.cotesParTablette.trim() != "") {
-                    isEmpty = false;
-                }
-                var avecVersementSanscotes=null;
-                var avecCotesSansVersement=null;
-                // tablette avec un versement sans cotes
-                if(line.numVersement && (!line.cotesParTablette || line.cotesParTablette==""))
-                    avecVersementSanscotes=line.numVersement;
 
-                if(!line.numVersement && line.cotesParTablette && line.cotesParTablette!="")
-                    avecCotesSansVersement=true;
-
-
-                if (!tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette]) {
-                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette] = {
-                        type: "tablette",
-                      //  id: line.id, ce qui compte c'est le name !!! voir magasinD3 drawTablette
-                        name: line.tablette,
-                        childrenObjs: {},
-                        countBoites: 0,
-                        commentaires: line.commentaires,
-                        longueurM: line.longueurTablette,
-                        numVersement: line.numVersement,
-                        longueurTotale: 0,
-                        longueurOccupee: 0,
-                        isEmpty: isEmpty,
-                        indisponible: (line.indisponible ? (line.commentaires || "indisponible") : null),
-                        avecVersementSanscotes: avecVersementSanscotes,
-                        avecCotesSansVersement: avecCotesSansVersement,
-                        versements:[line.numVersement]
-                    }
-                }else{
-                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].versements.push(line.numVersement);
-
-                }
-
-
-
-
-
-
-                var longueurOccupee = 0;
-                var longueurTotale = 0
-
-
-                // metrage importé depuis fichier csv dans magasin est faux (c'est le metrage de tout le versment et non pas celui occupé sur la tablette
-             /*   if (line.metrage && line.longueurTablette) {
-                    longueurOccupee = line.metrage;
-                    longueurTotale = line.longueurTablette;
-                }*/
-                longueurOccupee =0;
-                if(line.indisponible)
-                    longueurOccupee =line.longueurTablette;
-
-                if (line.cotesParTablette) {
-                    var boites = line.cotesParTablette.split(" ");
-
-                    if ( boites.length > 0) {//étageres avec boites
-                        longueurOccupee = (boites.length * tailleMoyenneBoite)
-                    }
+                    var longueurOccupee = 0;
+                    var longueurTotale = 0
 
 
                     // metrage importé depuis fichier csv dans magasin est faux (c'est le metrage de tout le versment et non pas celui occupé sur la tablette
-                     if ( line.longueurTablette) {
+                    /*   if (line.metrage && line.longueurTablette) {
+                           longueurOccupee = line.metrage;
+                           longueurTotale = line.longueurTablette;
+                       }*/
+                    longueurOccupee = 0;
+                    if (line.indisponible)
+                        longueurOccupee = line.longueurTablette;
 
-                               longueurTotale = line.longueurTablette;
-                           }
+                    if (line.cotesParTablette) {
+                        var boites = line.cotesParTablette.split(" ");
+
+                        if (boites.length > 0) {//étageres avec boites
+                            longueurOccupee = (boites.length * tailleMoyenneBoite)
+                        }
 
 
-                           if (boites) {
+                        // metrage importé depuis fichier csv dans magasin est faux (c'est le metrage de tout le versment et non pas celui occupé sur la tablette
+                        if (line.longueurTablette) {
 
-                               boites.forEach(function (boite) {
-                                   if (boite != " ") {
-                                       //  boite.parent = tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette];
+                            longueurTotale = line.longueurTablette;
+                        }
 
 
-                                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].childrenObjs[boite] = {
-                                           name: boite,
-                                           count: 1,
-                                           children: [],
-                                           numVersement: line.numVersement,
-                                           id_versement: line.id_versement
-                                       };
-                                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].countBoites += 1
-                                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].countBoites += 1;
-                                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].countBoites += 1
-                                       tree.childrenObjs[line.magasin].countBoites += 1
-                                       tree.countBoites += 1
+                        if (boites) {
 
-                                   }
+                            boites.forEach(function (boite) {
+                                if (boite != " ") {
+                                    //  boite.parent = tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette];
 
-                               })
-                           }
-                       }
-                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].longueurOccupee += longueurOccupee;
-                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].longueurTotale += longueurTotale;
-                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].longueurOccupee += longueurOccupee;
-                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].longueurTotale += longueurTotale;
-                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].longueurOccupee += longueurOccupee;
-                       tree.childrenObjs[line.magasin].childrenObjs[line.epi].longueurTotale += longueurTotale;
-                       tree.childrenObjs[line.magasin].longueurOccupee += longueurOccupee;
-                       tree.childrenObjs[line.magasin].longueurTotale += longueurTotale;
-                       tree.longueurOccupee += longueurOccupee
-                       tree.longueurTotale += longueurTotale
 
+                                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].childrenObjs[boite] = {
+                                        name: boite,
+                                        count: 1,
+                                        children: [],
+                                        numVersement: line.numVersement,
+                                        id_versement: line.id_versement
+                                    };
+                                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].countBoites += 1
+                                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].countBoites += 1;
+                                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].countBoites += 1
+                                    tree.childrenObjs[line.magasin].countBoites += 1
+                                    tree.countBoites += 1
 
-                   })
+                                }
 
+                            })
+                        }
+                    }
+                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].longueurOccupee += longueurOccupee;
+                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].childrenObjs[line.tablette].longueurTotale += longueurTotale;
+                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].longueurOccupee += longueurOccupee;
+                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].childrenObjs[line.travee].longueurTotale += longueurTotale;
+                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].longueurOccupee += longueurOccupee;
+                    tree.childrenObjs[line.magasin].childrenObjs[line.epi].longueurTotale += longueurTotale;
+                    tree.childrenObjs[line.magasin].longueurOccupee += longueurOccupee;
+                    tree.childrenObjs[line.magasin].longueurTotale += longueurTotale;
+                    tree.longueurOccupee += longueurOccupee
+                    tree.longueurTotale += longueurTotale
 
-                   recurse1 = function (obj) {
-                       obj.children = [];
-                       if (!obj.count)
-                           obj.count = 0;
-                       var taux = obj.longueurOccupee / obj.longueurTotale;
-                       obj.tauxOccupation = taux ? taux : 0
-                       for (var key in  obj.childrenObjs) {
-                           obj.children.push(obj.childrenObjs[key])
-                           obj.count += 1
-                           recurse1(obj.childrenObjs[key])
-                       }
-                   }
 
+                })
 
-                   recurse2 = function (obj) {
-                       if (obj.children) {
-                           obj.children.forEach(function (child) {
-                               recurse2(child);
 
-                           })
-                           delete  obj.childrenObjs;
-                           delete  obj.parent;
-                       }
+                recurse1 = function (obj) {
+                    obj.children = [];
+                    if (!obj.count)
+                        obj.count = 0;
+                    var taux = obj.longueurOccupee / obj.longueurTotale;
+                    obj.tauxOccupation = taux ? taux : 0
+                    for (var key in obj.childrenObjs) {
+                        obj.children.push(obj.childrenObjs[key])
+                        obj.count += 1
+                        recurse1(obj.childrenObjs[key])
+                    }
+                }
 
-                   }
 
-                   recurse1(tree);
-                   recurse2(tree);
-                   callback(null, tree)
+                recurse2 = function (obj) {
+                    if (obj.children) {
+                        obj.children.forEach(function (child) {
+                            recurse2(child);
 
-               })
+                        })
+                        delete obj.childrenObjs;
+                        delete obj.parent;
+                    }
 
+                }
 
-           },
+                recurse1(tree);
+                recurse2(tree);
+                callback(null, tree)
 
+            })
+        })
 
-           versementBoitesToTablettes: function (obj, callback) {
-               if (obj.numVersement && obj.metrage && obj.tablettes) {
 
+    },
 
-                   var versementId;
-                   var cotesExtremes = ""
-                   async.series([
 
-                           // chercher versement
-                           function (callbackSeries) {
-                               var sql = "select id  from versement where numVersement ='" + obj.numVersement + "'" // get versement Id
-                               mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement) {
-                                   if (err)
-                                       return callback(err);
-                                   if (resultVersement.length == 0)
-                                       return callback("noVersement");
+    magasinsGetEspacesOccupesMateriel: function (callback) {
 
-                                   versementId = resultVersement[0].id;
-                                   return callbackSeries(null, resultVersement)
-                               })
-                           },
+        var sql = "select magasin.id from magasin,espace_occupe where magasin.id_espace_occupe=espace_occupe.id and  espace_occupe.nature='matériel'"
+        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+            if (err)
+                return callback(err);
+            var array=[];
+            result.forEach(function(line){
+                array.push(line.id)
+            })
+            return callback(null,array);
 
 
-                           // chercher et update  tablettes cibles et boites
-                           function (callbackSeries) {
+        })
 
-                               var nBoites = obj.nbBoites;
-                               var epaisseurMoyBoite = obj.epaisseurMoyBoite;
-                               var tablettesBoites = []
-                               var index = 0;
-                               var boitesrestantaRanger = obj.nbBoites;
-                               var indexBoites = 0;
 
+    },
 
-                               var sql = "select id,DimTabletteMLineaire,coordonnees from magasin where coordonnees in " + JSON.stringify(obj.tablettes).replace("[", "(").replace("]", ")") // get tablettes ids
-                               mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin) {
-                                   if (err)
-                                       return callback(err);
-                                   if (resultMagasin.length == 0)
-                                       return callback("noTablettes");
+    versementBoitesToTablettes: function (obj, callback) {
+        if (obj.numVersement && obj.metrage && obj.tablettes) {
 
-                                   async.eachSeries(resultMagasin, function (tablette, callbackEach) {// create relation
 
-                                       var cotesParTabletteStr = "";
-                                       var metrageTablette = 0;
+            var versementId;
+            var cotesExtremes = ""
+            async.series([
 
-                                       if (obj.nbBoites && obj.epaisseurMoyBoite && tablette.DimTabletteMLineaire) {// boites sur tablette
-                                           metrageTablette = obj.nbBoites * obj.epaisseurMoyBoite;
+                    // chercher versement
+                    function (callbackSeries) {
+                        var sql = "select id  from versement where numVersement ='" + obj.numVersement + "'" // get versement Id
+                        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement) {
+                            if (err)
+                                return callback(err);
+                            if (resultVersement.length == 0)
+                                return callback("noVersement");
 
-                                           var maxBoitesParTablette = Math.round(tablette.DimTabletteMLineaire / obj.epaisseurMoyBoite * 100);
-                                           var boitesSurCetteTablette = Math.min(maxBoitesParTablette, boitesrestantaRanger);
-                                           boitesrestantaRanger -= boitesSurCetteTablette;
-                                           var boitesCotes = [];
-                                           for (var i = 0; i < boitesSurCetteTablette; i++) {
+                            versementId = resultVersement[0].id;
+                            return callbackSeries(null, resultVersement)
+                        })
+                    },
 
-                                               var indexBoiteStr = "" + (++indexBoites);
-                                               if ((indexBoiteStr).length == 1)
-                                                   indexBoiteStr = "0" + indexBoiteStr;
-                                               var cote = obj.numVersement + "/" + indexBoiteStr
-                                               if (i > 0)
-                                                   cotesParTabletteStr += " "
-                                               cotesParTabletteStr += cote
 
-                                               boitesCotes.push(cote);
-                                               if (indexBoites == 1)
-                                                   cotesExtremes += cote
-                                               if (indexBoites >= obj.nbBoites - 1)
-                                                   cotesExtremes += " " + cote
+                    // chercher et update  tablettes cibles et boites
+                    function (callbackSeries) {
 
-                                           }
+                        var nBoites = obj.nbBoites;
+                        var epaisseurMoyBoite = obj.epaisseurMoyBoite;
+                        var tablettesBoites = []
+                        var index = 0;
+                        var boitesrestantaRanger = obj.nbBoites;
+                        var indexBoites = 0;
 
 
-                                           tablettesBoites.push({tablette: tablette, boites: boitesCotes});
+                        var sql = "select id,DimTabletteMLineaire,coordonnees from magasin where coordonnees in " + JSON.stringify(obj.tablettes).replace("[", "(").replace("]", ")") // get tablettes ids
+                        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin) {
+                            if (err)
+                                return callback(err);
+                            if (resultMagasin.length == 0)
+                                return callback("noTablettes");
 
-                                       }
+                            async.eachSeries(resultMagasin, function (tablette, callbackEach) {// create relation
 
-                                       sql = "update magasin set metrage=" + metrageTablette + ",id_versement=" + versementId + ", numVersement='" + obj.numVersement + "' , cotesParTablette='" + cotesParTabletteStr + "' where id=" + tablette.id;
+                                var cotesParTabletteStr = "";
+                                var metrageTablette = 0;
 
-                                       mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin2) {
-                                           if (err)
-                                               return callbackEach(err);
-                                           return callbackEach();
+                                if (obj.nbBoites && obj.epaisseurMoyBoite && tablette.DimTabletteMLineaire) {// boites sur tablette
+                                    metrageTablette = obj.nbBoites * obj.epaisseurMoyBoite;
 
-                                       })
+                                    var maxBoitesParTablette = Math.round(tablette.DimTabletteMLineaire / obj.epaisseurMoyBoite * 100);
+                                    var boitesSurCetteTablette = Math.min(maxBoitesParTablette, boitesrestantaRanger);
+                                    boitesrestantaRanger -= boitesSurCetteTablette;
+                                    var boitesCotes = [];
+                                    for (var i = 0; i < boitesSurCetteTablette; i++) {
 
-                                   }, function (err) {
-                                       if (err)
-                                           return callbackSeries(err);
-                                       return callbackSeries(err, tablettesBoites);
-                                   })
-                               })
+                                        var indexBoiteStr = "" + (++indexBoites);
+                                        if ((indexBoiteStr).length == 1)
+                                            indexBoiteStr = "0" + indexBoiteStr;
+                                        var cote = obj.numVersement + "/" + indexBoiteStr
+                                        if (i > 0)
+                                            cotesParTabletteStr += " "
+                                        cotesParTabletteStr += cote
 
-                           },
+                                        boitesCotes.push(cote);
+                                        if (indexBoites == 1)
+                                            cotesExtremes += cote
+                                        if (indexBoites >= obj.nbBoites - 1)
+                                            cotesExtremes += " " + cote
 
+                                    }
 
-                           //update  refoulement : effacement des infos des tablettes
-                           function (callbackSeries) {
-                               if (!obj.refoulement)
-                                   return callbackSeries(null, [])
-                               var tablettesRefoulees = []
-                               async.eachSeries(obj.refoulement, function (tabletteRefoulee, callbackEach) {// create relation
-                                   tablettesRefoulees.push(tabletteRefoulee)
-                                   sql = "update magasin set metrage=null,id_versement=null, numVersement=null , cotesParTablette='' where id=" + tabletteRefoulee.id;
 
-                                   mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin2) {
-                                       if (err)
-                                           return callbackEach(err);
-                                       return callbackEach();
+                                    tablettesBoites.push({tablette: tablette, boites: boitesCotes});
 
-                                   })
+                                }
 
+                                sql = "update magasin set metrage=" + metrageTablette + ",id_versement=" + versementId + ", numVersement='" + obj.numVersement + "' , cotesParTablette='" + cotesParTabletteStr + "' where id=" + tablette.id;
 
-                               }, function (err) {
-                                   if (err)
-                                       return callbackSeries(err);
-                                   return callbackSeries(err, tablettesRefoulees);
-                               })
+                                mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin2) {
+                                    if (err)
+                                        return callbackEach(err);
+                                    return callbackEach();
 
-                           },
-                           // update versement metrage et cotes extremes boites
-                           function (callbackSeries) {
-                               var sql = "update versement set metrage=" + obj.metrage + ", cotesExtremesBoites='" + cotesExtremes + "' where id=" + versementId;
-                               mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement2) {
-                                   if (err)
-                                       return callbackSeries(err);
+                                })
 
-                                   return callbackSeries(err, resultVersement2);
-                               })
-                           }
+                            }, function (err) {
+                                if (err)
+                                    return callbackSeries(err);
+                                return callbackSeries(err, tablettesBoites);
+                            })
+                        })
 
+                    },
 
-                       ]
 
-                       //AT THE END !!!
-                       , function (err, results) {
-                           if (err)
-                               return callback(err);
+                    //update  refoulement : effacement des infos des tablettes
+                    function (callbackSeries) {
+                        if (!obj.refoulement)
+                            return callbackSeries(null, [])
+                        var tablettesRefoulees = []
+                        async.eachSeries(obj.refoulement, function (tabletteRefoulee, callbackEach) {// create relation
+                            tablettesRefoulees.push(tabletteRefoulee)
+                            sql = "update magasin set metrage=null,id_versement=null, numVersement=null , cotesParTablette='' where id=" + tabletteRefoulee.id;
 
+                            mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultMagasin2) {
+                                if (err)
+                                    return callbackEach(err);
+                                return callbackEach();
 
-                           var resume = {
-                               versement: {
-                                   "numVersement": obj.numVersement,
-                                   "metrage": obj.metrage,
-                                   "nbBoites": obj.nbBoites,
-                                   "epaisseurMoyBoite": obj.epaisseurMoyBoite,
-                               },
-                               tablettes: results[1],
-                               refoulement: results[2],
-                               date: new Date()
+                            })
 
-                           }
 
+                        }, function (err) {
+                            if (err)
+                                return callbackSeries(err);
+                            return callbackSeries(err, tablettesRefoulees);
+                        })
 
-                           return callback(err, resume);
-                       })
+                    },
+                    // update versement metrage et cotes extremes boites
+                    function (callbackSeries) {
+                        var sql = "update versement set metrage=" + obj.metrage + ", cotesExtremesBoites='" + cotesExtremes + "' where id=" + versementId;
+                        mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, resultVersement2) {
+                            if (err)
+                                return callbackSeries(err);
 
+                            return callbackSeries(err, resultVersement2);
+                        })
+                    }
 
-               }
-           }
 
-           ,
-           splitBoitesOnTablettes: function (sourceTablette, targetTablette, percentage) {
+                ]
 
-               async.series([
+                //AT THE END !!!
+                , function (err, results) {
+                    if (err)
+                        return callback(err);
 
-                   // chercher tablettes
-                   function (callbackSeries) {
-                       var sql = "select * from tablette where id in =(" + sourceTablette.id + "," + targetTablette.id + ")";
-                       mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
-                           if (err) {
-                               return callbackSeries(err);
-                           }
-                       })
-                   },
-                   function (callbackSeries) {
-                   }], function (err) {
 
+                    var resume = {
+                        versement: {
+                            "numVersement": obj.numVersement,
+                            "metrage": obj.metrage,
+                            "nbBoites": obj.nbBoites,
+                            "epaisseurMoyBoite": obj.epaisseurMoyBoite,
+                        },
+                        tablettes: results[1],
+                        refoulement: results[2],
+                        date: new Date()
 
-               })
+                    }
 
 
-           },
-           /**
-            *
-            *
-            *
-            *
-            * @param operation add-above,add-under, delete, split-above, split-under
-            * @param tablette de reference
-            * @param options if( split :splitPercentage)
-            * @param callback
-            */
+                    return callback(err, resume);
+                })
+
+
+        }
+    }
+
+    ,
+    splitBoitesOnTablettes: function (sourceTablette, targetTablette, percentage) {
+
+        async.series([
+
+            // chercher tablettes
+            function (callbackSeries) {
+                var sql = "select * from tablette where id in =(" + sourceTablette.id + "," + targetTablette.id + ")";
+                mySQLproxy.exec(mySqlConnectionOptions, sql, function (err, result) {
+                    if (err) {
+                        return callbackSeries(err);
+                    }
+                })
+            },
+            function (callbackSeries) {
+            }], function (err) {
+
+
+        })
+
+
+    },
+    /**
+     *
+     *
+     *
+     *
+     * @param operation add-above,add-under, delete, split-above, split-under
+     * @param tablette de reference
+     * @param options if( split :splitPercentage)
+     * @param callback
+     */
 
     modifytravee: function (operation, tablette, options, callback) {
         if (!options)
@@ -451,17 +478,11 @@ var whereStr="";
                         if (operation == "delete" && index <= indexTablette) {
                             return callbackEach();
                             offset = -1;
-                        }
-
-                        else if (options.above && index < indexTablette) {
+                        } else if (options.above && index < indexTablette) {
                             return callbackEach();
-                        }
-
-
-                        else if (index <= indexTablette) {
+                        } else if (index <= indexTablette) {
                             return callbackEach();
-                        }
-                        else {
+                        } else {
 
                             index += offset;
                             var indexStr = "" + index;
@@ -613,7 +634,7 @@ var whereStr="";
 
 module.exports = processData;
 if (false) {
-    processData.getMagasinTree(null,function (err, result) {
+    processData.getMagasinTree(null, function (err, result) {
         fs.writeFileSync("D:\\GitHub\\bailletArchives\\bailletarchives\\public\\js\\d3\\magasin.json", JSON.stringify(result, null, 2))
 
     });
@@ -661,22 +682,19 @@ if (false) {
 
 }
 
-if( false){
-    mySQLproxy.exec(mySqlConnectionOptions, " select coordonnees , id,cotesParTablette from magasin where cotesParTablette is not null and cotesParTablette<>'' ", function(err, result){
+if (false) {
+    mySQLproxy.exec(mySqlConnectionOptions, " select coordonnees , id,cotesParTablette from magasin where cotesParTablette is not null and cotesParTablette<>'' ", function (err, result) {
 
-        var regex=/\d*\/\d* */
-        result.forEach(function(line){
+        var regex = /\d*\/\d* */
+        result.forEach(function (line) {
 
 
-
-            if(regex.test(line.cotesParTablette)===false){
-           //  var xx=   regex.test(line.cotesParTablette)
-               console.log (line.coordonnees +"\t"+line.cotesParTablette+"\t"+ line.id)
-            }
-            else{
+            if (regex.test(line.cotesParTablette) === false) {
+                //  var xx=   regex.test(line.cotesParTablette)
+                console.log(line.coordonnees + "\t" + line.cotesParTablette + "\t" + line.id)
+            } else {
                 var line;
             }
-
 
 
         })

@@ -143,7 +143,7 @@ var recordController = (function () {
         $("#recordDetailsDiv").prepend("<span class='title'>" + table + "</span>&nbsp;&nbsp;");
 
 
-        if (obj && obj.id)
+        if (obj && obj.id!=null)
             listController.loadLinkedDivs()
 
         $(".objAttrInput").width(config.default.fieldInputWith)

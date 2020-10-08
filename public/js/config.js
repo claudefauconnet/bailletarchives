@@ -267,20 +267,54 @@ var config = (function () {
             tabs: [],
             onBeforeSave: authentication.onBeforeSave
         },
-        "divers": {
-            defaultSearchField: "intitule",
+        "espace_occupe": {
+            defaultSearchField: "libelle",
             tabs: ["magasin",],
-            sortFields: ["intitule desc"],
+            columns:["nature","metrage","tablettesExtremes","libelle","id"],
+            sortFields: ["libelle desc"],
             recordTools: [
                 {
                     title: "Localiser...",
-                    id: "versementLocaliserButton",
-                    toolFn: "Versement.locateCurrentVersement"
+                    id: "espaceOccupeLocaliserButton",
+                    toolFn: "EspaceOccupe.locateCurrentEspaceOccupe"
                 },
 
 
-            ],
-            onAfterDisplay: Divers.onBeforeEditing,
+            ]
+            ,  fieldConstraints: {
+                nature: {mandatory: true},
+                libelle:{mandatory: true},
+                metrage:{mandatory: true}
+
+            }
+
+
+
+
+            ,
+            relations: {
+            "magasin": {
+                type: "1-n",
+                joinObj: {
+                    tables: "espace_occupe,magasin",
+                    where: " magasin.id_espace_occupe=espace_occupe.id "
+                },
+                /*  createRelSql: "update items set id_versement=<%context.currentRecord.id%> where id=<%data.id%>",
+                  deleteRelSql: "update items set id_versement=null where id=<%data.id%>",*/
+                selectfields: ["coordonnees"],
+                //  onListLoadedFn: Versement.onMagasinsLoaded,
+
+                editableColumns:
+                    {
+                        cotesParTablette: {callback: Tablette.onAfterEditTaletteTableCell},
+                        commentaires: {}
+                    },
+
+
+                columns: ["coordonnees", "cotesParTablette", "commentaires", "DimTabletteMLineaire"]
+            }
+            },
+            onAfterDisplay: EspaceOccupe.onBeforeEditing,
         }
     }
     self.lists = {};

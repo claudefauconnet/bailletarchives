@@ -531,7 +531,7 @@ var Versement = (function () {
 
                     })
 
-                    var sql = "update magasin set id_versement=null, numVersement='', cotesParTablette='' where coordonnees in (" + tablettesStr + ") and id_versement=" + versement.id;
+                    var sql = "update magasin set id_versement=null, numVersement='',commentaires='', cotesParTablette='' where coordonnees in (" + tablettesStr + ") and id_versement=" + versement.id;
                     //and versement.id="+versement.id;  pour prendre en compte les tablettes avec plusieurs versements !!
                     mainController.execSql(sql, function (err, result) {
                         if (err)

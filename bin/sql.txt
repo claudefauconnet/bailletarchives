@@ -90,3 +90,78 @@ ALTER TABLE `versement`
 	ADD COLUMN `auteurVersement` VARCHAR(50) NULL DEFAULT NULL AFTER `commentaires`,
 	ADD COLUMN `dateVersement` DATE NULL DEFAULT NULL AFTER `auteurVersement`;
 
+
+
+
+
+	update   magasin  set indisponible=1 where ( id_versement is not null )  and (cotesParTablette is null or cotesParTablette='');
+
+
+
+
+	**************************************Juin 2020 tables items***********************************
+
+
+
+CREATE TABLE `espace_occupe` (
+	`libelle` TEXT NULL DEFAULT NULL,
+	`centreArchive` VARCHAR(50) NULL DEFAULT NULL,
+	`nature` VARCHAR(50) NULL DEFAULT NULL,
+	`cotesExtremesBoites` VARCHAR(100) NULL DEFAULT NULL,
+	`cotesExtremesDossiersNiveauUn` VARCHAR(100) NULL DEFAULT NULL,
+	`nbBoites` INT(11) NULL DEFAULT NULL,
+	`metrage` DECIMAL(10,2) NULL DEFAULT NULL,
+	`id` INT(11) NULL DEFAULT NULL
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB
+;
+
+ALTER TABLE `magasin`
+	ADD COLUMN `id_espace_occupe` INT NULL DEFAULT NULL AFTER `id_versement`,
+	ADD INDEX `id_espace_occupe` (`id_espace_occupe`);
+
+
+
+
+
+
+update magasin m JOIN importitemstablettes v ON v.coordonnees=m.coordonnees set m.id_espace_occupe=v.id_item
+
+//Toutes les tablettes liées au versement 0000 doivent avoir un id_item 22, soit de la tablette B-05-03-6 à B-05-05-7
+
+update magasin set id_espace_occupe=22 where numVersement="0000"
+
+
+*************statisitiques items,
+select magasin.magasin,items.nature,sum(magasin.DimTabletteMLineaire) from magasin,items where magasin.id_item=items.id group by magasin.magasin,items.nature
+
+
+
+select magasin,count(magasin.coordonnees),sum(magasin.DimTabletteMLineaire) from magasin group by magasin
+
+select count(magasin.coordonnees) as nbreTablettes,sum(versement.metrage) as versementMetrage,sum(magasin.DimTabletteMLineaire) as versementTotalLongTablettes from magasin,versement where magasin.id_versement=versement.id
+
+select items.nature,count(magasin.coordonnees),sum(magasin.DimTabletteMLineaire) from magasin,items where magasin.id_item=items.id group by items.nature
+
+
+rapport
+
+select numVersement,intitule, metrage from versement order by metrage
+
+UPDATE espace_occupe_x p
+  JOIN ( SELECT q.id_espace_occupe
+              , count(q.coordonnees) AS sum_attr
+           FROM magasin q
+          GROUP BY q.id_espace_occupe
+       ) r
+    ON r.id_espace_occupe = p.id
+   SET p.nbreTablettes = r.sum_attr
+
+
+
+
+   ALTER TABLE `magasin` ADD COLUMN `id_espace_occupe` INT(11) NULL DEFAULT NULL AFTER `id_versement`;
+
+
+
