@@ -286,8 +286,15 @@ var config = (function () {
                 libelle:{mandatory: true},
                 metrage:{mandatory: true}
 
-            }
-
+            },
+            recordTools: [
+                {
+                    title: "Calculer ...",
+                    id: "EspaceOccupeStats",
+                    toolFn: "EspaceOccupe.stats"
+                }
+                ],
+            onAfterDelete:EspaceOccupe.onAfterDelete
 
 
 
