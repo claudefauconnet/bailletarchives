@@ -164,9 +164,10 @@ var recordController = (function () {
 
 
     self.escapeMySqlChars = function (str) {
-
+console.log(str)
         if (typeof str != 'string')
             return str;
+
 
         str = str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
             switch (char) {
@@ -194,7 +195,7 @@ var recordController = (function () {
         str = str.replace(/[«»<=>]/g, function (char) {
             return "\\" + char;
         })
-
+        console.log(str)
         return str;
 
     }
